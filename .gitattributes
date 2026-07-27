@@ -1,0 +1,17 @@
+# Normalise line endings in the working tree so a Windows checkout does not
+# produce a diff against a Linux one.
+* text=auto eol=lf
+
+# Installer fixtures encode byte-exact expectations. Several of them exist
+# specifically to prove that a user's CRLF file survives a write unchanged, so
+# git must not normalise them on checkout — doing so would silently convert the
+# CRLF cases into LF cases and the assertions would pass while testing nothing.
+test/install/adapters/__fixtures__/** -text
+
+# The vendored OpenAPI spec is hashed into src/generated/meta.ts. Rewriting its
+# line endings would change that hash and make `npm run codegen:check` fail on
+# a different platform than the one that generated it.
+scripts/coolify-openapi.json -text
+
+*.png binary
+*.ico binary
