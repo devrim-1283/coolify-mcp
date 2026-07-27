@@ -1,0 +1,12 @@
+// Zed settings with a coolify entry the user has since edited.
+{
+  "context_servers": {
+    "coolify": {
+      // pinned on purpose
+      "command": "npx",
+      "args": ["-y", "coolify-mcp@0.9.0"],
+      "env": {},
+      "disabled": true
+    }
+  }
+}

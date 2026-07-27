@@ -1,0 +1,340 @@
+# Continuous integration.
+#
+# Every action is pinned to a full commit SHA with the tag in a trailing comment.
+# A tag is a moving pointer: `@v4` re-resolves on every run, so a compromised or
+# retagged action executes in a workflow that has already been reviewed. The
+# comment is what keeps the pin readable and lets Dependabot bump it.
+#
+# `permissions: contents: read` at the workflow level, elevated per job only.
+# Nothing here needs write access to anything.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A superseded run on the same ref is wasted CI. `main` is excluded from
+# cancellation so a push that lands while another is running still gets a
+# verdict recorded against it.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  lint:
+    name: lint · format · types
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # Each check runs even when an earlier one failed: three separate red
+      # crosses tell a contributor everything to fix in one pass, whereas
+      # stopping at the first means three round trips.
+      - name: ESLint
+        id: eslint
+        run: npm run lint
+
+      - name: Prettier
+        if: ${{ !cancelled() }}
+        run: npm run format:check
+
+      - name: TypeScript
+        if: ${{ !cancelled() }}
+        run: npm run typecheck
+
+  codegen:
+    name: codegen is up to date
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # src/generated/ is committed. Regenerating it here and failing on any diff
+      # is how upstream drift in Coolify's OpenAPI spec becomes a loud build
+      # failure instead of a catalog that silently disagrees with reality.
+      - name: npm run codegen && git diff --exit-code src/generated
+        run: npm run codegen:check
+
+      - name: Explain the failure
+        if: failure()
+        run: |
+          echo "::error::src/generated is out of date. Run 'npm run codegen' and commit the result."
+          git --no-pager diff --stat src/generated || true
+
+  test:
+    name: test · ${{ matrix.os }} · node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # 9 cells: 3 operating systems x 3 Node versions.
+        #
+        # No package-manager axis. That is right for a harness that has to work
+        # under npm/pnpm/yarn/bun; this is a single npm package, and which
+        # package manager a contributor uses locally has no bearing on whether
+        # the code is correct.
+        #
+        # Windows is not negotiable: %APPDATA%, backslash path arithmetic, CRLF
+        # fixtures and the npx spawn quirk all live there, and half the target
+        # clients are Windows-heavy.
+        os: [ubuntu-24.04, macos-15, windows-2025]
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  package:
+    name: package · publint · attw · size
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+      - name: publint
+        run: npx --yes publint@0.3.22 --strict
+
+      - name: Are the types wrong?
+        # coolify-mcp publishes binaries, not a library API surface: package.json
+        # declares no `types` and no `exports`, so there is nothing for attw to
+        # resolve. Running it anyway would fail on a fact that is intended.
+        # The check switches itself on the moment that changes, and says out loud
+        # that it skipped rather than passing silently.
+        run: |
+          if node -e "const p=require('./package.json');process.exit(p.types||p.typings||p.exports?0:1)"; then
+            npx --yes @arethetypeswrong/cli@0.18.5 --pack . --profile node16
+          else
+            echo "::notice title=attw skipped::package.json declares no types/exports, so there is no type surface to check"
+          fi
+
+      - name: npm pack, and enforce the size budget
+        run: |
+          npm pack --json > pack.json
+          node --input-type=module -e '
+            import { readFileSync } from "node:fs";
+            // 1 MB. A package every MCP client re-downloads through npx on a cold
+            // machine is a startup-latency budget, not just a disk figure: the
+            // client shows "server did not start" while npm is still unpacking.
+            const BUDGET = 1024 * 1024;
+            const [meta] = JSON.parse(readFileSync("pack.json", "utf8"));
+            const pct = ((meta.size / BUDGET) * 100).toFixed(1);
+            console.log(`${meta.filename}  packed ${meta.size} B  unpacked ${meta.unpackedSize} B  files ${meta.entryCount}`);
+            console.log(`budget ${BUDGET} B — using ${pct}%`);
+            if (meta.size > BUDGET) {
+              console.log(`::error title=Package too large::${meta.size} B packed exceeds the ${BUDGET} B budget`);
+              process.exit(1);
+            }
+          '
+
+      - name: Upload the tarball
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: package-tarball
+          path: "*.tgz"
+          retention-days: 7
+          if-no-files-found: error
+
+  smoke:
+    name: smoke · ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # One Node version is enough here — this proves the *published artefact*
+        # starts and speaks MCP, and that is an OS-shaped question (path
+        # separators, the npx shim, process spawning), not a Node-version-shaped
+        # one. The version matrix is the `test` job's job.
+        os: [ubuntu-24.04, macos-15, windows-2025]
+    # Git Bash ships on the Windows runners, so one shell covers all three
+    # platforms and the script below does not need three spellings.
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+      - name: Pack
+        # The filename is read out of `npm pack --json` rather than scraped from
+        # stdout, and kept RELATIVE. $RUNNER_TEMP and $PWD are Windows paths with
+        # backslashes on the Windows runner, and handing one of those to a
+        # Git Bash command is the classic way a cross-platform workflow fails on
+        # exactly one of its three cells.
+        run: |
+          npm pack --json > pack.json
+          TARBALL="$(node -e 'const p=require("./pack.json");console.log(p[0].filename)')"
+          echo "TARBALL=$TARBALL" >> "$GITHUB_ENV"
+
+      - name: npx the tarball
+        # Exercises the bin shim specifically. On Windows `npx` is `npx.cmd` and
+        # the package's bin becomes a generated `.cmd` wrapper; that path breaks
+        # differently from a plain `node dist/cli.js` invocation, which is why it
+        # gets its own step rather than being folded into the handshake below.
+        run: npx --yes "./$TARBALL" --version
+
+      - name: Install the tarball into a scratch project
+        run: |
+          mkdir -p .smoke
+          cd .smoke
+          npm init -y > /dev/null
+          npm install --no-audit --no-fund --silent "../$TARBALL"
+
+      - name: MCP initialize handshake and tools/list
+        env:
+          # The server refuses to start with no connection configured, and that
+          # refusal is correct — so give it one. The token is never resolved:
+          # resolution is lazy and happens on the first request, and this test
+          # issues none. Nothing here reaches the network.
+          COOLIFY_BASE_URL: https://coolify.invalid
+          COOLIFY_API_TOKEN: ci-smoke-placeholder-not-a-credential
+        run: |
+          cat > .smoke/handshake.mjs <<'SMOKE'
+          // Minimal MCP client. The stdio transport is newline-delimited
+          // JSON-RPC, so no framing library is needed — and not needing one is
+          // the point: this test must fail when the server is broken, never
+          // because the test's own dependencies moved.
+          import { spawn } from 'node:child_process';
+          import { createInterface } from 'node:readline';
+
+          const TIMEOUT_MS = 120_000;
+          const entry = process.argv[2];
+
+          const child = spawn(process.execPath, [entry], {
+            stdio: ['pipe', 'pipe', 'pipe'],
+            env: process.env,
+          });
+
+          // The server's stderr is its log. Echoing it is what turns "the smoke
+          // test hung" into an actionable failure.
+          child.stderr.on('data', (chunk) => process.stderr.write(`[server] ${chunk}`));
+
+          const pending = new Map();
+          createInterface({ input: child.stdout }).on('line', (line) => {
+            if (line.trim() === '') return;
+            let message;
+            try {
+              message = JSON.parse(line);
+            } catch {
+              fail(`stdout carried a line that is not JSON-RPC: ${line.slice(0, 200)}`);
+              return;
+            }
+            const resolve = pending.get(message.id);
+            if (resolve !== undefined) {
+              pending.delete(message.id);
+              resolve(message);
+            }
+          });
+
+          function fail(reason) {
+            console.error(`smoke: ${reason}`);
+            child.kill();
+            process.exit(1);
+          }
+
+          function send(message) {
+            child.stdin.write(`${JSON.stringify(message)}\n`);
+          }
+
+          function request(id, method, params) {
+            return new Promise((resolve, reject) => {
+              const timer = setTimeout(() => reject(new Error(`${method} timed out`)), TIMEOUT_MS);
+              pending.set(id, (message) => {
+                clearTimeout(timer);
+                resolve(message);
+              });
+              send({ jsonrpc: '2.0', id, method, params });
+            });
+          }
+
+          child.on('exit', (code) => {
+            if (pending.size > 0) fail(`server exited with code ${code} before answering`);
+          });
+
+          const initialize = await request(1, 'initialize', {
+            protocolVersion: '2025-06-18',
+            capabilities: {},
+            clientInfo: { name: 'coolify-mcp-smoke', version: '0.0.0' },
+          });
+          if (initialize.error) fail(`initialize failed: ${JSON.stringify(initialize.error)}`);
+          const info = initialize.result?.serverInfo ?? {};
+          if (info.name !== 'coolify-mcp') fail(`serverInfo.name was ${JSON.stringify(info.name)}`);
+          console.log(`initialize ok — ${info.name} ${info.version}, protocol ${initialize.result?.protocolVersion}`);
+
+          send({ jsonrpc: '2.0', method: 'notifications/initialized' });
+
+          const listed = await request(2, 'tools/list', {});
+          if (listed.error) fail(`tools/list failed: ${JSON.stringify(listed.error)}`);
+          const tools = listed.result?.tools ?? [];
+          const names = tools.map((tool) => tool.name).sort();
+          console.log(`tools/list ok — ${names.length} tools: ${names.join(', ')}`);
+
+          // Two assertions about the registered surface, both documented
+          // behaviour rather than incidental facts.
+          if (!names.includes('find_resources')) fail('find_resources was not registered');
+          // COOLIFY_ALLOW_DESTRUCTIVE is unset here, so the destructive door must
+          // not exist at all — absent from tools/list, not listed-and-refusing.
+          if (names.includes('execute_destructive_operation')) {
+            fail('execute_destructive_operation is registered without COOLIFY_ALLOW_DESTRUCTIVE');
+          }
+          // With the destructive tool unregistered, nothing in the list may claim
+          // to be destructive: the host's consent model reads these hints.
+          const lying = tools.filter((tool) => tool.annotations?.destructiveHint === true);
+          if (lying.length > 0) fail(`destructiveHint: true on ${lying.map((t) => t.name).join(', ')}`);
+
+          child.kill();
+          console.log('smoke ok');
+          process.exit(0);
+          SMOKE
+
+          node .smoke/handshake.mjs .smoke/node_modules/coolify-mcp/dist/index.js
+
+  # One required status check for branch protection, so adding a matrix cell does
+  # not mean editing the protection rules. `always()` plus an explicit result
+  # test is deliberate: without it a skipped or cancelled dependency reports
+  # success, which is how a broken build gets merged.
+  ci:
+    name: CI
+    if: always()
+    needs: [lint, codegen, test, package, smoke]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Verify every job succeeded
+        run: |
+          echo '${{ toJSON(needs) }}' |
+            node -e '
+              let raw = "";
+              process.stdin.on("data", (chunk) => (raw += chunk)).on("end", () => {
+                const jobs = JSON.parse(raw);
+                const failed = Object.entries(jobs).filter(([, job]) => job.result !== "success");
+                for (const [name, job] of failed) console.log(`::error::${name}: ${job.result}`);
+                process.exit(failed.length === 0 ? 0 : 1);
+              });
+            '

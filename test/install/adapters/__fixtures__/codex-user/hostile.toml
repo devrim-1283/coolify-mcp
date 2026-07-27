@@ -1,0 +1,7 @@
+﻿# Hostile on purpose: BOM, CRLF, tabs, comments.
+model = "gpt-5"
+
+[mcp_servers.filesystem]
+command = "npx"
+	args = ["-y", "@modelcontextprotocol/server-filesystem", "/srv"]  # tab-indented
+	startup_timeout_sec = 60

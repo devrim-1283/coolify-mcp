@@ -1,0 +1,12 @@
+﻿// Zed settings — hostile on purpose: BOM, CRLF, tabs, comments, trailing comma.
+{
+	/* block comment above the container */
+	"theme": "One Dark",
+	"context_servers": {
+		"some-mcp-server": {
+			"command": "npx",
+			"args": ["-y", "some-mcp-server"], // trailing comment
+			"env": {},
+		},
+	},
+}

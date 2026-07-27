@@ -1,0 +1,12 @@
+// Zed settings. Comments here are the whole point of the JSONC contract.
+{
+  "theme": "One Dark",
+  "context_servers": {
+    // A server the user set up before coolify-mcp existed.
+    "some-mcp-server": {
+      "command": "npx",
+      "args": ["-y", "some-mcp-server"],
+      "env": {}
+    }
+  }
+}

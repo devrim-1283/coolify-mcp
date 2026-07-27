@@ -1,0 +1,4 @@
+﻿# Hostile on purpose: BOM, CRLF, tabs, comments.
+defaultModel: minimax/abab-6.5
+permissionMode: ask
+logLevel: info

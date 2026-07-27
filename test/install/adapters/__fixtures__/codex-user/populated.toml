@@ -1,0 +1,7 @@
+# Codex CLI configuration.
+model = "gpt-5"
+
+[mcp_servers.filesystem]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "/srv"]
+startup_timeout_sec = 60

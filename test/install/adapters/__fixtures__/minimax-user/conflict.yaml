@@ -1,0 +1,9 @@
+defaultModel: minimax/abab-6.5
+mcp:
+  coolify:
+    type: local
+    command:
+      - npx
+      - -y
+      - coolify-mcp@0.9.0
+    enabled: false

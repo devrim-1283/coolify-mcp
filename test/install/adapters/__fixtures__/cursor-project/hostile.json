@@ -1,0 +1,15 @@
+﻿{
+	"mcpServers": {
+		"filesystem": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@modelcontextprotocol/server-filesystem",
+				"/srv"
+			],
+			"env": {
+				"FS_ROOT": "/srv"
+			}
+		}
+	}
+}

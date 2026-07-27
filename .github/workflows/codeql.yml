@@ -1,0 +1,77 @@
+# CodeQL static analysis.
+#
+# Worth running on a project like this specifically because of what it holds:
+# a bearer token, a shell-free subprocess launcher, and file writers that merge
+# into configuration the user did not open. The queries that matter here are the
+# injection and path-traversal families.
+#
+# On every PR because a finding is cheapest to fix before merge, and weekly
+# because CodeQL's query packs improve after code stops changing — a rule
+# published next month should still find a bug written last month.
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Tuesday 04:17 UTC. Off the hour so this run does not queue behind every
+    # other repository on the planet scheduling at 00:00.
+    - cron: '17 4 * * 2'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  analyze:
+    name: analyze · ${{ matrix.language }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      # Writing the results into the repository's Security tab.
+      security-events: write
+      # CodeQL reads workflow run metadata to attribute alerts to a run.
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # One entry today. Kept as a matrix so adding a language is a one-line
+        # change rather than a restructure.
+        language: [javascript-typescript]
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@4187e74d05793876e9989daffde9c3e66b4acd07 # v3.37.3
+        with:
+          languages: ${{ matrix.language }}
+          # security-extended adds the lower-precision queries. Worth the noise
+          # for a process that holds an infrastructure credential.
+          queries: security-extended
+          # Analyse the source of record. The bundle in dist/ is generated, and
+          # alerts against generated output cannot be fixed where they are
+          # reported.
+          config: |
+            paths:
+              - src
+              - scripts
+            paths-ignore:
+              - src/generated
+              - dist
+              - node_modules
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@4187e74d05793876e9989daffde9c3e66b4acd07 # v3.37.3
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@4187e74d05793876e9989daffde9c3e66b4acd07 # v3.37.3
+        with:
+          category: /language:${{ matrix.language }}
