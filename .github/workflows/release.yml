@@ -1,0 +1,202 @@
+# Release: publish to npm with provenance.
+#
+# A package that thousands of developer machines `npx` with a live infrastructure
+# token attached is not a package to publish from a laptop. Three properties are
+# non-negotiable here:
+#
+#   1. Provenance. `npm publish --provenance` attaches a signed attestation
+#      linking the tarball to this repository, this workflow and this commit.
+#      Anyone can verify on npm which source produced the bytes they are running.
+#   2. No long-lived credential where trusted publishing is configured. The OIDC
+#      token is minted per run, scoped to this workflow, and expires.
+#   3. A human in the loop. The `release` environment is configured with required
+#      reviewers, so the publish job waits for an approval that a compromised tag
+#      push cannot supply on its own.
+#
+# ONE-TIME SETUP on npmjs.com: package settings -> Publishing access ->
+# "Trusted publisher" -> GitHub Actions, repository devrim-1283/coolify-mcp,
+# workflow `release.yml`, environment `release`. Until that exists, set an
+# NPM_TOKEN secret instead and the token path below is used.
+#
+# Every action is pinned to a full commit SHA; the tag is a comment.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to release, e.g. v1.4.2
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Everything that can fail without side effects fails here, before an approval
+  # is requested. Asking a human to approve a release and then failing the build
+  # is how approvals turn into rubber stamps.
+  # ---------------------------------------------------------------------------
+  verify:
+    name: verify
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: The tag must be exactly ^v[0-9]+\.[0-9]+\.[0-9]+$
+        id: tag
+        # `on.push.tags` globs cannot express the real rule, so it is asserted
+        # here. Anything else — a prerelease suffix, a `v1.2` shorthand, a
+        # `latest` pointer — is refused rather than published as a stable
+        # version by accident.
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          if ! printf '%s' "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error title=Bad release tag::'$TAG' does not match ^v[0-9]+\.[0-9]+\.[0-9]+$"
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      - name: package.json must agree with the tag
+        run: |
+          MANIFEST="$(node -p "require('./package.json').version")"
+          if [ "$MANIFEST" != "${{ steps.tag.outputs.version }}" ]; then
+            echo "::error title=Version mismatch::package.json is $MANIFEST but the tag says ${{ steps.tag.outputs.version }}"
+            exit 1
+          fi
+
+      - name: CHANGELOG must mention this version
+        # A release with no changelog entry is a release nobody can evaluate
+        # before installing it.
+        run: |
+          if ! grep -q "\[${{ steps.tag.outputs.version }}\]" CHANGELOG.md; then
+            echo "::error title=Missing changelog::CHANGELOG.md has no [${{ steps.tag.outputs.version }}] section"
+            exit 1
+          fi
+
+      - run: npm ci
+      - run: npm run codegen:check
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+      - name: Publish dry run
+        # Prints the exact file list that would be published. `files` in
+        # package.json is an allowlist, and a release that silently ships a
+        # source tree or a .env is worth one cheap check.
+        run: npm publish --dry-run
+
+  # ---------------------------------------------------------------------------
+  # The only job with any privilege, and the only one behind the gate.
+  # ---------------------------------------------------------------------------
+  publish:
+    name: publish to npm
+    needs: verify
+    runs-on: ubuntu-24.04
+    # Configure this environment with required reviewers in repository settings.
+    # That is what makes the manual approval real rather than decorative.
+    environment:
+      name: release
+      url: https://www.npmjs.com/package/coolify-mcp/v/${{ needs.verify.outputs.version }}
+    permissions:
+      # Minting the OIDC token for provenance. Nothing else is elevated.
+      id-token: write
+      contents: read
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.verify.outputs.tag }}
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Use an npm that supports trusted publishing
+        # Trusted publishing needs npm >= 11.5.1. The runner's bundled npm
+        # tracks the Node release and is often older, so it is upgraded
+        # explicitly rather than hoped for.
+        run: npm install -g npm@latest
+
+      - run: npm ci
+      # package.json declares no `prepublishOnly`, so the build is explicit here.
+      # `files` ships `dist/`, and an unbuilt dist means publishing an empty
+      # package that installs cleanly and does nothing.
+      - run: npm run build
+
+      - name: Publish (trusted publishing, OIDC)
+        if: env.NPM_TOKEN == ''
+        run: npm publish --provenance --access public
+
+      - name: Publish (automation token)
+        if: env.NPM_TOKEN != ''
+        env:
+          NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
+        run: npm publish --provenance --access public
+
+  # ---------------------------------------------------------------------------
+  # After npm, so a GitHub release never advertises a version that is not there.
+  # ---------------------------------------------------------------------------
+  github-release:
+    name: github release
+    needs: [verify, publish]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.verify.outputs.tag }}
+          fetch-depth: 0
+
+      - name: Extract this version's changelog section
+        # Line scanning rather than a regex, on purpose: this script passes
+        # through YAML quoting and then shell quoting before Node sees it, and a
+        # regex with backslashes in it is the thing that survives neither.
+        run: |
+          node --input-type=module -e '
+            import { readFileSync, writeFileSync } from "node:fs";
+            const heading = "[" + process.argv[1] + "]";
+            const lines = readFileSync("CHANGELOG.md", "utf8").split("\n");
+            const start = lines.findIndex((line) => line.startsWith("## ") && line.includes(heading));
+            const body = [];
+            for (let i = start + 1; start !== -1 && i < lines.length; i += 1) {
+              if (lines[i].startsWith("## ")) break;
+              body.push(lines[i]);
+            }
+            writeFileSync("RELEASE_NOTES.md", body.join("\n").trim());
+          ' "${{ needs.verify.outputs.version }}"
+          wc -c RELEASE_NOTES.md
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.verify.outputs.tag }}
+        # --verify-tag refuses to invent a tag that does not exist; falling back
+        # to generated notes keeps a release from failing over a formatting
+        # change in CHANGELOG.md.
+        run: |
+          if [ -s RELEASE_NOTES.md ]; then
+            gh release create "$TAG" --title "$TAG" --verify-tag --notes-file RELEASE_NOTES.md
+          else
+            gh release create "$TAG" --title "$TAG" --verify-tag --generate-notes
+          fi

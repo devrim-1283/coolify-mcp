@@ -1,0 +1,55 @@
+# Dependabot.
+#
+# Two ecosystems, and the second one is the point: every workflow in this
+# repository pins its actions to a full commit SHA, which is the right security
+# posture and is also the thing nobody updates by hand. Dependabot rewrites the
+# SHA and the version comment together, so pinning does not decay into running
+# a two-year-old action forever.
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: tuesday
+      time: '05:00'
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'chore'
+      prefix-development: 'chore'
+      include: scope
+    labels: [dependencies]
+    groups:
+      # One PR for the whole dev toolchain. These land together, are reviewed by
+      # running CI, and individually are not interesting. Runtime dependencies
+      # are deliberately NOT grouped: there are five of them, they ship inside
+      # the published package, and each one deserves to be looked at on its own.
+      dev-dependencies:
+        dependency-type: development
+        update-types: [minor, patch]
+    ignore:
+      # The `engines` field says >=20.10. A @types/node major that assumes a
+      # newer runtime would typecheck against APIs the supported floor does not
+      # have — an upgrade to make deliberately, alongside the CI matrix.
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: tuesday
+      time: '05:00'
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'ci'
+      include: scope
+    labels: [dependencies, github-actions]
+    groups:
+      # Actions move together and are reviewed as one change: the diff is a set
+      # of SHAs, and reviewing five of those in one PR is no harder than one.
+      actions:
+        patterns: ['*']

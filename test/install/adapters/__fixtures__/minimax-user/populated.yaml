@@ -1,0 +1,7 @@
+defaultModel: minimax/abab-6.5
+permissionMode: ask
+provider:
+  minimax:
+    npm: "@ai-sdk/openai-compatible"
+    options:
+      baseURL: https://api.minimax.chat/v1
