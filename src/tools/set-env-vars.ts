@@ -121,40 +121,50 @@ function resolveConnection(cfg: ServerConfig, instance: string | undefined): Con
  * spec describes, and a caller who does ask for it gets either the behaviour or
  * Coolify's own error, which is a better guide than our guess either way.
  */
-const VARIABLE = z.object({
-  key: z
-    .string()
-    .min(1)
-    .max(MAX_KEY_LENGTH)
-    // No whitespace and no `=`: both make the variable unusable in the container
-    // the moment it is exported, and Coolify does not reject them for you.
-    .regex(/^[^\s=]+$/, 'must not contain whitespace or "="')
-    .describe('Variable name, for example DATABASE_URL.'),
-  value: z
-    .string()
-    .max(MAX_VALUE_LENGTH)
-    .describe('Value to set. An empty string sets the variable to empty; it does not remove it.'),
-  is_preview: z
-    .boolean()
-    .optional()
-    .describe('Apply to preview (pull request) deployments instead of the production environment.'),
-  is_build_time: z
-    .boolean()
-    .optional()
-    .describe(
-      'Expose the variable to the build as well as the running container. Needed by build-time frameworks such as Next.js and Vite.',
-    ),
-  is_literal: z
-    .boolean()
-    .optional()
-    .describe(
-      'Treat the value literally, with no escaping or variable expansion. Use for values containing $ or backslashes.',
-    ),
-  is_multiline: z
-    .boolean()
-    .optional()
-    .describe('The value spans multiple lines, for example a PEM certificate or private key.'),
-});
+const VARIABLE = z
+  .object({
+    key: z
+      .string()
+      .min(1)
+      .max(MAX_KEY_LENGTH)
+      // No whitespace and no `=`: both make the variable unusable in the container
+      // the moment it is exported, and Coolify does not reject them for you.
+      .regex(/^[^\s=]+$/, 'must not contain whitespace or "="')
+      .describe('Variable name, for example DATABASE_URL.'),
+    value: z
+      .string()
+      .max(MAX_VALUE_LENGTH)
+      .describe('Value to set. An empty string sets the variable to empty; it does not remove it.'),
+    is_preview: z
+      .boolean()
+      .optional()
+      .describe(
+        'Apply to preview (pull request) deployments instead of the production environment.',
+      ),
+    is_build_time: z
+      .boolean()
+      .optional()
+      .describe(
+        'Expose the variable to the build as well as the running container. Needed by build-time frameworks such as Next.js and Vite.',
+      ),
+    is_literal: z
+      .boolean()
+      .optional()
+      .describe(
+        'Treat the value literally, with no escaping or variable expansion. Use for values containing $ or backslashes.',
+      ),
+    is_multiline: z
+      .boolean()
+      .optional()
+      .describe('The value spans multiple lines, for example a PEM certificate or private key.'),
+  })
+  // The one nested object in the whole tool surface, and so the one place the
+  // top-level wrapper in `tools/register.ts` cannot reach. Same reasoning as
+  // there: Zod 4 stopped emitting `additionalProperties: false` for a
+  // non-strict object, and the published schema should keep telling a model
+  // that `is_secret` — the field an LLM most often assumes exists here — is not
+  // one of the six that do. Parsing still strips rather than rejects.
+  .meta({ additionalProperties: false });
 
 type Variable = z.infer<typeof VARIABLE>;
 

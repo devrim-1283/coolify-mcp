@@ -970,23 +970,28 @@ export const genericTools: ToolDef[] = [
 // Shared schema fragments
 // ---------------------------------------------------------------------------
 
+// `z.record` takes the key schema explicitly from Zod 4 onward. Under v3 the
+// single-argument form meant "string keys", which is what all three of these
+// always were — so `z.string()` here is the same schema written out, not a
+// narrowing.
+
 function pathParamsField(): z.ZodTypeAny {
   return z
-    .record(z.union([z.string(), z.number()]))
+    .record(z.string(), z.union([z.string(), z.number()]))
     .optional()
     .describe(PATH_PARAMS_DESCRIPTION);
 }
 
 function queryField(): z.ZodTypeAny {
   return z
-    .record(z.union([z.string(), z.number(), z.boolean()]))
+    .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
     .optional()
     .describe(QUERY_DESCRIPTION);
 }
 
 /** See the file header for why this is a bare record and not a generated schema. */
 function bodyField(): z.ZodTypeAny {
-  return z.record(z.unknown()).optional().describe(BODY_DESCRIPTION);
+  return z.record(z.string(), z.unknown()).optional().describe(BODY_DESCRIPTION);
 }
 
 function fieldsField(): z.ZodTypeAny {
