@@ -85,8 +85,17 @@ export function instanceProperty(
   return { instance: enumOf(values).describe(parts.join(' ')).default(fallback) };
 }
 
-/** `z.enum` needs a non-empty tuple; a registry with no connections never reaches here. */
-function enumOf(values: readonly string[]): z.ZodEnum<[string, ...string[]]> {
+/**
+ * `z.enum` needs a non-empty tuple; a registry with no connections never
+ * reaches here.
+ *
+ * The return type is inferred rather than written out. Zod 4 reparameterised
+ * `ZodEnum` over `Record<string, EnumValue>` instead of v3's
+ * `[string, ...string[]]` tuple, and spelling either one here would pin this
+ * helper to a single major version for no gain — every caller passes the result
+ * straight into an input schema shape.
+ */
+function enumOf(values: readonly string[]) {
   const [first, ...rest] = values;
   if (first === undefined) throw new Error('coolify-mcp: no connections configured.');
   return z.enum([first, ...rest]);
