@@ -12,14 +12,20 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { CoolifyError } from '../src/types.js';
 import type { Connection, ConnectionRegistry, CoolifyRequest, DangerClass } from '../src/types.js';
 import { configureTransport, coolifyRequest } from '../src/http/client.js';
 
 const TOKEN = '13|abcdefghijklmnopqrstuvwxyz0123456789ABCD';
 
-let fetchSpy: ReturnType<typeof vi.fn>;
-let resolveTokenSpy: ReturnType<typeof vi.fn>;
+// Spelled out rather than `ReturnType<typeof vi.fn>`. A bare `vi.fn()` is typed
+// as "some function or constructor" from Vitest 4 onward, which no longer
+// satisfies `Connection.resolveToken` — and naming the signature here is what
+// makes a spy that stops matching the interface a type error rather than a
+// silently-passing test.
+let fetchSpy: Mock<typeof fetch>;
+let resolveTokenSpy: Mock<() => Promise<string>>;
 
 function makeConnection(overrides: Partial<Connection> = {}): Connection {
   return {
