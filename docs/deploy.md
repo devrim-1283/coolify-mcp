@@ -289,7 +289,7 @@ If your client does not expand references, you have a choice to make with your
 eyes open, and `doctor` will have an opinion:
 
 ```bash
-npx coolify-mcp doctor --all-servers
+npx @done-dynamics/coolify-mcp doctor --all-servers
 ```
 
 A literal token in a `headers` block is reported as `bearer-literal`, because

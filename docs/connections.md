@@ -248,8 +248,8 @@ connections whose tokens belong to the same Coolify account share one allowance.
 ## Inspecting what you have
 
 ```bash
-npx coolify-mcp connections          # every connection, its token source, whether it resolves
-npx coolify-mcp connections --json
+npx @done-dynamics/coolify-mcp connections          # every connection, its token source, whether it resolves
+npx @done-dynamics/coolify-mcp connections --json
 ```
 
 Resolving may prompt — Touch ID, a vault unlock. That is the point: "the variable
@@ -258,8 +258,8 @@ only the second predicts whether the server will work. No token, and no part of
 one, is ever printed.
 
 ```bash
-npx coolify-mcp check                      # live probe, every connection
-npx coolify-mcp check --connection prod
+npx @done-dynamics/coolify-mcp check                      # live probe, every connection
+npx @done-dynamics/coolify-mcp check --connection prod
 ```
 
 `check` makes two requests, in this order:

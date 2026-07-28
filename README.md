@@ -2,7 +2,7 @@
 
 **Fleet-level MCP server for Coolify — multiple instances and teams from one connection, full REST API coverage, MIT.**
 
-[![npm](https://img.shields.io/npm/v/coolify-mcp.svg)](https://www.npmjs.com/package/coolify-mcp)
+[![npm](https://img.shields.io/npm/v/%40done-dynamics%2Fcoolify-mcp.svg)](https://www.npmjs.com/package/@done-dynamics/coolify-mcp)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 One MCP server that talks to every Coolify instance and every Coolify team you
@@ -20,7 +20,7 @@ Two environment variables and one command.
 export COOLIFY_BASE_URL=https://coolify.example.com
 export COOLIFY_API_TOKEN='13|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 
-npx coolify-mcp install
+npx @done-dynamics/coolify-mcp install
 ```
 
 PowerShell:
@@ -29,7 +29,7 @@ PowerShell:
 $env:COOLIFY_BASE_URL = "https://coolify.example.com"
 $env:COOLIFY_API_TOKEN = "13|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
-npx coolify-mcp install
+npx @done-dynamics/coolify-mcp install
 ```
 
 Get the token from **Coolify → Keys & Tokens → API tokens**. `install` detects
@@ -39,14 +39,14 @@ touch, and writes only after you approve.
 Then verify:
 
 ```bash
-npx coolify-mcp check      # is the instance reachable, and does the token work?
-npx coolify-mcp doctor     # config health, and a scan for credentials at rest
+npx @done-dynamics/coolify-mcp check      # is the instance reachable, and does the token work?
+npx @done-dynamics/coolify-mcp doctor     # config health, and a scan for credentials at rest
 ```
 
 ### One thing to know before you start
 
 **The installer writes pointer config only — never a credential.** The entry it
-writes into your client config is `npx -y coolify-mcp@latest` and, at most, a
+writes into your client config is `npx -y @done-dynamics/coolify-mcp@latest` and, at most, a
 connection _name_. It never writes `COOLIFY_BASE_URL` or `COOLIFY_API_TOKEN`
 into a file.
 
@@ -58,7 +58,7 @@ That means the two variables have to reach the server some other way:
 | Editors (Cursor, Zed)                            | Inherit the environment of the process that launched them — which on macOS is often _not_ your shell. Add the variables to the entry's `env` block by hand, or use a [registry file](./docs/connections.md). |
 | Claude Desktop                                   | Does **not** inherit the shell environment at all. Use a [registry file](./docs/connections.md) with `tokenCommand`/`tokenKeychain`, or put the values in the entry's `env` block.                           |
 
-`npx coolify-mcp doctor` tells you which of these applies to your machine and
+`npx @done-dynamics/coolify-mcp doctor` tells you which of these applies to your machine and
 whether the token actually resolves.
 
 ---
@@ -112,19 +112,19 @@ the default surface is 15 tools and not 42.
 
 ## Install per client
 
-Every snippet below is the byte-exact output of `npx coolify-mcp install` into an
+Every snippet below is the byte-exact output of `npx @done-dynamics/coolify-mcp install` into an
 empty config file. Nothing here is paraphrased, and keeping it that way is a
 required check for anyone adding a client adapter — see
 [CONTRIBUTING](./CONTRIBUTING.md#the-docs-parity-convention).
 
 Prefer the installer. It merges into existing configs without disturbing other
 MCP servers, preserves comments in JSONC files, refuses to write into a config
-it cannot parse, and can be reversed with `npx coolify-mcp uninstall`.
+it cannot parse, and can be reversed with `npx @done-dynamics/coolify-mcp uninstall`.
 
 ### Claude Code — `~/.claude.json` or `<project>/.mcp.json`
 
 ```bash
-npx coolify-mcp install --client claude-code
+npx @done-dynamics/coolify-mcp install --client claude-code
 ```
 
 ```json
@@ -135,7 +135,7 @@ npx coolify-mcp install --client claude-code
       "command": "npx",
       "args": [
         "-y",
-        "coolify-mcp@latest"
+        "@done-dynamics/coolify-mcp@latest"
       ],
       "env": {}
     }
@@ -150,7 +150,7 @@ Claude Code expands `${VAR}` and `${VAR:-default}` inside `env`, so you can add
 ### Cursor — `~/.cursor/mcp.json` or `<project>/.cursor/mcp.json`
 
 ```bash
-npx coolify-mcp install --client cursor
+npx @done-dynamics/coolify-mcp install --client cursor
 ```
 
 ```json
@@ -160,7 +160,7 @@ npx coolify-mcp install --client cursor
       "command": "npx",
       "args": [
         "-y",
-        "coolify-mcp@latest"
+        "@done-dynamics/coolify-mcp@latest"
       ],
       "env": {}
     }
@@ -175,13 +175,13 @@ reference is stored verbatim and reaches the server as literal text.
 ### Codex CLI — `~/.codex/config.toml`
 
 ```bash
-npx coolify-mcp install --client codex
+npx @done-dynamics/coolify-mcp install --client codex
 ```
 
 ```toml
 [mcp_servers.coolify]
 command = "npx"
-args = [ "-y", "coolify-mcp@latest" ]
+args = [ "-y", "@done-dynamics/coolify-mcp@latest" ]
 startup_timeout_sec = 60
 ```
 
@@ -192,7 +192,7 @@ Always stdio, never a `url` key — older Codex versions drop the _entire_
 ### Kimi CLI — `~/.kimi/mcp.json`
 
 ```bash
-npx coolify-mcp install --client kimi
+npx @done-dynamics/coolify-mcp install --client kimi
 ```
 
 ```json
@@ -202,7 +202,7 @@ npx coolify-mcp install --client kimi
       "command": "npx",
       "args": [
         "-y",
-        "coolify-mcp@latest"
+        "@done-dynamics/coolify-mcp@latest"
       ],
       "env": {}
     }
@@ -215,7 +215,7 @@ npx coolify-mcp install --client kimi
 ### Zed — `settings.json`
 
 ```bash
-npx coolify-mcp install --client zed
+npx @done-dynamics/coolify-mcp install --client zed
 ```
 
 ```json
@@ -225,7 +225,7 @@ npx coolify-mcp install --client zed
       "command": "npx",
       "args": [
         "-y",
-        "coolify-mcp@latest"
+        "@done-dynamics/coolify-mcp@latest"
       ],
       "env": {}
     }
@@ -240,7 +240,7 @@ survive. [Details →](./docs/clients/zed.md)
 ### OpenCode — `opencode.json`
 
 ```bash
-npx coolify-mcp install --client opencode --scope project
+npx @done-dynamics/coolify-mcp install --client opencode --scope project
 ```
 
 ```json
@@ -251,7 +251,7 @@ npx coolify-mcp install --client opencode --scope project
       "command": [
         "npx",
         "-y",
-        "coolify-mcp@latest"
+        "@done-dynamics/coolify-mcp@latest"
       ],
       "enabled": true,
       "environment": {}
@@ -267,7 +267,7 @@ executable, and the env key is `environment`.
 ### Claude Desktop — `claude_desktop_config.json`
 
 ```bash
-npx coolify-mcp install --client claude-desktop
+npx @done-dynamics/coolify-mcp install --client claude-desktop
 ```
 
 ```json
@@ -277,7 +277,7 @@ npx coolify-mcp install --client claude-desktop
       "command": "npx",
       "args": [
         "-y",
-        "coolify-mcp@latest"
+        "@done-dynamics/coolify-mcp@latest"
       ],
       "env": {}
     }
@@ -286,7 +286,7 @@ npx coolify-mcp install --client claude-desktop
 ```
 
 On Windows the installer emits `"command": "cmd"` with
-`"args": ["/c", "npx", "-y", "coolify-mcp@latest"]`, because Claude Desktop
+`"args": ["/c", "npx", "-y", "@done-dynamics/coolify-mcp@latest"]`, because Claude Desktop
 spawns without a shell and `npx.cmd` cannot be executed directly. Claude Desktop
 also does not inherit your shell environment — see
 [details →](./docs/clients/claude-desktop.md).
@@ -294,7 +294,7 @@ also does not inherit your shell environment — see
 ### MiniMax CLI — `~/.minimax/config.yaml` — **UNVERIFIED, print only**
 
 ```bash
-npx coolify-mcp install --client minimax --print
+npx @done-dynamics/coolify-mcp install --client minimax --print
 ```
 
 The key MiniMax uses for MCP servers is not known, and coolify-mcp will not
@@ -314,7 +314,7 @@ Coolify box, in a container — and serve every client you own.
 
 ```bash
 export COOLIFY_MCP_AUTH_TOKEN="$(openssl rand -base64 32)"
-npx coolify-mcp serve --http --port 3000
+npx @done-dynamics/coolify-mcp serve --http --port 3000
 ```
 
 |                     | stdio                 | HTTP                        |
@@ -460,7 +460,7 @@ Other variables: `COOLIFY_TIMEOUT_MS` (1000–120000, default 30000),
 - Use `tokenCommand` for `op` / `pass` / `vault` / `gopass` — it is a shell-free argv array, so any command that prints the token works.
 - Create the Coolify token with the narrowest ability set that does the job. `read` + `read:sensitive` covers everything read-only.
 - Prefer `readOnly: true` on connections you do not need to write to.
-- Run `npx coolify-mcp doctor` on any machine that has ever had an MCP client on it.
+- Run `npx @done-dynamics/coolify-mcp doctor` on any machine that has ever had an MCP client on it.
 
 **Never do this.**
 
@@ -472,9 +472,9 @@ Other variables: `COOLIFY_TIMEOUT_MS` (1000–120000, default 30000),
 **Run doctor.**
 
 ```bash
-npx coolify-mcp doctor              # your entry only
-npx coolify-mcp doctor --all-servers # every MCP server in every config
-npx coolify-mcp doctor --json        # for CI
+npx @done-dynamics/coolify-mcp doctor              # your entry only
+npx @done-dynamics/coolify-mcp doctor --all-servers # every MCP server in every config
+npx @done-dynamics/coolify-mcp doctor --json        # for CI
 ```
 
 Doctor scans every client config for the Laravel Sanctum token shape
@@ -534,14 +534,14 @@ leave the process). The last one cannot be routed around by any tool.
 
 ## Enterprise
 
-**Version pinning.** By default the installer writes `coolify-mcp@latest`, so
+**Version pinning.** By default the installer writes `@done-dynamics/coolify-mcp@latest`, so
 every client spawn resolves the newest published version and may execute code
 that did not exist when you installed it. Convenient for one developer,
 out of policy at most companies:
 
 ```bash
-npx coolify-mcp install --all-detected --pin        # pin the version you are running now
-npx coolify-mcp install --all-detected --pin=1.4.2  # pin an exact version
+npx @done-dynamics/coolify-mcp install --all-detected --pin        # pin the version you are running now
+npx @done-dynamics/coolify-mcp install --all-detected --pin=1.4.2  # pin an exact version
 ```
 
 A pinned install upgrades only when you run `install` again. `doctor` reports
@@ -570,7 +570,7 @@ report with kebab-case finding codes suitable for matching in a pipeline:
                     "resolved": true, "wellFormed": true, "readOnly": true,
                     "allowDestructive": false, "shadowsFile": false }],
   "clients":     [{ "adapterId": "claude-code-user", "path": "…", "configExists": true,
-                    "entryPresent": true, "packageSpec": "coolify-mcp@1.4.2",
+                    "entryPresent": true, "packageSpec": "@done-dynamics/coolify-mcp@1.4.2",
                     "confidence": "verified", "unscannedEntries": 3 }],
   "findings":    [{ "code": "plaintext-credential", "severity": "critical",
                     "file": "…", "keyPath": ["mcpServers","other","env","API_TOKEN"],
@@ -665,15 +665,15 @@ end-to-end and is print-only. See [docs/clients/](./docs/clients/).
 ## Commands
 
 ```
-npx coolify-mcp install [--client a,b] [--scope user|project] [--connection NAME]
+npx @done-dynamics/coolify-mcp install [--client a,b] [--scope user|project] [--connection NAME]
                         [--pin[=VERSION]] [--transport stdio|http] [--no-native-cli]
                         [--update] [--dry-run] [--print] [--yes] [--json]
-npx coolify-mcp doctor  [--all-servers] [--fix] [--json]
-npx coolify-mcp uninstall [--client a,b] [--all] [--scope user|project] [--force]
+npx @done-dynamics/coolify-mcp doctor  [--all-servers] [--fix] [--json]
+npx @done-dynamics/coolify-mcp uninstall [--client a,b] [--all] [--scope user|project] [--force]
                           [--dry-run] [--yes] [--json]
-npx coolify-mcp connections [--json]
-npx coolify-mcp check [--connection NAME] [--json]
-npx coolify-mcp serve --http [--port N] [--host ADDR] [--allowed-host HOST]
+npx @done-dynamics/coolify-mcp connections [--json]
+npx @done-dynamics/coolify-mcp check [--connection NAME] [--json]
+npx @done-dynamics/coolify-mcp serve --http [--port N] [--host ADDR] [--allowed-host HOST]
 ```
 
 `coolify-mcp <command> --help` for per-command options.
@@ -695,7 +695,7 @@ npx coolify-mcp serve --http [--port N] [--host ADDR] [--allowed-host HOST]
 ## Requirements
 
 Node.js ≥ 20.10. No native dependencies, ever — that is what keeps
-`npx coolify-mcp` working everywhere. Runtime dependencies are
+`npx @done-dynamics/coolify-mcp` working everywhere. Runtime dependencies are
 `@modelcontextprotocol/sdk`, `zod`, `smol-toml`, `jsonc-parser` and `yaml`.
 
 ## License

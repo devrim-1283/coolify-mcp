@@ -1,5 +1,5 @@
 {
-  "name": "coolify-mcp",
+  "name": "@done-dynamics/coolify-mcp",
   "version": "0.1.0",
   "description": "Fleet-level MCP server for Coolify — multiple instances and teams from one connection, full REST API coverage.",
   "license": "MIT",

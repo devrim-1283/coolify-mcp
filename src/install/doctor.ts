@@ -189,7 +189,7 @@ export interface DoctorClientReport {
   parseable: boolean;
   entryPresent: boolean;
   confidence: 'verified' | 'unverified';
-  /** e.g. `coolify-mcp@1.4.2`, read back out of the installed entry. */
+  /** e.g. `@done-dynamics/coolify-mcp@1.4.2`, read back out of the installed entry. */
   packageSpec?: string;
   /** Server entries in this file that doctor did not attribute. See `allServers`. */
   unscannedEntries: number;
@@ -214,6 +214,13 @@ export interface DoctorOptions {
   homeDir?: string;
   platform?: NodeJS.Platform;
   packageVersion?: string;
+  /**
+   * The npm package name, which since 0.1.0 is not the same string as the
+   * command. Passed in rather than read here so doctor stays a pure function of
+   * its options — the CLI owns the manifest, and a test can drive a rename
+   * without touching one.
+   */
+  packageName?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -240,6 +247,7 @@ export async function runDoctor(options: DoctorOptions = {}): Promise<DoctorRepo
   const homeDir = options.homeDir ?? homedir();
   const platform = options.platform ?? process.platform;
   const packageVersion = options.packageVersion ?? 'unknown';
+  const packageName = options.packageName ?? 'coolify-mcp';
 
   const findings: DoctorFinding[] = [];
   const targets: FixTargets = new Map();
@@ -253,7 +261,7 @@ export async function runDoctor(options: DoctorOptions = {}): Promise<DoctorRepo
     homeDir,
     projectRoot: cwd,
     platform,
-    packageSpec: `coolify-mcp@${packageVersion}`,
+    packageSpec: `${packageName}@${packageVersion}`,
     transport: 'stdio',
   };
   const scan: ScanOptions = {
@@ -1119,8 +1127,19 @@ function extractPackageSpec(entry: unknown): string | undefined {
   const args = entry['args'];
   if (Array.isArray(args)) for (const arg of args) if (typeof arg === 'string') words.push(arg);
 
-  return words.find((word) => word === 'coolify-mcp' || word.startsWith('coolify-mcp@'));
+  // Matched on the BARE name with an optional npm scope, not on the published
+  // package name, and that is the point of the regex rather than an equality
+  // check. The entry doctor most needs to read is an old one: a config written
+  // before 0.1.0 says `coolify-mcp@…`, one written after says
+  // `@done-dynamics/coolify-mcp@…`, and a machine with both is exactly the
+  // "clients disagree on which one to run" case this function exists to find.
+  // An equality test against the current name would go quiet on the entries
+  // that matter most.
+  return words.find((word) => PACKAGE_WORD.test(word));
 }
+
+/** `coolify-mcp`, `coolify-mcp@1.4.2`, `@scope/coolify-mcp@latest`. */
+const PACKAGE_WORD = /^(?:@[\w.-]+\/)?coolify-mcp(?:@.+)?$/;
 
 function reportVersionDrift(
   clients: DoctorClientReport[],

@@ -34,9 +34,9 @@ variable name.
 ## Install
 
 ```bash
-npx coolify-mcp install --client cursor
-npx coolify-mcp install --client cursor --scope user
-npx coolify-mcp install --client cursor --scope project
+npx @done-dynamics/coolify-mcp install --client cursor
+npx @done-dynamics/coolify-mcp install --client cursor --scope user
+npx @done-dynamics/coolify-mcp install --client cursor --scope project
 ```
 
 ## What the installer writes
@@ -48,7 +48,7 @@ npx coolify-mcp install --client cursor --scope project
       "command": "npx",
       "args": [
         "-y",
-        "coolify-mcp@latest"
+        "@done-dynamics/coolify-mcp@latest"
       ],
       "env": {}
     }
@@ -57,7 +57,7 @@ npx coolify-mcp install --client cursor --scope project
 ```
 
 With `--connection prod`, `env` becomes `{"COOLIFY_CONNECTION": "prod"}`. With
-`--pin=1.4.2`, `args` becomes `["-y", "coolify-mcp@1.4.2"]`.
+`--pin=1.4.2`, `args` becomes `["-y", "@done-dynamics/coolify-mcp@1.4.2"]`.
 
 No `"type"` key: unlike the Claude Code adapter there is no native CLI to stay
 byte-identical with, so the entry carries only what Cursor needs.
@@ -77,7 +77,7 @@ that fails to start.
       "command": "npx",
       "args": [
         "-y",
-        "coolify-mcp@latest"
+        "@done-dynamics/coolify-mcp@latest"
       ],
       "envFile": "/absolute/path/to/coolify.env",
       "env": {}
@@ -101,7 +101,7 @@ COOLIFY_API_TOKEN=13|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
       "command": "npx",
       "args": [
         "-y",
-        "coolify-mcp@latest"
+        "@done-dynamics/coolify-mcp@latest"
       ],
       "env": {
         "COOLIFY_BASE_URL": "${env:COOLIFY_BASE_URL}",
@@ -124,7 +124,7 @@ is why — use `envFile`, or a
 ## Verify
 
 ```bash
-npx coolify-mcp doctor
+npx @done-dynamics/coolify-mcp doctor
 ```
 
 Doctor knows Cursor's syntax: when it finds a literal credential in a Cursor
@@ -137,7 +137,7 @@ Then, in Cursor: Settings → MCP should show `coolify` connected.
 ## Uninstall
 
 ```bash
-npx coolify-mcp uninstall --client cursor
+npx @done-dynamics/coolify-mcp uninstall --client cursor
 ```
 
 ## Confirmed vs unconfirmed
