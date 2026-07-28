@@ -69,17 +69,94 @@ export interface AdapterFixtureSpec {
 }
 
 export const ADAPTER_FIXTURES: readonly AdapterFixtureSpec[] = [
-  { id: 'claude-code-user', format: 'json', ext: 'json', container: ['mcpServers'], doc: 'claude-code', sibling: 'filesystem' },
-  { id: 'claude-code-project', format: 'json', ext: 'json', container: ['mcpServers'], doc: 'claude-code', sibling: 'filesystem' },
-  { id: 'cursor-user', format: 'json', ext: 'json', container: ['mcpServers'], doc: 'cursor', sibling: 'filesystem' },
-  { id: 'cursor-project', format: 'json', ext: 'json', container: ['mcpServers'], doc: 'cursor', sibling: 'filesystem' },
-  { id: 'codex-user', format: 'toml', ext: 'toml', container: ['mcp_servers'], doc: 'codex', sibling: 'filesystem' },
-  { id: 'kimi-user', format: 'json', ext: 'json', container: ['mcpServers'], doc: 'kimi', sibling: 'filesystem' },
-  { id: 'zed-user', format: 'jsonc', ext: 'jsonc', container: ['context_servers'], doc: 'zed', sibling: 'some-mcp-server' },
-  { id: 'zed-project', format: 'jsonc', ext: 'jsonc', container: ['context_servers'], doc: 'zed', sibling: 'some-mcp-server' },
-  { id: 'opencode-user', format: 'json', ext: 'json', container: ['mcp'], doc: 'opencode', sibling: 'filesystem' },
-  { id: 'opencode-project', format: 'json', ext: 'json', container: ['mcp'], doc: 'opencode', sibling: 'filesystem' },
-  { id: 'claude-desktop', format: 'json', ext: 'json', container: ['mcpServers'], doc: 'claude-desktop', sibling: 'filesystem' },
+  {
+    id: 'claude-code-user',
+    format: 'json',
+    ext: 'json',
+    container: ['mcpServers'],
+    doc: 'claude-code',
+    sibling: 'filesystem',
+  },
+  {
+    id: 'claude-code-project',
+    format: 'json',
+    ext: 'json',
+    container: ['mcpServers'],
+    doc: 'claude-code',
+    sibling: 'filesystem',
+  },
+  {
+    id: 'cursor-user',
+    format: 'json',
+    ext: 'json',
+    container: ['mcpServers'],
+    doc: 'cursor',
+    sibling: 'filesystem',
+  },
+  {
+    id: 'cursor-project',
+    format: 'json',
+    ext: 'json',
+    container: ['mcpServers'],
+    doc: 'cursor',
+    sibling: 'filesystem',
+  },
+  {
+    id: 'codex-user',
+    format: 'toml',
+    ext: 'toml',
+    container: ['mcp_servers'],
+    doc: 'codex',
+    sibling: 'filesystem',
+  },
+  {
+    id: 'kimi-user',
+    format: 'json',
+    ext: 'json',
+    container: ['mcpServers'],
+    doc: 'kimi',
+    sibling: 'filesystem',
+  },
+  {
+    id: 'zed-user',
+    format: 'jsonc',
+    ext: 'jsonc',
+    container: ['context_servers'],
+    doc: 'zed',
+    sibling: 'some-mcp-server',
+  },
+  {
+    id: 'zed-project',
+    format: 'jsonc',
+    ext: 'jsonc',
+    container: ['context_servers'],
+    doc: 'zed',
+    sibling: 'some-mcp-server',
+  },
+  {
+    id: 'opencode-user',
+    format: 'json',
+    ext: 'json',
+    container: ['mcp'],
+    doc: 'opencode',
+    sibling: 'filesystem',
+  },
+  {
+    id: 'opencode-project',
+    format: 'json',
+    ext: 'json',
+    container: ['mcp'],
+    doc: 'opencode',
+    sibling: 'filesystem',
+  },
+  {
+    id: 'claude-desktop',
+    format: 'json',
+    ext: 'json',
+    container: ['mcpServers'],
+    doc: 'claude-desktop',
+    sibling: 'filesystem',
+  },
   {
     id: 'minimax-user',
     format: 'yaml',
@@ -211,7 +288,10 @@ export async function install(sandbox: Sandbox, options: ApplyOptions = {}): Pro
   return applyPlan(plan, options);
 }
 
-export async function uninstall(sandbox: Sandbox, options: ApplyOptions = {}): Promise<ApplyResult> {
+export async function uninstall(
+  sandbox: Sandbox,
+  options: ApplyOptions = {},
+): Promise<ApplyResult> {
   const plan = await planUninstall({ ctx: sandbox.ctx, clients: [sandbox.adapter.id] });
   return applyPlan(plan, options);
 }
@@ -240,7 +320,10 @@ export function issueCodes(result: ApplyResult): string[] {
  * a test that read the file back through the same parser the writer used could
  * not tell a writer bug from a parser bug.
  */
-export async function parseConfig(text: string, format: AdapterFixtureSpec['format']): Promise<unknown> {
+export async function parseConfig(
+  text: string,
+  format: AdapterFixtureSpec['format'],
+): Promise<unknown> {
   const body = text.replace(/^﻿/, '');
   if (body.trim() === '') return {};
   switch (format) {
@@ -252,7 +335,7 @@ export async function parseConfig(text: string, format: AdapterFixtureSpec['form
     }
     case 'toml': {
       const { parse } = await import('smol-toml');
-      return parse(body) as unknown;
+      return parse(body);
     }
     case 'yaml': {
       const { parse } = await import('yaml');
@@ -271,7 +354,10 @@ export function at(root: unknown, keyPath: readonly string[]): unknown {
 }
 
 /** Our entry, read back out of the file the adapter wrote. */
-export async function readManagedEntry(sandbox: Sandbox, spec: AdapterFixtureSpec): Promise<unknown> {
+export async function readManagedEntry(
+  sandbox: Sandbox,
+  spec: AdapterFixtureSpec,
+): Promise<unknown> {
   const text = sandbox.read();
   if (text === null) return undefined;
   return at(await parseConfig(text, spec.format), [...spec.container, MANAGED_NAME]);

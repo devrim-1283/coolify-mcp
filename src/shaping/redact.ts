@@ -80,7 +80,12 @@ export function isSensitiveKey(key: string): boolean {
   return SENSITIVE_KEY.test(key);
 }
 
-function walk(node: unknown, secrets: readonly string[], reveal: boolean, sensitive: boolean): unknown {
+function walk(
+  node: unknown,
+  secrets: readonly string[],
+  reveal: boolean,
+  sensitive: boolean,
+): unknown {
   if (typeof node === 'string') {
     // Only non-empty strings are masked: `"password": ""` masked to `***` would
     // assert that a password exists. Numbers and booleans are left alone — they
@@ -117,7 +122,9 @@ function maskSecrets(text: string, secrets: readonly string[]): string {
  * one would leave the remainder of the longer one sitting in the clear.
  */
 function sortSecrets(secrets: Iterable<string>): string[] {
-  return [...secrets].filter((s) => s.length >= MIN_SECRET_LENGTH).sort((a, b) => b.length - a.length);
+  return [...secrets]
+    .filter((s) => s.length >= MIN_SECRET_LENGTH)
+    .sort((a, b) => b.length - a.length);
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {

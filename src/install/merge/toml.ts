@@ -44,7 +44,7 @@ export function parseTomlDocument(source: string): TomlDocument {
   if (body.trim() === '') return { table: {} };
 
   try {
-    return { table: parse(body) as Record<string, unknown> };
+    return { table: parse(body) };
   } catch (error: unknown) {
     return { table: {}, issue: unparseable(error) };
   }
@@ -133,7 +133,8 @@ export function replaceTomlSection(
   const tail = body.slice(span.end);
   // Keep the blank run that separated us from whatever follows, so an update
   // does not quietly restyle the rest of the file.
-  const separator = span.trailingBlankLines > 0 && tail !== '' ? eol.repeat(span.trailingBlankLines) : '';
+  const separator =
+    span.trailingBlankLines > 0 && tail !== '' ? eol.repeat(span.trailingBlankLines) : '';
 
   const text = bom + body.slice(0, span.start) + block + separator + tail;
   return { text, changed: text !== source, issues: [] };
@@ -399,8 +400,7 @@ function blankLineAtEnd(text: string): boolean {
 }
 
 function unparseable(error: unknown): ValidationIssue {
-  const where =
-    error instanceof TomlError ? ` at line ${error.line}, column ${error.column}` : '';
+  const where = error instanceof TomlError ? ` at line ${error.line}, column ${error.column}` : '';
   // smol-toml appends a source excerpt to `message`; the first line is the
   // diagnosis and the rest would just be the file echoed back at the user.
   const detail = error instanceof Error ? (error.message.split('\n')[0] ?? '') : String(error);

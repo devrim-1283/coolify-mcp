@@ -19,7 +19,6 @@
  */
 
 import { readFileSync } from 'node:fs';
-import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
@@ -35,7 +34,10 @@ const TOKEN = '13|abcdefghijklmnopqrstuvwxyz0123456789ABCD';
 const SOURCE = '/home/dev/.coolify-mcp/config.json';
 
 function file(connection: Record<string, unknown>, name = 'prod'): unknown {
-  return { version: CONFIG_VERSION, connections: { [name]: { baseUrl: 'https://coolify.example.com', ...connection } } };
+  return {
+    version: CONFIG_VERSION,
+    connections: { [name]: { baseUrl: 'https://coolify.example.com', ...connection } },
+  };
 }
 
 function rejection(raw: unknown): ConfigError {
@@ -177,7 +179,10 @@ describe('connection validation', () => {
   });
 
   it('explains a wrong version in terms of the file, not of Zod', () => {
-    const error = rejection({ version: 2, connections: { prod: { baseUrl: 'https://coolify.example.com' } } });
+    const error = rejection({
+      version: 2,
+      connections: { prod: { baseUrl: 'https://coolify.example.com' } },
+    });
 
     expect(error.message).toContain('This file is a v1 registry.');
   });
@@ -185,7 +190,11 @@ describe('connection validation', () => {
   it('allows $schema so editors can validate the file', () => {
     expect(() =>
       parseConfigFile(
-        { $schema: 'https://example.com/config.v1.json', version: CONFIG_VERSION, connections: { prod: { baseUrl: 'https://a.example.com' } } },
+        {
+          $schema: 'https://example.com/config.v1.json',
+          version: CONFIG_VERSION,
+          connections: { prod: { baseUrl: 'https://a.example.com' } },
+        },
         SOURCE,
       ),
     ).not.toThrow();
@@ -246,7 +255,11 @@ function zodConnectionKeys(): string[] {
   const error = rejection(file({ definitely_not_a_property: 1 }));
   const line = error.message.split('\n').find((text) => text.startsWith('Valid properties:'));
   if (line === undefined) throw new Error('the error message no longer lists the valid properties');
-  return line.replace('Valid properties:', '').replace(/\.$/, '').split(',').map((key) => key.trim());
+  return line
+    .replace('Valid properties:', '')
+    .replace(/\.$/, '')
+    .split(',')
+    .map((key) => key.trim());
 }
 
 describe('schema/config.v1.json mirrors src/config/schema.ts', () => {
@@ -264,7 +277,11 @@ describe('schema/config.v1.json mirrors src/config/schema.ts', () => {
   });
 
   it('declares exactly the top-level properties the parser accepts', () => {
-    const error = rejection({ version: CONFIG_VERSION, connections: { prod: { baseUrl: 'https://a.example.com' } }, nope: 1 });
+    const error = rejection({
+      version: CONFIG_VERSION,
+      connections: { prod: { baseUrl: 'https://a.example.com' } },
+      nope: 1,
+    });
     expect(error.message).toContain('"nope" is not a valid property');
 
     expect(Object.keys(node('properties')).sort()).toEqual(
@@ -301,16 +318,26 @@ describe('schema/config.v1.json mirrors src/config/schema.ts', () => {
   });
 
   it('agrees on the tokenEnv pattern', () => {
-    expect(node('$defs', 'connection', 'properties', 'tokenEnv')['pattern']).toBe('^[A-Za-z_][A-Za-z0-9_]*$');
+    expect(node('$defs', 'connection', 'properties', 'tokenEnv')['pattern']).toBe(
+      '^[A-Za-z_][A-Za-z0-9_]*$',
+    );
   });
 
   it('encodes the at-most-one-token-source rule', () => {
     // Three `not: {required: [a, b]}` clauses, one per pair. Without them an
     // editor would autocomplete a second source the server then refuses.
-    const clauses = node('$defs', 'connection')['allOf'] as Array<{ not?: { required?: string[] } }>;
-    const pairs = clauses.map((clause) => [...(clause.not?.required ?? [])].sort().join('+')).sort();
+    const clauses = node('$defs', 'connection')['allOf'] as Array<{
+      not?: { required?: string[] };
+    }>;
+    const pairs = clauses
+      .map((clause) => [...(clause.not?.required ?? [])].sort().join('+'))
+      .sort();
 
-    expect(pairs).toEqual(['tokenCommand+tokenEnv', 'tokenCommand+tokenKeychain', 'tokenEnv+tokenKeychain']);
+    expect(pairs).toEqual([
+      'tokenCommand+tokenEnv',
+      'tokenCommand+tokenKeychain',
+      'tokenEnv+tokenKeychain',
+    ]);
   });
 
   it('ships an example the parser actually accepts', () => {

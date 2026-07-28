@@ -135,7 +135,8 @@ function fromFile(name: string, config: ConnectionConfig, env: NodeJS.ProcessEnv
     // file already described; the reverse would let an env var re-open a
     // connection the file deliberately closed.
     readOnly: config.readOnly || booleanEnv(env, 'COOLIFY_READ_ONLY', false),
-    allowDestructive: config.allowDestructive ?? booleanEnv(env, 'COOLIFY_ALLOW_DESTRUCTIVE', false),
+    allowDestructive:
+      config.allowDestructive ?? booleanEnv(env, 'COOLIFY_ALLOW_DESTRUCTIVE', false),
     timeoutMs: config.timeoutMs,
     insecureTLS: config.insecureTLS,
   };
@@ -180,7 +181,10 @@ function collectEnvConnections(env: NodeJS.ProcessEnv): Map<string, ConnectionSp
 
   const bare = readEnvValue(env, 'COOLIFY_BASE_URL');
   if (bare !== undefined) {
-    found.set(DEFAULT_CONNECTION_NAME, envSpec(DEFAULT_CONNECTION_NAME, bare, 'COOLIFY_BASE_URL', env));
+    found.set(
+      DEFAULT_CONNECTION_NAME,
+      envSpec(DEFAULT_CONNECTION_NAME, bare, 'COOLIFY_BASE_URL', env),
+    );
   }
 
   // Sorted so that a malformed variable always reports the same one first.
@@ -318,7 +322,8 @@ function userConfigPaths(
   const xdg = readEnvValue(env, 'XDG_CONFIG_HOME');
   const appData = readEnvValue(env, 'APPDATA');
   const configDir =
-    xdg ?? (platform === 'win32' && appData !== undefined ? appData : path.join(homedir, '.config'));
+    xdg ??
+    (platform === 'win32' && appData !== undefined ? appData : path.join(homedir, '.config'));
 
   return [
     path.join(configDir, CONFIG_DIR_NAME, USER_CONFIG_FILENAME),

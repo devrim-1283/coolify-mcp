@@ -74,7 +74,10 @@ export function readResourceType(args: Record<string, unknown>): ResourceType {
     );
   }
   if (!(RESOURCE_TYPES as readonly string[]).includes(raw)) {
-    throw new CoolifyError(`\`resource_type\` must be one of: ${RESOURCE_TYPES.join(', ')}.`, 'validation');
+    throw new CoolifyError(
+      `\`resource_type\` must be one of: ${RESOURCE_TYPES.join(', ')}.`,
+      'validation',
+    );
   }
   return raw as ResourceType;
 }

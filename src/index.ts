@@ -77,7 +77,9 @@ function resolveLogLevel(env: NodeJS.ProcessEnv): LogLevel {
 
   // Not fatal — refusing to start over a log level would be absurd — but not
   // silent either, or the user watches for output that never arrives.
-  note(`ignoring COOLIFY_LOG_LEVEL="${raw}"; expected one of ${LOG_LEVELS.join(', ')}. Using ${DEFAULT_LOG_LEVEL}.`);
+  note(
+    `ignoring COOLIFY_LOG_LEVEL="${raw}"; expected one of ${LOG_LEVELS.join(', ')}. Using ${DEFAULT_LOG_LEVEL}.`,
+  );
   return DEFAULT_LOG_LEVEL;
 }
 

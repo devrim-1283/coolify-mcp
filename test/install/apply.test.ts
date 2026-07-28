@@ -125,7 +125,10 @@ describe('--dry-run', () => {
 
 describe('what a human is shown', () => {
   function seedWithPlaintextToken(box: Sandbox): void {
-    const existing = JSON.parse(readFileSync(box.configPath, 'utf8')) as Record<string, Record<string, unknown>>;
+    const existing = JSON.parse(readFileSync(box.configPath, 'utf8')) as Record<
+      string,
+      Record<string, unknown>
+    >;
     (existing['mcpServers'] as Record<string, Record<string, unknown>>)['other-tool'] = {
       command: 'npx',
       args: ['-y', 'other-mcp'],

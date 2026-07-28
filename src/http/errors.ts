@@ -201,7 +201,12 @@ export function mapHttpError(ctx: HttpErrorContext): CoolifyError {
       ctx.status,
     );
   }
-  return new CoolifyError(summarize(body, `Coolify returned ${ctx.status}.`), 'unknown', undefined, ctx.status);
+  return new CoolifyError(
+    summarize(body, `Coolify returned ${ctx.status}.`),
+    'unknown',
+    undefined,
+    ctx.status,
+  );
 }
 
 function map400(ctx: HttpErrorContext, body: CoolifyErrorBody, key: string): CoolifyError {
@@ -219,7 +224,12 @@ function map400(ctx: HttpErrorContext, body: CoolifyErrorBody, key: string): Coo
     return mapInvalidRequest(body);
   }
 
-  return new CoolifyError(summarize(body, 'Coolify rejected the request.'), 'validation', undefined, 400);
+  return new CoolifyError(
+    summarize(body, 'Coolify rejected the request.'),
+    'validation',
+    undefined,
+    400,
+  );
 }
 
 /** The three sub-cases of `{"message":"Invalid request.","error":...}`. */

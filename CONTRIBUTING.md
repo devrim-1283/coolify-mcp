@@ -65,7 +65,7 @@ npx coolify-mcp install --print            # the snippet, no file access
 npx coolify-mcp install --client zed --dry-run
 ```
 
-`--dry-run` runs the *same* `applyPlan` call the real install runs, with `dryRun`
+`--dry-run` runs the _same_ `applyPlan` call the real install runs, with `dryRun`
 flipped. There is no parallel preview implementation that can drift.
 
 ## Where the security story lives
@@ -73,10 +73,10 @@ flipped. There is no parallel preview implementation that can drift.
 Two files. Any review should start with them, and any change to either deserves
 extra scrutiny:
 
-| File | Question |
-|---|---|
-| `src/tools/register.ts` | What tools exist at all. |
-| `src/http/client.ts` | What may leave the process. |
+| File                    | Question                    |
+| ----------------------- | --------------------------- |
+| `src/tools/register.ts` | What tools exist at all.    |
+| `src/http/client.ts`    | What may leave the process. |
 
 See [SECURITY.md](./SECURITY.md) for the threat model.
 
@@ -109,28 +109,28 @@ import {
 
 The contract, and the parts of it that are not negotiable:
 
-| Member | Rule |
-|---|---|
-| `id` | `"<client>-<scope>"`, unique. `doctor` reports a duplicate as `adapter-duplicate-id`. |
-| `client`, `aliases` | The `--client` selectors. `client` is also the prefix of every `ValidationIssue` code this adapter emits. |
-| `format` | `json` \| `jsonc` \| `toml` \| `yaml`. Picks the merge writer. |
-| `confidence` | `'verified'` only under the rule in step 4. |
-| `transports` | Declare **only what you actually write.** Advertising `'http'` and then emitting stdio lets `--transport http` be accepted and silently ignored, which is worse than refusing the flag. |
-| `resolvePath(ctx)` | Uses `pathFor(ctx)`, never bare `node:path` — path arithmetic must follow `ctx.platform`, not the host, or a Linux CI runner emits POSIX separators for a win32 fixture. Derive `%APPDATA%` from `ctx.homeDir`; `InstallCtx` deliberately carries no environment, which is what keeps `resolvePath` deterministic under the fixtures. |
-| `planWrite`, `planRemove` | **PURE. No I/O.** They return inert `Operation` data. This is what makes `--dry-run` a real preview rather than a second code path. |
-| `detect`, `readEntry`, `validate` | May do I/O. Must not throw for an ordinary missing file. |
-| `nativeCli` | Optional. Prefer the client's own CLI when the argument form is **verified** — it preserves invariants we do not know about. If it is not verified, leave it out; see Codex. |
+| Member                            | Rule                                                                                                                                                                                                                                                                                                                                  |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                              | `"<client>-<scope>"`, unique. `doctor` reports a duplicate as `adapter-duplicate-id`.                                                                                                                                                                                                                                                 |
+| `client`, `aliases`               | The `--client` selectors. `client` is also the prefix of every `ValidationIssue` code this adapter emits.                                                                                                                                                                                                                             |
+| `format`                          | `json` \| `jsonc` \| `toml` \| `yaml`. Picks the merge writer.                                                                                                                                                                                                                                                                        |
+| `confidence`                      | `'verified'` only under the rule in step 4.                                                                                                                                                                                                                                                                                           |
+| `transports`                      | Declare **only what you actually write.** Advertising `'http'` and then emitting stdio lets `--transport http` be accepted and silently ignored, which is worse than refusing the flag.                                                                                                                                               |
+| `resolvePath(ctx)`                | Uses `pathFor(ctx)`, never bare `node:path` — path arithmetic must follow `ctx.platform`, not the host, or a Linux CI runner emits POSIX separators for a win32 fixture. Derive `%APPDATA%` from `ctx.homeDir`; `InstallCtx` deliberately carries no environment, which is what keeps `resolvePath` deterministic under the fixtures. |
+| `planWrite`, `planRemove`         | **PURE. No I/O.** They return inert `Operation` data. This is what makes `--dry-run` a real preview rather than a second code path.                                                                                                                                                                                                   |
+| `detect`, `readEntry`, `validate` | May do I/O. Must not throw for an ordinary missing file.                                                                                                                                                                                                                                                                              |
+| `nativeCli`                       | Optional. Prefer the client's own CLI when the argument form is **verified** — it preserves invariants we do not know about. If it is not verified, leave it out; see Codex.                                                                                                                                                          |
 
 ### Getting the entry body right
 
 The env block is the single most dangerous field in an adapter. `applyInterpolation`
 takes the canonical `${VAR}` env block and rewrites it into the target's syntax:
 
-| Style | Client | Behaviour |
-|---|---|---|
-| `'dollar-brace'` | Claude Code | `${VAR}` and `${VAR:-default}` pass through unchanged. |
-| `'dollar-env'` | Cursor | Rewritten to `${env:VAR}`. A `:-default` is **discarded**, not smuggled into the variable name. |
-| `'none'` | everything unverified | The reference is **dropped** and reported through `droppedRefNote`. |
+| Style            | Client                | Behaviour                                                                                       |
+| ---------------- | --------------------- | ----------------------------------------------------------------------------------------------- |
+| `'dollar-brace'` | Claude Code           | `${VAR}` and `${VAR:-default}` pass through unchanged.                                          |
+| `'dollar-env'`   | Cursor                | Rewritten to `${env:VAR}`. A `:-default` is **discarded**, not smuggled into the variable name. |
+| `'none'`         | everything unverified | The reference is **dropped** and reported through `droppedRefNote`.                             |
 
 **When in doubt, use `'none'`.** Dropping is the whole point: the installer writes
 pointer config only, so "this client cannot expand a reference" must never degrade
@@ -139,24 +139,24 @@ produce is an entry missing a variable, never one leaking a credential.
 
 ### Merge semantics per format
 
-| Format | Writer | Rule |
-|---|---|---|
-| JSON | `merge/json.ts` | Deep merge under the managed key path only. |
+| Format    | Writer           | Rule                                                                                                                                                                                   |
+| --------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| JSON      | `merge/json.ts`  | Deep merge under the managed key path only.                                                                                                                                            |
 | **JSONC** | `merge/jsonc.ts` | **`jsonc-parser`'s `modify()` / `applyEdits()`.** A naive `JSON.parse`/`stringify` round-trip deletes every comment in the user's file. That is explicitly forbidden by this contract. |
-| TOML | `merge/toml.ts` | **Append-only**, and **refuse to write into a file that does not parse** (`<client>-config-unparseable`). Appending to a broken config turns a five-second repair into archaeology. |
-| YAML | `merge/yaml.ts` | Merge under the key path. |
+| TOML      | `merge/toml.ts`  | **Append-only**, and **refuse to write into a file that does not parse** (`<client>-config-unparseable`). Appending to a broken config turns a five-second repair into archaeology.    |
+| YAML      | `merge/yaml.ts`  | Merge under the key path.                                                                                                                                                              |
 
 ## 2. Add the four fixtures
 
 Under `test/install/adapters/__fixtures__/<adapter-id>/`, with the extension of
 the client's format:
 
-| Fixture | What it asserts |
-|---|---|
-| `empty` | The file does not exist → it is created correctly, with the right parent directories. |
-| `populated` | Unrelated MCP servers are already present → ours is added and **theirs are byte-identical afterwards**. |
+| Fixture     | What it asserts                                                                                                                                        |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `empty`     | The file does not exist → it is created correctly, with the right parent directories.                                                                  |
+| `populated` | Unrelated MCP servers are already present → ours is added and **theirs are byte-identical afterwards**.                                                |
 | `commented` | Comments, CRLF line endings, a BOM and trailing commas are all **preserved**. This is the JSONC and TOML contract, and it is where naive writers fail. |
-| `conflict` | A `coolify` entry already exists and has drifted → append-only skips it and warns rather than clobbering it. |
+| `conflict`  | A `coolify` entry already exists and has drifted → append-only skips it and warns rather than clobbering it.                                           |
 
 And three invariants, which the shared harness applies to **every** adapter:
 
@@ -174,7 +174,7 @@ The parity check needs a rule for which block to extract, so:
 > invocation (`coolify-mcp@latest`, empty `env`).
 
 Any other snippet in that file — hand-edit examples, credential wiring, alternative
-shapes — must sit under a different heading and be labelled as *not* what the
+shapes — must sit under a different heading and be labelled as _not_ what the
 installer writes. Look at [docs/clients/claude-code.md](./docs/clients/claude-code.md)
 for the pattern.
 
@@ -224,7 +224,7 @@ is not a failure — it is a working, useful contribution:
   caller that ignored the flag has nothing to execute.
 - `--print` still gives users a snippet to apply by hand, with the candidates and
   the verification procedure spelled out.
-- `readEntry()` can probe *both* candidate locations read-only. If either ever
+- `readEntry()` can probe _both_ candidate locations read-only. If either ever
   returns a value on a real install, the key is settled — and that probe runs on
   every `doctor`, on every user's machine, for free.
 

@@ -26,7 +26,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 import type { InstallCtx, Operation, ServerEntry } from '../../../src/types.js';
 import {
   ADAPTER_FIXTURES,
-  ALL_CASES,
   FILE_CASES,
   MANAGED_NAME,
   adapterFor,
@@ -312,11 +311,17 @@ describe.each(DOC_TARGETS)('docs parity — $doc', (spec: AdapterFixtureSpec) =>
     const expected = await plannedEntry(spec);
     expect(expected, `${spec.id} planned no entry to compare against`).toBeDefined();
 
-    expect(normalizeSpec(at(documented?.value, ['command']))).toEqual(normalizeSpec(at(expected, ['command'])));
-    expect(normalizeSpec(at(documented?.value, ['args']))).toEqual(normalizeSpec(at(expected, ['args'])));
+    expect(normalizeSpec(at(documented?.value, ['command']))).toEqual(
+      normalizeSpec(at(expected, ['command'])),
+    );
+    expect(normalizeSpec(at(documented?.value, ['args']))).toEqual(
+      normalizeSpec(at(expected, ['args'])),
+    );
     // `env` vs `environment` is a silent failure: the client reads no
     // environment at all and the server reports a missing token.
-    expect(envKeyOf(documented?.value) ?? envKeyOf(expected)).toBe(envKeyOf(expected) ?? envKeyOf(documented?.value));
+    expect(envKeyOf(documented?.value) ?? envKeyOf(expected)).toBe(
+      envKeyOf(expected) ?? envKeyOf(documented?.value),
+    );
   });
 
   it('uses the reference syntax this client actually expands', async () => {

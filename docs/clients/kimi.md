@@ -1,15 +1,15 @@
 # Kimi CLI
 
-| | |
-|---|---|
-| Adapter id | `kimi-user` |
-| `--client` selectors | `kimi`, `kimi-cli`, `kimi-user` |
-| Config | `~/.kimi/mcp.json` (Windows: `%USERPROFILE%\.kimi\mcp.json`) |
-| Key path | `mcpServers.coolify` |
-| Format | JSON |
-| Transports written | `stdio` only |
-| Confidence | **verified** for the path, the key and the `mcp add` form |
-| Native CLI | `kimi mcp add`, preferred when the `kimi` binary is on PATH |
+|                      |                                                              |
+| -------------------- | ------------------------------------------------------------ |
+| Adapter id           | `kimi-user`                                                  |
+| `--client` selectors | `kimi`, `kimi-cli`, `kimi-user`                              |
+| Config               | `~/.kimi/mcp.json` (Windows: `%USERPROFILE%\.kimi\mcp.json`) |
+| Key path             | `mcpServers.coolify`                                         |
+| Format               | JSON                                                         |
+| Transports written   | `stdio` only                                                 |
+| Confidence           | **verified** for the path, the key and the `mcp add` form    |
+| Native CLI           | `kimi mcp add`, preferred when the `kimi` binary is on PATH  |
 
 ## Do not write `~/.kimi/mcp-configs/mcp-servers.json`
 
@@ -81,7 +81,7 @@ Kimi is a terminal program, so it inherits your shell environment and this works
 
 For multiple instances or teams, define a
 [registry file](../connections.md#layer-2--a-registry-file) and select one with
-`--connection`, which writes only the connection *name* into the config.
+`--connection`, which writes only the connection _name_ into the config.
 
 `doctor --fix` will not rewrite literals in a Kimi config, because Kimi is not on
 the verified-expansion list. A config referencing a variable the client never
@@ -119,10 +119,10 @@ npx coolify-mcp uninstall --client kimi
 
 ## Confirmed vs unconfirmed
 
-| Item | Status |
-|---|---|
-| `~/.kimi/mcp.json` path | confirmed |
-| `mcpServers` key | confirmed |
-| `kimi mcp add --transport stdio <name> -- <cmd> <args…>` | confirmed |
-| `-e KEY=VALUE` flags on `kimi mcp add` | **not verified** — failure falls back to the file writer |
-| `${VAR}` expansion inside `env` | **not verified** — treated as "no expansion" until proven |
+| Item                                                     | Status                                                    |
+| -------------------------------------------------------- | --------------------------------------------------------- |
+| `~/.kimi/mcp.json` path                                  | confirmed                                                 |
+| `mcpServers` key                                         | confirmed                                                 |
+| `kimi mcp add --transport stdio <name> -- <cmd> <args…>` | confirmed                                                 |
+| `-e KEY=VALUE` flags on `kimi mcp add`                   | **not verified** — failure falls back to the file writer  |
+| `${VAR}` expansion inside `env`                          | **not verified** — treated as "no expansion" until proven |

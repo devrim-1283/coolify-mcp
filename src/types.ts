@@ -222,7 +222,11 @@ export interface ToolDef {
   surface: 'read' | 'write' | 'destructive';
   /** Zod raw shape. Built per-config so `instance` can be conditional. */
   inputSchema: (cfg: ServerConfig) => Record<string, unknown>;
-  handler: (args: Record<string, unknown>, cfg: ServerConfig, extra: ToolExtra) => Promise<ToolResult>;
+  handler: (
+    args: Record<string, unknown>,
+    cfg: ServerConfig,
+    extra: ToolExtra,
+  ) => Promise<ToolResult>;
 }
 
 export interface ToolExtra {

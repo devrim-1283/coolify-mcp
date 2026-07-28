@@ -47,16 +47,16 @@ npx coolify-mcp doctor     # config health, and a scan for credentials at rest
 
 **The installer writes pointer config only — never a credential.** The entry it
 writes into your client config is `npx -y coolify-mcp@latest` and, at most, a
-connection *name*. It never writes `COOLIFY_BASE_URL` or `COOLIFY_API_TOKEN`
+connection _name_. It never writes `COOLIFY_BASE_URL` or `COOLIFY_API_TOKEN`
 into a file.
 
 That means the two variables have to reach the server some other way:
 
-| Client kind | How the token arrives |
-|---|---|
-| CLI clients (Claude Code, Codex, Kimi, OpenCode) | They inherit your shell environment. Export the two variables in `~/.zshrc`, `~/.bashrc`, or your PowerShell profile. |
-| Editors (Cursor, Zed) | Inherit the environment of the process that launched them — which on macOS is often *not* your shell. Add the variables to the entry's `env` block by hand, or use a [registry file](./docs/connections.md). |
-| Claude Desktop | Does **not** inherit the shell environment at all. Use a [registry file](./docs/connections.md) with `tokenCommand`/`tokenKeychain`, or put the values in the entry's `env` block. |
+| Client kind                                      | How the token arrives                                                                                                                                                                                        |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| CLI clients (Claude Code, Codex, Kimi, OpenCode) | They inherit your shell environment. Export the two variables in `~/.zshrc`, `~/.bashrc`, or your PowerShell profile.                                                                                        |
+| Editors (Cursor, Zed)                            | Inherit the environment of the process that launched them — which on macOS is often _not_ your shell. Add the variables to the entry's `env` block by hand, or use a [registry file](./docs/connections.md). |
+| Claude Desktop                                   | Does **not** inherit the shell environment at all. Use a [registry file](./docs/connections.md) with `tokenCommand`/`tokenKeychain`, or put the values in the entry's `env` block.                           |
 
 `npx coolify-mcp doctor` tells you which of these applies to your machine and
 whether the token actually resolves.
@@ -68,17 +68,17 @@ whether the token actually resolves.
 There are already two good ways to reach Coolify from an MCP client. This is an
 honest account of both, and of the one axis where neither competes.
 
-| | Coolify's built-in `/mcp` | `@masonator/coolify-mcp` | **coolify-mcp** (this project) |
-|---|---|---|---|
-| Where it runs | Inside your Coolify instance | Local process | Local process |
-| Tools | 10 | ~42, hand-curated | 15 by default (16 with destructive enabled) + 189-operation catalog |
-| Writes | No — all 10 are read-only | Yes | Yes, behind flags |
-| Instances per process | 1 | 1 | **N** |
-| Teams reachable | The token's team | The token's team | **M — one connection per (instance, team)** |
-| Cross-instance search | No | No | **Yes — `find_resources instance:"*"`** |
-| API coverage | Curated subset | Curated subset | **Full published surface** via `search_operations` → `execute_*` |
-| Install | Nothing to install | npm | npm, with an installer for 8 clients |
-| License | Coolify's | MIT | MIT |
+|                       | Coolify's built-in `/mcp`    | `@masonator/coolify-mcp` | **coolify-mcp** (this project)                                      |
+| --------------------- | ---------------------------- | ------------------------ | ------------------------------------------------------------------- |
+| Where it runs         | Inside your Coolify instance | Local process            | Local process                                                       |
+| Tools                 | 10                           | ~42, hand-curated        | 15 by default (16 with destructive enabled) + 189-operation catalog |
+| Writes                | No — all 10 are read-only    | Yes                      | Yes, behind flags                                                   |
+| Instances per process | 1                            | 1                        | **N**                                                               |
+| Teams reachable       | The token's team             | The token's team         | **M — one connection per (instance, team)**                         |
+| Cross-instance search | No                           | No                       | **Yes — `find_resources instance:"*"`**                             |
+| API coverage          | Curated subset               | Curated subset           | **Full published surface** via `search_operations` → `execute_*`    |
+| Install               | Nothing to install           | npm                      | npm, with an installer for 8 clients                                |
+| License               | Coolify's                    | MIT                      | MIT                                                                 |
 
 **Coolify's own `/mcp` endpoint** is the lowest-friction option by a mile:
 nothing to install, nothing to configure, and it lives where the data is. It is
@@ -179,7 +179,7 @@ args = [ "-y", "coolify-mcp@latest" ]
 startup_timeout_sec = 60
 ```
 
-Always stdio, never a `url` key — older Codex versions drop the *entire*
+Always stdio, never a `url` key — older Codex versions drop the _entire_
 `config.toml` on an unknown key, taking every other MCP server in it with them.
 [Details →](./docs/clients/codex.md)
 
@@ -391,14 +391,14 @@ multi-team is.
 
 ### Precedence
 
-| Setting | Rule |
-|---|---|
-| A connection name defined in both env and file | **Env replaces the file entry WHOLE.** No field-level merge. `doctor` reports the shadowing. |
-| `COOLIFY_CONNECTION` vs `defaultConnection` | Env wins. `COOLIFY_CONNECTION=PROD` is accepted for `prod`. |
-| `COOLIFY_READ_ONLY=true` vs a file connection | **Tightens only.** It can close a connection the file left open; it can never re-open one the file closed. |
+| Setting                                                       | Rule                                                                                                                                                                |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A connection name defined in both env and file                | **Env replaces the file entry WHOLE.** No field-level merge. `doctor` reports the shadowing.                                                                        |
+| `COOLIFY_CONNECTION` vs `defaultConnection`                   | Env wins. `COOLIFY_CONNECTION=PROD` is accepted for `prod`.                                                                                                         |
+| `COOLIFY_READ_ONLY=true` vs a file connection                 | **Tightens only.** It can close a connection the file left open; it can never re-open one the file closed.                                                          |
 | `COOLIFY_ALLOW_DESTRUCTIVE` vs `allowDestructive` in the file | The file value wins for that connection when present, otherwise the env default applies. Both must admit the call for the destructive tool to be registered at all. |
-| `extends` in a registry file | Exactly one level. A name in both replaces the base entry whole. |
-| No default and several connections | There is **no** default. Every tool requires an explicit `instance`. |
+| `extends` in a registry file                                  | Exactly one level. A name in both replaces the base entry whole.                                                                                                    |
+| No default and several connections                            | There is **no** default. Every tool requires an explicit `instance`.                                                                                                |
 
 Other variables: `COOLIFY_TIMEOUT_MS` (1000–120000, default 30000),
 `COOLIFY_INSECURE_TLS`, `COOLIFY_LOG_LEVEL` (`error`/`warn`/`info`/`debug`).
@@ -446,24 +446,24 @@ you to rotate anyway. Full details: [docs/secrets.md](./docs/secrets.md).
 operations are enabled. Everything else in Coolify's API is behind
 `search_operations` → `describe_operation` → `execute_*`.
 
-| Tool | Class | Coolify ability |
-|---|---|---|
-| `find_resources` | read | `read` |
-| `get_resource` | read | `read` |
-| `get_logs` | read | `read:sensitive` |
-| `get_environment_variables` | read | `read:sensitive` |
-| `list_deployments` | read | `read` |
-| `get_deployment` | read | `read` (`read:sensitive` for build log content) |
-| `list_servers` | read | `read` |
-| `list_projects` | read | `read` |
-| `search_operations` | read | none — local catalog |
-| `describe_operation` | read | none — local catalog |
-| `execute_read_operation` | read | `read`, or `read:sensitive` on `/logs` and `/envs` |
-| `deploy` | write | `deploy` |
-| `control_resource` | write | `write` |
-| `set_environment_variables` | write | `write` |
-| `execute_write_operation` | write | `write` |
-| `execute_destructive_operation` | **destructive** | `write` (or `root`) |
+| Tool                            | Class           | Coolify ability                                    |
+| ------------------------------- | --------------- | -------------------------------------------------- |
+| `find_resources`                | read            | `read`                                             |
+| `get_resource`                  | read            | `read`                                             |
+| `get_logs`                      | read            | `read:sensitive`                                   |
+| `get_environment_variables`     | read            | `read:sensitive`                                   |
+| `list_deployments`              | read            | `read`                                             |
+| `get_deployment`                | read            | `read` (`read:sensitive` for build log content)    |
+| `list_servers`                  | read            | `read`                                             |
+| `list_projects`                 | read            | `read`                                             |
+| `search_operations`             | read            | none — local catalog                               |
+| `describe_operation`            | read            | none — local catalog                               |
+| `execute_read_operation`        | read            | `read`, or `read:sensitive` on `/logs` and `/envs` |
+| `deploy`                        | write           | `deploy`                                           |
+| `control_resource`              | write           | `write`                                            |
+| `set_environment_variables`     | write           | `write`                                            |
+| `execute_write_operation`       | write           | `write`                                            |
+| `execute_destructive_operation` | **destructive** | `write` (or `root`)                                |
 
 `control_resource` carries `destructiveHint: false` on purpose: stopping a
 resource causes downtime but destroys no data and is undone by the `start` in the
@@ -577,10 +577,10 @@ so upstream drift is loud rather than silent.
 **Generic body validation is deliberately permissive.** Coolify's OpenAPI
 document is generated from PHP attributes and is wrong in places
 ([upstream #7702](https://github.com/coollabsio/coolify/issues/7702)). A generic
-executor that hard-validated against it would reject *valid* calls with no way to
+executor that hard-validated against it would reject _valid_ calls with no way to
 override. So `execute_write_operation` passes `body` through unchanged and lets
 Coolify's own per-field validation errors come back verbatim. Path parameters
-*are* validated strictly — those come from the URL template, which cannot be
+_are_ validated strictly — those come from the URL template, which cannot be
 wrong.
 
 **The rate-limit bucket is per Coolify user, not per token.** Five tokens
@@ -608,7 +608,7 @@ flag warns on stderr and requests stay verified. Prefer
 switching verification off.
 
 **Client paths that are not fully confirmed.** Zed on Windows (derived from
-`%APPDATA%`), the OpenCode *global* config location, and the Claude Desktop Linux
+`%APPDATA%`), the OpenCode _global_ config location, and the Claude Desktop Linux
 path (there is no official Linux build). Each is flagged by `doctor` with a
 `*-path-unconfirmed` finding when the file is absent. MiniMax is unverified
 end-to-end and is print-only. See [docs/clients/](./docs/clients/).
@@ -634,14 +634,14 @@ npx coolify-mcp check [--connection NAME] [--json]
 
 ## Documentation
 
-| | |
-|---|---|
-| [docs/connections.md](./docs/connections.md) | Connections, instances, teams, the registry file, precedence |
-| [docs/secrets.md](./docs/secrets.md) | Token sources, doctor, rotation |
-| [docs/tools.md](./docs/tools.md) | Every tool, every parameter, the danger gate, response shaping |
-| [docs/clients/](./docs/clients/) | One page per client: exact file, exact snippet, what to verify |
-| [SECURITY.md](./SECURITY.md) | Threat model and disclosure |
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | Dev loop, and how to add a client adapter |
+|                                              |                                                                |
+| -------------------------------------------- | -------------------------------------------------------------- |
+| [docs/connections.md](./docs/connections.md) | Connections, instances, teams, the registry file, precedence   |
+| [docs/secrets.md](./docs/secrets.md)         | Token sources, doctor, rotation                                |
+| [docs/tools.md](./docs/tools.md)             | Every tool, every parameter, the danger gate, response shaping |
+| [docs/clients/](./docs/clients/)             | One page per client: exact file, exact snippet, what to verify |
+| [SECURITY.md](./SECURITY.md)                 | Threat model and disclosure                                    |
+| [CONTRIBUTING.md](./CONTRIBUTING.md)         | Dev loop, and how to add a client adapter                      |
 
 ## Requirements
 

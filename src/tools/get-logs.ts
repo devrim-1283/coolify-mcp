@@ -63,7 +63,9 @@ function extractLogText(data: unknown): string {
     const value = data[key];
     if (typeof value === 'string') return value;
     if (Array.isArray(value)) {
-      return value.map((entry) => (typeof entry === 'string' ? entry : JSON.stringify(entry))).join('\n');
+      return value
+        .map((entry) => (typeof entry === 'string' ? entry : JSON.stringify(entry)))
+        .join('\n');
     }
   }
   return Object.keys(data).length > 0 ? JSON.stringify(data) : '';
@@ -104,23 +106,33 @@ export const getLogs: ToolDef = {
       .max(MAX_LINES)
       .optional()
       .default(DEFAULT_LINES)
-      .describe(`How many trailing lines to ask Coolify for. The output is additionally capped at ${MAX_LOG_BYTES} bytes.`),
+      .describe(
+        `How many trailing lines to ask Coolify for. The output is additionally capped at ${MAX_LOG_BYTES} bytes.`,
+      ),
     show_timestamps: z
       .boolean()
       .optional()
-      .describe('Prefix each line with the container timestamp. Off by default because timestamps roughly double the payload.'),
+      .describe(
+        'Prefix each line with the container timestamp. Off by default because timestamps roughly double the payload.',
+      ),
     sub_service_name: z
       .string()
       .max(200)
       .optional()
-      .describe('Names one container inside a service. Only meaningful when resource_type is "service", which can hold several containers.'),
+      .describe(
+        'Names one container inside a service. Only meaningful when resource_type is "service", which can hold several containers.',
+      ),
     ...instanceProperty(cfg),
   }),
   handler: async (args, cfg, extra) =>
     runRead(async () => {
       const type = readResourceType(args);
       const uuid = requiredUuid(args, 'uuid');
-      const lines = boundedInteger(args, 'lines', { fallback: DEFAULT_LINES, min: 1, max: MAX_LINES });
+      const lines = boundedInteger(args, 'lines', {
+        fallback: DEFAULT_LINES,
+        min: 1,
+        max: MAX_LINES,
+      });
       const timestamps = optionalBoolean(args, 'show_timestamps', false);
       const subService = optionalString(args, 'sub_service_name');
       const connection = resolveConnection(cfg, args['instance']);

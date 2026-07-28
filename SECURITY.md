@@ -22,11 +22,11 @@ message, a tool result, a `doctor` report — that is a vulnerability, not a bug
 
 ## Supported versions
 
-| Version | Supported |
-|---|---|
-| Latest minor of the current major | ✅ security fixes |
-| Previous minor | ✅ critical fixes for 90 days after the next minor ships |
-| Anything older | ❌ |
+| Version                           | Supported                                                |
+| --------------------------------- | -------------------------------------------------------- |
+| Latest minor of the current major | ✅ security fixes                                        |
+| Previous minor                    | ✅ critical fixes for 90 days after the next minor ships |
+| Anything older                    | ❌                                                       |
 
 Pre-1.0, "current major" means the latest published minor. Pin your version
 (`coolify-mcp install --pin`) and upgrade deliberately; see
@@ -203,8 +203,8 @@ every PR and weekly. Dependabot watches npm and Actions.
 ## Residual risk — stated plainly
 
 **Any MCP server that holds a write-capable API token is, by construction, a
-confused-deputy surface.** The properties above constrain *where* requests can go
-and *what class* of request is possible. They cannot make the model's judgement
+confused-deputy surface.** The properties above constrain _where_ requests can go
+and _what class_ of request is possible. They cannot make the model's judgement
 sound. If your Coolify token can restart a service, then a sufficiently persuasive
 string inside a build log can, in principle, cause a service to be restarted —
 because that is a legitimate operation the operator explicitly enabled, issued
@@ -260,10 +260,10 @@ did not add a concept to work around it.
 
 Two files, and between them the whole story:
 
-| File | Question it answers |
-|---|---|
-| `src/tools/register.ts` | What tools exist at all. |
-| `src/http/client.ts` | What may leave the process. |
+| File                    | Question it answers         |
+| ----------------------- | --------------------------- |
+| `src/tools/register.ts` | What tools exist at all.    |
+| `src/http/client.ts`    | What may leave the process. |
 
 Then `src/config/schema.ts` (why a token cannot be in a config file) and
 `src/install/plan.ts` (why the installer cannot write one).

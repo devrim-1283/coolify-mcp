@@ -1,16 +1,16 @@
 # Claude Code
 
-| | |
-|---|---|
-| Adapter ids | `claude-code-user`, `claude-code-project` |
-| `--client` selectors | `claude-code`, `claudecode`, `claude-code-user`, `claude-code-project` |
-| User config | `~/.claude.json` (Windows: `%USERPROFILE%\.claude.json`) |
-| Project config | `<projectRoot>/.mcp.json` |
-| Key path | `mcpServers.coolify` |
-| Format | JSON |
-| Transports written | `stdio` only |
-| Confidence | **verified** — both paths and the reference syntax are documented upstream |
-| Native CLI | `claude mcp add-json`, preferred when the `claude` binary is on PATH |
+|                      |                                                                            |
+| -------------------- | -------------------------------------------------------------------------- |
+| Adapter ids          | `claude-code-user`, `claude-code-project`                                  |
+| `--client` selectors | `claude-code`, `claudecode`, `claude-code-user`, `claude-code-project`     |
+| User config          | `~/.claude.json` (Windows: `%USERPROFILE%\.claude.json`)                   |
+| Project config       | `<projectRoot>/.mcp.json`                                                  |
+| Key path             | `mcpServers.coolify`                                                       |
+| Format               | JSON                                                                       |
+| Transports written   | `stdio` only                                                               |
+| Confidence           | **verified** — both paths and the reference syntax are documented upstream |
+| Native CLI           | `claude mcp add-json`, preferred when the `claude` binary is on PATH       |
 
 Claude Code is the one client where the canonical entry needs no rewriting at
 all: it expands `${VAR}` and `${VAR:-default}` inside `command`, `args`, `env`,
@@ -80,7 +80,7 @@ export COOLIFY_API_TOKEN='13|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 ```
 
 **2. Reference the variables from the entry.** Claude Code expands `${VAR}`, so
-you can make the dependency explicit — the *reference* goes in the file, never
+you can make the dependency explicit — the _reference_ goes in the file, never
 the value:
 
 ```json
@@ -107,7 +107,7 @@ the value:
 
 For several instances or teams, define a
 [registry file](../connections.md#layer-2--a-registry-file) and select one with
-`--connection`, which puts only the connection *name* in the config.
+`--connection`, which puts only the connection _name_ in the config.
 
 ## Verify
 
@@ -138,10 +138,10 @@ since installation is left alone and reported, unless you pass `--force`.
 
 ## Confirmed vs unconfirmed
 
-| Item | Status |
-|---|---|
-| `~/.claude.json` user path | confirmed |
-| `<projectRoot>/.mcp.json` project path | confirmed |
-| `mcpServers` key | confirmed |
-| `${VAR}` / `${VAR:-default}` expansion | confirmed |
+| Item                                                        | Status    |
+| ----------------------------------------------------------- | --------- |
+| `~/.claude.json` user path                                  | confirmed |
+| `<projectRoot>/.mcp.json` project path                      | confirmed |
+| `mcpServers` key                                            | confirmed |
+| `${VAR}` / `${VAR:-default}` expansion                      | confirmed |
 | `claude mcp add-json … --scope user\|project` argument form | confirmed |

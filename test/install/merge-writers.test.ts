@@ -44,22 +44,48 @@ function errorCodes(issues: ReadonlyArray<{ severity: string; code: string }>): 
 // ---------------------------------------------------------------------------
 
 describe('every writer refuses a file it cannot parse', () => {
-  const CASES: ReadonlyArray<[string, () => { text: string; changed: boolean; issues: Array<{ severity: string; code: string }> }, string]> = [
+  const CASES: ReadonlyArray<
+    [
+      string,
+      () => { text: string; changed: boolean; issues: Array<{ severity: string; code: string }> },
+      string,
+    ]
+  > = [
     ['json', () => mergeJson('{ "mcpServers": ', KEY_PATH, ENTRY), '{ "mcpServers": '],
-    ['jsonc', () => mergeJsonc('{ "context_servers": ', ['context_servers', 'coolify'], ENTRY), '{ "context_servers": '],
-    ['toml', () => appendTomlSection('model = \n[mcp_servers.x]\n', 'mcp_servers.coolify', '[mcp_servers.coolify]\n'), 'model = \n[mcp_servers.x]\n'],
-    ['yaml', () => mergeYaml('mcp:\n  a: [1, 2\n', ['mcp', 'coolify'], ENTRY), 'mcp:\n  a: [1, 2\n'],
+    [
+      'jsonc',
+      () => mergeJsonc('{ "context_servers": ', ['context_servers', 'coolify'], ENTRY),
+      '{ "context_servers": ',
+    ],
+    [
+      'toml',
+      () =>
+        appendTomlSection(
+          'model = \n[mcp_servers.x]\n',
+          'mcp_servers.coolify',
+          '[mcp_servers.coolify]\n',
+        ),
+      'model = \n[mcp_servers.x]\n',
+    ],
+    [
+      'yaml',
+      () => mergeYaml('mcp:\n  a: [1, 2\n', ['mcp', 'coolify'], ENTRY),
+      'mcp:\n  a: [1, 2\n',
+    ],
   ];
 
-  it.each(CASES)('%s reports an error and returns the input untouched', (_format, run, original) => {
-    const result = run();
+  it.each(CASES)(
+    '%s reports an error and returns the input untouched',
+    (_format, run, original) => {
+      const result = run();
 
-    expect(errorCodes(result.issues).length).toBeGreaterThan(0);
-    expect(result.changed).toBe(false);
-    // Guaranteed by the contract: apply() checks `issues`, but a writer that
-    // also mangled `text` would corrupt the file for any caller that did not.
-    expect(result.text).toBe(original);
-  });
+      expect(errorCodes(result.issues).length).toBeGreaterThan(0);
+      expect(result.changed).toBe(false);
+      // Guaranteed by the contract: apply() checks `issues`, but a writer that
+      // also mangled `text` would corrupt the file for any caller that did not.
+      expect(result.text).toBe(original);
+    },
+  );
 });
 
 describe('every writer is a no-op when nothing moved', () => {
@@ -88,8 +114,16 @@ describe('every writer is a no-op when nothing moved', () => {
   });
 
   it('toml refuses to touch a section it already sees, and says so', () => {
-    const first = appendTomlSection('', 'mcp_servers.coolify', '[mcp_servers.coolify]\ncommand = "npx"\n');
-    const second = appendTomlSection(first.text, 'mcp_servers.coolify', '[mcp_servers.coolify]\ncommand = "other"\n');
+    const first = appendTomlSection(
+      '',
+      'mcp_servers.coolify',
+      '[mcp_servers.coolify]\ncommand = "npx"\n',
+    );
+    const second = appendTomlSection(
+      first.text,
+      'mcp_servers.coolify',
+      '[mcp_servers.coolify]\ncommand = "other"\n',
+    );
 
     expect(second.changed).toBe(false);
     expect(second.text).toBe(first.text);
@@ -104,7 +138,11 @@ describe('every writer is a no-op when nothing moved', () => {
 describe('json writer', () => {
   it('replaces arrays instead of concatenating them', () => {
     // Concatenating `args` would append `-y coolify-mcp` again on every install.
-    const source = JSON.stringify({ mcpServers: { coolify: { args: ['-y', 'coolify-mcp@0.9.0'] } } }, null, 2);
+    const source = JSON.stringify(
+      { mcpServers: { coolify: { args: ['-y', 'coolify-mcp@0.9.0'] } } },
+      null,
+      2,
+    );
 
     const result = mergeJson(source, KEY_PATH, ENTRY);
 
@@ -177,9 +215,13 @@ describe('json writer', () => {
   });
 
   it('leaves an empty container alone when the caller says it was already there', () => {
-    const removed = removeJson(`${JSON.stringify({ mcpServers: { coolify: ENTRY } }, null, 2)}\n`, KEY_PATH, {
-      pruneEmpty: false,
-    });
+    const removed = removeJson(
+      `${JSON.stringify({ mcpServers: { coolify: ENTRY } }, null, 2)}\n`,
+      KEY_PATH,
+      {
+        pruneEmpty: false,
+      },
+    );
 
     expect(JSON.parse(removed.text)).toEqual({ mcpServers: {} });
   });
@@ -197,7 +239,17 @@ describe('json writer', () => {
 
 describe('jsonc writer', () => {
   it('keeps a comment that sits inside our own entry', () => {
-    const source = ['{', '  "mcpServers": {', '    "coolify": {', '      // pinned by hand', '      "command": "npx"', '    }', '  }', '}', ''].join('\n');
+    const source = [
+      '{',
+      '  "mcpServers": {',
+      '    "coolify": {',
+      '      // pinned by hand',
+      '      "command": "npx"',
+      '    }',
+      '  }',
+      '}',
+      '',
+    ].join('\n');
 
     const result = mergeJsonc(source, KEY_PATH, ENTRY);
 
@@ -206,7 +258,18 @@ describe('jsonc writer', () => {
   });
 
   it('edits only the values that moved', () => {
-    const source = ['{', '  "mcpServers": {', '    "coolify": {', '      "command": "npx",', '      "args": ["-y", "coolify-mcp@0.9.0"]', '    }', '  },', '  "theme": "One Dark" // kept', '}', ''].join('\n');
+    const source = [
+      '{',
+      '  "mcpServers": {',
+      '    "coolify": {',
+      '      "command": "npx",',
+      '      "args": ["-y", "coolify-mcp@0.9.0"]',
+      '    }',
+      '  },',
+      '  "theme": "One Dark" // kept',
+      '}',
+      '',
+    ].join('\n');
 
     const result = mergeJsonc(source, KEY_PATH, ENTRY);
 
@@ -220,7 +283,15 @@ describe('jsonc writer', () => {
     // nothing but a comment parses as empty, and deleting it throws away
     // something a human wrote. The protection only works if the comment is still
     // there to see once our property is gone.
-    const source = ['{', '  "mcpServers": {', '    // add servers here', '    "coolify": { "command": "npx" }', '  }', '}', ''].join('\n');
+    const source = [
+      '{',
+      '  "mcpServers": {',
+      '    // add servers here',
+      '    "coolify": { "command": "npx" }',
+      '  }',
+      '}',
+      '',
+    ].join('\n');
 
     const removed = removeJsonc(source, KEY_PATH);
 
@@ -232,28 +303,58 @@ describe('jsonc writer', () => {
     // longer loads. Removing a property whose trailing comma is followed by a
     // comment must not leave the comma behind: `{ , // note }` is not JSONC, and
     // a Zed settings.json in that state loses every setting in it, not just ours.
-    const source = ['{', '  "mcpServers": {', '    "coolify": { "command": "npx" },', '    // add servers here', '  }', '}', ''].join('\n');
+    const source = [
+      '{',
+      '  "mcpServers": {',
+      '    "coolify": { "command": "npx" },',
+      '    // add servers here',
+      '  }',
+      '}',
+      '',
+    ].join('\n');
 
     const removed = removeJsonc(source, KEY_PATH);
 
     expect(removed.text).not.toMatch(/\{\s*,/);
     const errors: ParseError[] = [];
-    parseJsonc(removed.text, errors, { allowTrailingComma: true, disallowComments: false, allowEmptyContent: true });
-    expect(errors, `removeJsonc produced unparseable JSONC: ${JSON.stringify(removed.text)}`).toEqual([]);
+    parseJsonc(removed.text, errors, {
+      allowTrailingComma: true,
+      disallowComments: false,
+      allowEmptyContent: true,
+    });
+    expect(
+      errors,
+      `removeJsonc produced unparseable JSONC: ${JSON.stringify(removed.text)}`,
+    ).toEqual([]);
   });
 
   it('reports an error instead of writing bytes that do not parse', () => {
     // Belt and braces on the same failure: even if a writer produced broken
     // text, `issues` is the channel apply() checks before writing, so a silent
     // `issues: []` on corrupt output is a second, independent defect.
-    const source = ['{', '  "mcpServers": {', '    "coolify": { "command": "npx" },', '    // add servers here', '  }', '}', ''].join('\n');
+    const source = [
+      '{',
+      '  "mcpServers": {',
+      '    "coolify": { "command": "npx" },',
+      '    // add servers here',
+      '  }',
+      '}',
+      '',
+    ].join('\n');
 
     const removed = removeJsonc(source, KEY_PATH);
     const errors: ParseError[] = [];
-    parseJsonc(removed.text, errors, { allowTrailingComma: true, disallowComments: false, allowEmptyContent: true });
+    parseJsonc(removed.text, errors, {
+      allowTrailingComma: true,
+      disallowComments: false,
+      allowEmptyContent: true,
+    });
 
     if (errors.length > 0) {
-      expect(errorCodes(removed.issues).length, 'unparseable output was reported as a clean success').toBeGreaterThan(0);
+      expect(
+        errorCodes(removed.issues).length,
+        'unparseable output was reported as a clean success',
+      ).toBeGreaterThan(0);
     }
   });
 
@@ -297,7 +398,8 @@ describe('toml writer', () => {
   });
 
   it('rewrites in place under --update and leaves the neighbours alone', () => {
-    const source = '[mcp_servers.coolify]\ncommand = "old"\n\n[mcp_servers.other]\ncommand = "other"\n';
+    const source =
+      '[mcp_servers.coolify]\ncommand = "old"\n\n[mcp_servers.other]\ncommand = "other"\n';
 
     const result = replaceTomlSection(source, SECTION, BLOCK);
 
@@ -322,7 +424,8 @@ describe('toml writer', () => {
   });
 
   it('removes sub-tables along with the section', () => {
-    const source = '[mcp_servers.coolify]\ncommand = "npx"\n\n[mcp_servers.coolify.env]\nA = "b"\n\n[mcp_servers.other]\ncommand = "other"\n';
+    const source =
+      '[mcp_servers.coolify]\ncommand = "npx"\n\n[mcp_servers.coolify.env]\nA = "b"\n\n[mcp_servers.other]\ncommand = "other"\n';
 
     const removed = removeTomlSection(source, SECTION);
 
@@ -333,7 +436,17 @@ describe('toml writer', () => {
   it('is not fooled by a [ inside a multi-line array', () => {
     // The scanner has to skip these; treating one as a table header would make
     // the section span the wrong region and delete somebody else's config.
-    const source = ['model = "gpt-5"', 'paths = [', '  "[not-a-header]",', '  "b",', ']', '', '[mcp_servers.other]', 'command = "other"', ''].join('\n');
+    const source = [
+      'model = "gpt-5"',
+      'paths = [',
+      '  "[not-a-header]",',
+      '  "b",',
+      ']',
+      '',
+      '[mcp_servers.other]',
+      'command = "other"',
+      '',
+    ].join('\n');
 
     const installed = appendTomlSection(source, SECTION, BLOCK);
     const removed = removeTomlSection(installed.text, SECTION);
@@ -343,7 +456,16 @@ describe('toml writer', () => {
   });
 
   it('is not fooled by a [ inside a multi-line string', () => {
-    const source = ['banner = """', '[mcp_servers.coolify]', 'this is prose, not a table', '"""', '', '[mcp_servers.other]', 'command = "other"', ''].join('\n');
+    const source = [
+      'banner = """',
+      '[mcp_servers.coolify]',
+      'this is prose, not a table',
+      '"""',
+      '',
+      '[mcp_servers.other]',
+      'command = "other"',
+      '',
+    ].join('\n');
 
     const doc = parseTomlDocument(source);
     expect(doc.issue).toBeUndefined();
@@ -368,7 +490,11 @@ describe('toml writer', () => {
   });
 
   it('splits dotted keys, honouring quoting', () => {
-    expect(splitDottedKey('mcp_servers."my.server".env')).toEqual(['mcp_servers', 'my.server', 'env']);
+    expect(splitDottedKey('mcp_servers."my.server".env')).toEqual([
+      'mcp_servers',
+      'my.server',
+      'env',
+    ]);
     expect(splitDottedKey('a.b.c')).toEqual(['a', 'b', 'c']);
   });
 });
@@ -393,7 +519,16 @@ describe('yaml writer', () => {
   });
 
   it('keeps comments, which a parse/stringify round trip destroys', () => {
-    const source = ['# MiniMax configuration', 'defaultModel: minimax/abab-6.5 # the fast one', '', '# servers', 'mcp:', '  other:', '    type: local', ''].join('\n');
+    const source = [
+      '# MiniMax configuration',
+      'defaultModel: minimax/abab-6.5 # the fast one',
+      '',
+      '# servers',
+      'mcp:',
+      '  other:',
+      '    type: local',
+      '',
+    ].join('\n');
 
     const result = mergeYaml(source, YAML_PATH, YAML_ENTRY);
 
@@ -403,7 +538,14 @@ describe('yaml writer', () => {
   });
 
   it('keeps anchors and aliases instead of expanding them into duplicates', () => {
-    const source = ['defaults: &defaults', '  type: local', '  enabled: true', 'mcp:', '  other: *defaults', ''].join('\n');
+    const source = [
+      'defaults: &defaults',
+      '  type: local',
+      '  enabled: true',
+      'mcp:',
+      '  other: *defaults',
+      '',
+    ].join('\n');
 
     const result = mergeYaml(source, YAML_PATH, YAML_ENTRY);
 
@@ -422,7 +564,8 @@ describe('yaml writer', () => {
   });
 
   it('replaces an array rather than appending to it', () => {
-    const source = 'mcp:\n  coolify:\n    command:\n      - npx\n      - "-y"\n      - coolify-mcp@0.9.0\n';
+    const source =
+      'mcp:\n  coolify:\n    command:\n      - npx\n      - "-y"\n      - coolify-mcp@0.9.0\n';
 
     const result = mergeYaml(source, YAML_PATH, YAML_ENTRY);
 
@@ -472,7 +615,14 @@ describe('yaml writer', () => {
   });
 
   it('install then remove restores the original bytes', () => {
-    const source = ['# MiniMax configuration', 'defaultModel: minimax/abab-6.5', 'mcp:', '  other:', '    type: local', ''].join('\n');
+    const source = [
+      '# MiniMax configuration',
+      'defaultModel: minimax/abab-6.5',
+      'mcp:',
+      '  other:',
+      '    type: local',
+      '',
+    ].join('\n');
 
     const installed = mergeYaml(source, YAML_PATH, YAML_ENTRY);
     const removed = removeYaml(installed.text, YAML_PATH);

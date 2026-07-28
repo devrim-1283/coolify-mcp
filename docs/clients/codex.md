@@ -1,15 +1,15 @@
 # Codex CLI
 
-| | |
-|---|---|
-| Adapter id | `codex-user` |
-| `--client` selectors | `codex`, `openai-codex`, `codex-user` |
-| Config | `~/.codex/config.toml` (Windows: `%USERPROFILE%\.codex\config.toml`) |
-| Section | `[mcp_servers.coolify]` |
-| Format | TOML |
-| Transports written | `stdio` only — **never** anything else. See below. |
-| Confidence | **verified** |
-| Native CLI | deliberately not used. See below. |
+|                      |                                                                      |
+| -------------------- | -------------------------------------------------------------------- |
+| Adapter id           | `codex-user`                                                         |
+| `--client` selectors | `codex`, `openai-codex`, `codex-user`                                |
+| Config               | `~/.codex/config.toml` (Windows: `%USERPROFILE%\.codex\config.toml`) |
+| Section              | `[mcp_servers.coolify]`                                              |
+| Format               | TOML                                                                 |
+| Transports written   | `stdio` only — **never** anything else. See below.                   |
+| Confidence           | **verified**                                                         |
+| Native CLI           | deliberately not used. See below.                                    |
 
 ## Two hard rules, both learned from a real incident
 
@@ -68,7 +68,7 @@ MCP, which routinely exceeds Codex's default startup budget on a cold machine.
 The failure looks like "server did not start" rather than "still downloading".
 
 Emitting the key is safe precisely because `command` is always present: the
-version skew that poisons `config.toml` is a *missing required* field, not an
+version skew that poisons `config.toml` is a _missing required_ field, not an
 extra one, and an unrecognized scalar is ignored.
 
 Pinning with `--pin` also helps here: a pinned version is cached after the first
@@ -124,7 +124,7 @@ codex mcp list          # if your Codex version has it
 ```
 
 After installing, start Codex and confirm the `coolify` tools appear. If Codex
-starts and *no* MCP servers work, check whether `config.toml` still parses:
+starts and _no_ MCP servers work, check whether `config.toml` still parses:
 
 ```bash
 npx coolify-mcp doctor    # reports codex-config-unparseable with the offset
@@ -140,11 +140,11 @@ Removes the `[mcp_servers.coolify]` section and its sub-tables.
 
 ## Confirmed vs unconfirmed
 
-| Item | Status |
-|---|---|
-| `~/.codex/config.toml` path | confirmed |
-| `[mcp_servers.<name>]` section shape | confirmed |
-| Old versions dropping the whole file on an unknown `url` key | confirmed (this is why rule 1 exists) |
-| `env` values stored verbatim, no `${VAR}` expansion | confirmed |
-| `startup_timeout_sec` accepted and ignored by versions that do not know it | confirmed |
-| `codex mcp add` argument form | **not verified** — deliberately unused |
+| Item                                                                       | Status                                 |
+| -------------------------------------------------------------------------- | -------------------------------------- |
+| `~/.codex/config.toml` path                                                | confirmed                              |
+| `[mcp_servers.<name>]` section shape                                       | confirmed                              |
+| Old versions dropping the whole file on an unknown `url` key               | confirmed (this is why rule 1 exists)  |
+| `env` values stored verbatim, no `${VAR}` expansion                        | confirmed                              |
+| `startup_timeout_sec` accepted and ignored by versions that do not know it | confirmed                              |
+| `codex mcp add` argument form                                              | **not verified** — deliberately unused |

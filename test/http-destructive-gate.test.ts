@@ -29,7 +29,7 @@ function makeConnection(overrides: Partial<Connection> = {}): Connection {
     allowDestructive: false,
     timeoutMs: 5_000,
     insecureTLS: false,
-    resolveToken: resolveTokenSpy as unknown as () => Promise<string>,
+    resolveToken: resolveTokenSpy,
     ...overrides,
   };
 }
@@ -56,7 +56,10 @@ async function refusal(promise: Promise<unknown>): Promise<CoolifyError> {
 
 beforeEach(() => {
   resolveTokenSpy = vi.fn(async () => TOKEN);
-  fetchSpy = vi.fn(async () => new Response('{"ok":true}', { status: 200, headers: { 'content-type': 'application/json' } }));
+  fetchSpy = vi.fn(
+    async () =>
+      new Response('{"ok":true}', { status: 200, headers: { 'content-type': 'application/json' } }),
+  );
   vi.stubGlobal('fetch', fetchSpy);
   configureTransport({});
 });
@@ -88,12 +91,12 @@ describe('destructive gate (transport layer)', () => {
   it('refuses POST /disable, which is destructive without being a DELETE', async () => {
     // Turning the API off locks the token out of its own instance. "Block the
     // DELETEs" would miss it, so the override list is matched by method+path...
-    const byPath = await refusal(
-      coolifyRequest(makeRequest({ method: 'POST', path: '/disable' })),
-    );
+    const byPath = await refusal(coolifyRequest(makeRequest({ method: 'POST', path: '/disable' })));
     // ...and by operation id, so a caller cannot dodge it by rewriting the path.
     const byId = await refusal(
-      coolifyRequest(makeRequest({ method: 'POST', path: '/something-else', operationId: 'disable-api' })),
+      coolifyRequest(
+        makeRequest({ method: 'POST', path: '/something-else', operationId: 'disable-api' }),
+      ),
     );
 
     expect(byPath.kind).toBe('destructive_blocked');
@@ -166,7 +169,14 @@ describe('destructive classification cannot be weakened', () => {
     configureTransport({ classifyOperation: (): DangerClass => 'destructive' });
 
     const error = await refusal(
-      coolifyRequest(makeRequest({ method: 'POST', path: '/applications/abc-123/wipe', operationId: 'wipe-application', body: { confirm: true } })),
+      coolifyRequest(
+        makeRequest({
+          method: 'POST',
+          path: '/applications/abc-123/wipe',
+          operationId: 'wipe-application',
+          body: { confirm: true },
+        }),
+      ),
     );
 
     expect(error.kind).toBe('destructive_blocked');
@@ -231,7 +241,13 @@ describe('gate ordering and the adjacent transport gates', () => {
     configureTransport({ registry });
 
     const error = await refusal(
-      coolifyRequest(makeRequest({ method: 'POST', path: '/applications/abc-123/restart', connection: readOnly })),
+      coolifyRequest(
+        makeRequest({
+          method: 'POST',
+          path: '/applications/abc-123/restart',
+          connection: readOnly,
+        }),
+      ),
     );
 
     expect(error.hint).toContain('staging');
@@ -239,7 +255,11 @@ describe('gate ordering and the adjacent transport gates', () => {
 
   it('allows reads on a read-only connection', async () => {
     const response = await coolifyRequest(
-      makeRequest({ method: 'GET', path: '/applications', connection: makeConnection({ readOnly: true }) }),
+      makeRequest({
+        method: 'GET',
+        path: '/applications',
+        connection: makeConnection({ readOnly: true }),
+      }),
     );
 
     expect(response.status).toBe(200);
@@ -253,7 +273,9 @@ describe('gate ordering and the adjacent transport gates', () => {
       new Response(null, { status: 302, headers: { location: 'https://attacker.tld/collect' } }),
     );
 
-    const error = await refusal(coolifyRequest(makeRequest({ method: 'GET', path: '/applications' })));
+    const error = await refusal(
+      coolifyRequest(makeRequest({ method: 'GET', path: '/applications' })),
+    );
 
     expect(error.kind).toBe('network');
     expect(error.message.toLowerCase()).toContain('redirect');

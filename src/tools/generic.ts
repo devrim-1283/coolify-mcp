@@ -275,7 +275,9 @@ function instanceField(cfg: ServerConfig, mayDefault: boolean): Record<string, u
         .describe(`Connection to read from. Defaults to \`${defaultName}\`.`),
     };
   }
-  return { instance: values.describe('Connection to act on. No default — name the target explicitly.') };
+  return {
+    instance: values.describe('Connection to act on. No default — name the target explicitly.'),
+  };
 }
 
 function resolveConnection(cfg: ServerConfig, args: Args, mayDefault: boolean): Connection {
@@ -377,11 +379,18 @@ type QueryValue = string | number | boolean;
  * nothing, which is worth a refusal. A wrong *type* is something Coolify itself
  * reports far better than a stale spec could.
  */
-function buildQuery(operation: CatalogOperation, raw: Args | undefined): Record<string, QueryValue> | undefined {
-  const entries = Object.entries(raw ?? {}).filter(([, value]) => value !== undefined && value !== null);
+function buildQuery(
+  operation: CatalogOperation,
+  raw: Args | undefined,
+): Record<string, QueryValue> | undefined {
+  const entries = Object.entries(raw ?? {}).filter(
+    ([, value]) => value !== undefined && value !== null,
+  );
   if (entries.length === 0) return undefined;
 
-  const unexpected = entries.map(([key]) => key).filter((key) => !operation.queryParams.includes(key));
+  const unexpected = entries
+    .map(([key]) => key)
+    .filter((key) => !operation.queryParams.includes(key));
   if (unexpected.length > 0) {
     throw new CoolifyError(
       `\`${operation.id}\` has no query parameter ${quoteList(unexpected)}.`,
@@ -499,7 +508,9 @@ function renderError(error: unknown, fallbackNextStep: string): ToolResult {
 }
 
 function unknownOperation(cfg: ServerConfig, id: string): ToolResult {
-  const near = searchOperations(view(cfg), { query: id, limit: MAX_NEAR_MATCHES }).map((row) => row.id);
+  const near = searchOperations(view(cfg), { query: id, limit: MAX_NEAR_MATCHES }).map(
+    (row) => row.id,
+  );
   const nextStep =
     near.length > 0
       ? `Closest ids in this catalog: ${near.join(', ')}. ${catalogProvenance()}`
@@ -553,7 +564,9 @@ function searchHandler(args: Args, cfg: ServerConfig): ToolResult {
         'If your instance is newer, the endpoint may not be in this catalog.',
     );
   } else {
-    notes.push('Full path, query and body schemas for one operation are available from describe_operation.');
+    notes.push(
+      'Full path, query and body schemas for one operation are available from describe_operation.',
+    );
     if (rows.length >= limit) {
       notes.push(`The result was cut at limit ${limit}; more operations may match.`);
     }
@@ -576,7 +589,10 @@ function searchHandler(args: Args, cfg: ServerConfig): ToolResult {
 function describeHandler(args: Args, cfg: ServerConfig): ToolResult {
   const id = (readString(args, 'operation_id') ?? '').trim();
   if (id === '') {
-    return toolError('`operation_id` is required.', 'search_operations returns the ids this server accepts.');
+    return toolError(
+      '`operation_id` is required.',
+      'search_operations returns the ids this server accepts.',
+    );
   }
 
   const operation = findOperation(cfg, id);
@@ -607,7 +623,9 @@ function describeHandler(args: Args, cfg: ServerConfig): ToolResult {
     );
   }
   if (operation.method === 'PATCH' || operation.method === 'PUT') {
-    notes.push('Coolify refuses a PATCH or PUT whose body decodes to nothing, so `body` needs at least one field.');
+    notes.push(
+      'Coolify refuses a PATCH or PUT whose body decodes to nothing, so `body` needs at least one field.',
+    );
   }
 
   const envelope = shapeResponse(detail, {
@@ -676,7 +694,10 @@ async function executeHandler(
   const id = (readString(args, 'operation_id') ?? '').trim();
   try {
     if (id === '') {
-      return toolError('`operation_id` is required.', `search_operations returns ids that ${shape.door.tool} accepts.`);
+      return toolError(
+        '`operation_id` is required.',
+        `search_operations returns ids that ${shape.door.tool} accepts.`,
+      );
     }
 
     const operation = findOperation(cfg, id);
@@ -745,7 +766,9 @@ function executeHint(
     notes.push(`Coolify returned HTTP ${response.status} with an empty body.`);
   }
   if (flags.projected) {
-    notes.push('Only the requested `fields` are present; omitting `fields` returns the full record.');
+    notes.push(
+      'Only the requested `fields` are present; omitting `fields` returns the full record.',
+    );
   }
   if (flags.masked) {
     notes.push('Credential-shaped values are masked; `reveal: true` returns them in the clear.');
@@ -800,7 +823,13 @@ const searchTool: ToolDef = {
     query: z.string().optional().describe(SEARCH_QUERY_DESCRIPTION),
     family: z.enum(FAMILIES).optional().describe('Restrict results to one resource family.'),
     method: z.enum(METHODS).optional().describe('Restrict results to one HTTP method.'),
-    limit: z.number().int().min(1).max(MAX_SEARCH_LIMIT).optional().describe(SEARCH_LIMIT_DESCRIPTION),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_SEARCH_LIMIT)
+      .optional()
+      .describe(SEARCH_LIMIT_DESCRIPTION),
   }),
   handler: guarded(searchHandler, 'Re-run with a different query, family or method.'),
 };
@@ -929,19 +958,30 @@ const destructiveTool = executeTool({
  * `execute_destructive_operation` is exported like the rest; whether it is
  * registered at all is `tools/register.ts`'s decision (layer 1 of the gate).
  */
-export const genericTools: ToolDef[] = [searchTool, describeTool, readTool, writeTool, destructiveTool];
-
+export const genericTools: ToolDef[] = [
+  searchTool,
+  describeTool,
+  readTool,
+  writeTool,
+  destructiveTool,
+];
 
 // ---------------------------------------------------------------------------
 // Shared schema fragments
 // ---------------------------------------------------------------------------
 
 function pathParamsField(): z.ZodTypeAny {
-  return z.record(z.union([z.string(), z.number()])).optional().describe(PATH_PARAMS_DESCRIPTION);
+  return z
+    .record(z.union([z.string(), z.number()]))
+    .optional()
+    .describe(PATH_PARAMS_DESCRIPTION);
 }
 
 function queryField(): z.ZodTypeAny {
-  return z.record(z.union([z.string(), z.number(), z.boolean()])).optional().describe(QUERY_DESCRIPTION);
+  return z
+    .record(z.union([z.string(), z.number(), z.boolean()]))
+    .optional()
+    .describe(QUERY_DESCRIPTION);
 }
 
 /** See the file header for why this is a bare record and not a generated schema. */
@@ -998,7 +1038,11 @@ function readStringArray(args: Args, key: string): string[] | undefined {
  * arrives from the model, and `"constructor"` answers a plain `in` check from
  * the prototype chain.
  */
-function readEnum<T extends string>(args: Args, key: string, allowed: Record<T, true>): T | undefined {
+function readEnum<T extends string>(
+  args: Args,
+  key: string,
+  allowed: Record<T, true>,
+): T | undefined {
   const value = readString(args, key);
   if (value === undefined) return undefined;
   if (!Object.prototype.hasOwnProperty.call(allowed, value)) {

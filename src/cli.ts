@@ -257,7 +257,11 @@ function list(values: OptionValues, name: string): string[] {
     .filter((item) => item !== '');
 }
 
-function choice<T extends string>(values: OptionValues, name: string, allowed: readonly T[]): T | undefined {
+function choice<T extends string>(
+  values: OptionValues,
+  name: string,
+  allowed: readonly T[],
+): T | undefined {
   const raw = text(values, name);
   if (raw === undefined) return undefined;
   const match = allowed.find((candidate) => candidate === raw);
@@ -403,7 +407,8 @@ async function commandCheck(values: OptionValues): Promise<number> {
     // `--connection PROD` is the predictable mistake. `config/resolve.ts` accepts
     // it for $COOLIFY_CONNECTION; refusing it here would be an inconsistency the
     // user has no way to predict.
-    const found = registry.connections.get(requested) ?? registry.connections.get(requested.toLowerCase());
+    const found =
+      registry.connections.get(requested) ?? registry.connections.get(requested.toLowerCase());
     if (found === undefined) {
       throw new UsageError(
         `no connection named "${requested}". Configured: ${[...registry.connections.keys()].join(', ')}.`,
@@ -491,7 +496,8 @@ async function probeIdentity(connection: Connection): Promise<ProbeOutcome> {
     const label = name === undefined ? '(unnamed)' : `"${name}"`;
     return { ok: true, detail: `team ${label}${id === undefined ? '' : ` (id ${String(id)})`}` };
   } catch (error: unknown) {
-    const hint = error instanceof CoolifyError && error.hint !== undefined ? ` — ${error.hint}` : '';
+    const hint =
+      error instanceof CoolifyError && error.hint !== undefined ? ` — ${error.hint}` : '';
     return { ok: false, detail: `${errorText(error)}${hint}` };
   }
 }
@@ -628,7 +634,8 @@ function renderDiff(result: ApplyResult): string {
 
 function summarize(result: ApplyResult, plan: Plan): string {
   const lines = result.targets.map((target) => {
-    const commands = target.commands.length === 0 ? '' : `  via ${target.commands[0]?.[0] ?? 'cli'}`;
+    const commands =
+      target.commands.length === 0 ? '' : `  via ${target.commands[0]?.[0] ?? 'cli'}`;
     return `  ${target.adapterId.padEnd(22)} ${target.status.padEnd(10)}${target.path}${commands}`;
   });
   const issues = [...plan.issues, ...result.issues, ...result.targets.flatMap((t) => t.issues)];
@@ -786,7 +793,10 @@ function fail(error: unknown): number {
 // `process.exitCode` rather than `process.exit`, so buffered stdout is flushed
 // before the process goes away — a truncated report is the one output a
 // diagnostic tool must never produce.
-main(process.argv.slice(2))
+// `void`, because nothing downstream can handle a rejection here: `fail`
+// already absorbed the only one that can occur, and an unhandled rejection at
+// the top of a CLI prints a stack over the report it was about to write.
+void main(process.argv.slice(2))
   .catch(fail)
   .then((code) => {
     process.exitCode = code;

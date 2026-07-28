@@ -1,17 +1,17 @@
 # Claude Desktop
 
-| | |
-|---|---|
-| Adapter id | `claude-desktop` |
-| `--client` selectors | `claude-desktop`, `claudedesktop` |
-| Config (macOS) | `~/Library/Application Support/Claude/claude_desktop_config.json` |
-| Config (Windows) | `%USERPROFILE%\AppData\Roaming\Claude\claude_desktop_config.json` |
-| Config (Linux) | `~/.config/Claude/claude_desktop_config.json` — **convention, not documented** |
-| Key path | `mcpServers.coolify` |
-| Format | JSON |
-| Transports written | `stdio` only |
-| Confidence | **verified** for the shape; macOS and Windows paths documented, Linux derived |
-| Native CLI | none |
+|                      |                                                                                |
+| -------------------- | ------------------------------------------------------------------------------ |
+| Adapter id           | `claude-desktop`                                                               |
+| `--client` selectors | `claude-desktop`, `claudedesktop`                                              |
+| Config (macOS)       | `~/Library/Application Support/Claude/claude_desktop_config.json`              |
+| Config (Windows)     | `%USERPROFILE%\AppData\Roaming\Claude\claude_desktop_config.json`              |
+| Config (Linux)       | `~/.config/Claude/claude_desktop_config.json` — **convention, not documented** |
+| Key path             | `mcpServers.coolify`                                                           |
+| Format               | JSON                                                                           |
+| Transports written   | `stdio` only                                                                   |
+| Confidence           | **verified** for the shape; macOS and Windows paths documented, Linux derived  |
+| Native CLI           | none                                                                           |
 
 ## Two behaviours make this the odd one out
 
@@ -103,7 +103,7 @@ Then:
 npx coolify-mcp install --client claude-desktop --connection prod
 ```
 
-The config entry holds one string — the connection *name* — and the token is
+The config entry holds one string — the connection _name_ — and the token is
 resolved from 1Password (or `pass`, `vault`, `gopass`, the macOS keychain,
 `secret-tool`) when the server starts. `tokenCommand` is a shell-free argv array,
 so any command that prints the token works.
@@ -158,12 +158,12 @@ npx coolify-mcp uninstall --client claude-desktop
 
 ## Confirmed vs unconfirmed
 
-| Item | Status |
-|---|---|
-| `mcpServers` key and entry shape | confirmed |
-| macOS path (`~/Library/Application Support/Claude/`) | confirmed |
-| Windows path (`%APPDATA%\Claude\`) | confirmed |
-| `cmd /c` wrapper needed on Windows | confirmed |
-| No shell-environment inheritance | confirmed |
-| Linux path (`~/.config/Claude/`) | **XDG convention, not documented** |
-| `${VAR}` expansion inside `env` | **not verified** — treated as "no expansion" |
+| Item                                                 | Status                                       |
+| ---------------------------------------------------- | -------------------------------------------- |
+| `mcpServers` key and entry shape                     | confirmed                                    |
+| macOS path (`~/Library/Application Support/Claude/`) | confirmed                                    |
+| Windows path (`%APPDATA%\Claude\`)                   | confirmed                                    |
+| `cmd /c` wrapper needed on Windows                   | confirmed                                    |
+| No shell-environment inheritance                     | confirmed                                    |
+| Linux path (`~/.config/Claude/`)                     | **XDG convention, not documented**           |
+| `${VAR}` expansion inside `env`                      | **not verified** — treated as "no expansion" |

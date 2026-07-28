@@ -200,7 +200,13 @@ function scoreToken(token: string, entry: SearchIndexEntry): number {
   return (
     fieldScore(token, entry.idTokens, entry.id, SCORE_ID_TOKEN, SCORE_ID_SUBSTRING) +
     fieldScore(token, entry.pathTokens, entry.path, SCORE_PATH_TOKEN, SCORE_PATH_SUBSTRING) +
-    fieldScore(token, entry.summaryTokens, entry.summary, SCORE_SUMMARY_TOKEN, SCORE_SUMMARY_SUBSTRING)
+    fieldScore(
+      token,
+      entry.summaryTokens,
+      entry.summary,
+      SCORE_SUMMARY_TOKEN,
+      SCORE_SUMMARY_SUBSTRING,
+    )
   );
 }
 
