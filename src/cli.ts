@@ -1,5 +1,5 @@
 /**
- * The `coolify-mcp` CLI: install, doctor, uninstall, connections, check.
+ * The `coolify-mcp` CLI: install, doctor, uninstall, connections, check, serve.
  *
  * A separate binary from `src/index.ts`, which is the stdio MCP server. That
  * one may write nothing but JSON-RPC to stdout; this one is an ordinary
@@ -7,6 +7,11 @@
  * JSON) and stderr carries prompts and diagnostics. Keeping the two apart is
  * what lets `coolify-mcp doctor --json | jq` work while a confirmation prompt is
  * still visible to the human.
+ *
+ * `serve` runs the MCP server out of this binary too, and does not weaken that
+ * rule. Its protocol channel is a socket, so stdout belongs to nobody and a
+ * startup banner on it is safe; everything the running server itself emits still
+ * goes to stderr, exactly as in stdio mode.
  *
  * Argument parsing is `node:util` `parseArgs` and nothing else. A CLI framework
  * would be a runtime dependency on the critical path of `npx coolify-mcp`, where
@@ -29,7 +34,16 @@ import { parseArgs } from 'node:util';
 import { stringify as stringifyYaml } from 'yaml';
 import { resolveRegistry } from './config/resolve.js';
 import { ConfigError } from './config/schema.js';
+import { ALLOWED_HOSTS_ENV, resolveAllowedHosts, toServerConfig } from './config/server-config.js';
 import { coolifyRequest } from './http/client.js';
+import { resolveAuthToken } from './http/http-auth.js';
+import {
+  serveHttp,
+  DEFAULT_HTTP_HOST,
+  DEFAULT_HTTP_PORT,
+  HEALTH_PATH,
+  MCP_PATH,
+} from './http/serve.js';
 import { redact } from './shaping/redact.js';
 import {
   doctorExitCode,
@@ -65,6 +79,7 @@ COMMANDS
   uninstall     remove the entries this CLI wrote
   connections   list resolved connections and where each token comes from
   check         live probe: GET /api/health, then /api/v1/teams/current
+  serve         run the MCP server over HTTP (--http); stdio is coolify-mcp-server
 
   ${PROGRAM} <command> --help    per-command options
   ${PROGRAM} --version`;
@@ -168,12 +183,66 @@ OPTIONS
   --connection NAME   probe one connection. Default: all of them.
   --json              machine-readable output on stdout.`;
 
+const SERVE_HELP = `${PROGRAM} serve — run the MCP server over HTTP
+
+  The same server, the same tools, the same gates as stdio — reached over a
+  socket instead of a pipe, so it can run somewhere other than the machine the
+  client is on. Including on Coolify itself.
+
+  --http is required rather than implied by "serve". A second transport is a
+  plausible future, and a bare "serve" that silently means one of them is a
+  rename waiting to break every config that had already written it down.
+
+  This command does not return. It stays in the foreground until Ctrl-C or
+  SIGTERM, then closes the listener and exits 0.
+
+OPTIONS
+  --http               required; see above.
+  --port N             default ${DEFAULT_HTTP_PORT}. 0 binds an ephemeral port, reported at startup.
+  --host ADDR          default ${DEFAULT_HTTP_HOST}. See BINDING.
+  --allowed-host HOST  also accept this Host/Origin (repeatable). ${ALLOWED_HOSTS_ENV}
+                       carries the same list, comma-separated, so a container
+                       does not have to restate the whole command to add one.
+
+AUTHENTICATION
+  COOLIFY_MCP_AUTH_TOKEN is required and serve refuses to start without it. A
+  process that binds a port while holding live Coolify credentials and answers
+  whoever asks is not a degraded configuration, it is an incident.
+
+  It is NOT a Coolify token. Clients present this one; the server holds the
+  Coolify tokens and never hands them out, so a compromised client credential
+  does not become a Coolify credential, and rotating either leaves the other
+  alone.
+
+BINDING
+  The default is ${DEFAULT_HTTP_HOST}, so an absent-minded serve is not a service on
+  the LAN. --host 0.0.0.0 has to be typed — inside a container it should be,
+  because there the container is the network boundary.
+
+  DNS rebinding protection is always on: Host and Origin are checked against the
+  address actually bound. Behind a reverse proxy the public hostname is not that
+  address, so name it with --allowed-host or every proxied request is refused.
+
+ENDPOINTS
+  POST ${MCP_PATH} — MCP JSON-RPC, bearer required. GET and DELETE answer 405: the
+    session model is stateless, so there is no stream to open and no session to
+    end.
+  GET ${HEALTH_PATH} — liveness, unauthenticated on purpose. It is what a container
+    health check and a load balancer call, and neither of them carries a token.
+    It reveals only that a process is listening: no connection names, no
+    version, no configuration.
+
+  Request logs go to stderr, one line each, never the Authorization header and
+  never a body. TLS is the reverse proxy's job; this speaks plain HTTP behind
+  it.`;
+
 const HELP: Record<string, string> = {
   install: INSTALL_HELP,
   doctor: DOCTOR_HELP,
   uninstall: UNINSTALL_HELP,
   connections: CONNECTIONS_HELP,
   check: CHECK_HELP,
+  serve: SERVE_HELP,
 };
 
 // ---------------------------------------------------------------------------
@@ -220,6 +289,17 @@ const COMMAND_OPTIONS: Record<string, Record<string, OptionSpec>> = {
   },
   connections: { ...COMMON_OPTIONS },
   check: { ...COMMON_OPTIONS, connection: { type: 'string' } },
+  // Not `...COMMON_OPTIONS`: that carries --json, and --json is a report format
+  // for a command that produces a report. `serve` produces a running process.
+  // A flag that parses and then does nothing is a lie the next reader can only
+  // disprove by reading the implementation, so it is not declared.
+  serve: {
+    help: { type: 'boolean', short: 'h' },
+    http: { type: 'boolean' },
+    port: { type: 'string' },
+    host: { type: 'string' },
+    'allowed-host': { type: 'string', multiple: true },
+  },
 };
 
 /**
@@ -323,6 +403,8 @@ async function main(argv: string[]): Promise<number> {
       return commandConnections(values);
     case 'check':
       return commandCheck(values);
+    case 'serve':
+      return commandServe(values);
     default:
       throw new UsageError(`unknown command "${command}".`);
   }
@@ -510,6 +592,147 @@ function formatProbes(results: ProbeResult[]): string {
     lines.push(`  identity  ${result.identity.ok ? 'ok  ' : 'FAIL'}  ${result.identity.detail}`);
   }
   return lines.join('\n');
+}
+
+// ---------------------------------------------------------------------------
+// serve
+// ---------------------------------------------------------------------------
+
+/** A port is 16 bits. 0 is legal and means "whatever the OS has free". */
+const MAX_PORT = 65535;
+
+/**
+ * Serves MCP over HTTP and stays in the foreground until interrupted.
+ *
+ * Every refusal below happens BEFORE a socket is bound, and that ordering is the
+ * whole shape of the function: once the listener is up the process can be talked
+ * to, and there is no configuration problem worth discovering after that moment.
+ */
+async function commandServe(values: OptionValues): Promise<number> {
+  if (!flag(values, 'http')) {
+    throw new UsageError(
+      'serve requires --http. Serving over stdio is precisely what the ' +
+        'coolify-mcp-server binary already does, so serve has nothing to add there; ' +
+        'naming the transport explicitly leaves room for a second one later without ' +
+        'renaming a command that every config file has already written down.',
+    );
+  }
+
+  const host = text(values, 'host') ?? DEFAULT_HTTP_HOST;
+  const port = resolvePort(values);
+  const allowedHosts = resolveAllowedHosts(list(values, 'allowed-host'), process.env);
+
+  const registry = await resolveRegistry(process.env, process.cwd(), homedir());
+  const cfg = toServerConfig(registry, process.env, (message) =>
+    process.stderr.write(`${PROGRAM}: ${message}\n`),
+  );
+
+  // Deliberately not wrapped: a ConfigError from here reaches `fail()`, which
+  // prints it verbatim and redacted. That message already names the variable and
+  // the minimum length, and nothing this line could add would improve on it.
+  const authToken = resolveAuthToken(process.env);
+
+  const running = await serveHttp(cfg, {
+    host,
+    port,
+    authToken,
+    // Omitted rather than passed empty. The option is additive on top of the
+    // host:port the transport derives for itself, and an empty array is an
+    // ambiguous way to say "add nothing" to an implementation that might
+    // reasonably read a present key as an override.
+    ...(allowedHosts.length > 0 ? { allowedHosts } : {}),
+  });
+
+  process.stdout.write(`${redact(serveBanner(running.url, registry.connections.size))}\n`);
+  return runUntilSignal(() => running.close());
+}
+
+/**
+ * `--port`, or the default.
+ *
+ * Digits-only and then range, rather than a bare `Number()`, because `Number('')`
+ * and `Number(' ')` are both 0 — and 0 is a legal port meaning "bind an ephemeral
+ * one". A fat-fingered `--port ""` would otherwise move the server to a port
+ * nobody configured and report success, which is the single worst class of wrong
+ * answer: the one that looks right.
+ */
+function resolvePort(values: OptionValues): number {
+  const raw = text(values, 'port');
+  if (raw === undefined) return DEFAULT_HTTP_PORT;
+
+  const trimmed = raw.trim();
+  const port = Number(trimmed);
+  if (!/^\d+$/.test(trimmed) || port > MAX_PORT) {
+    throw new UsageError(`--port must be an integer between 0 and ${MAX_PORT} (got "${raw}").`);
+  }
+  return port;
+}
+
+/**
+ * What is printed once the listener is actually up.
+ *
+ * Both paths are interpolated from the constants the server routes on, so a
+ * rename there cannot leave this printing a URL that 404s. The URL comes back
+ * from `serveHttp` rather than being reassembled from the flags, because with
+ * `--port 0` the port the user asked for is not the port they got.
+ *
+ * The connection COUNT and not the connections: names and base URLs are
+ * `coolify-mcp connections`' job, and a startup banner is very often the thing
+ * that ends up pasted into an issue. Neither credential appears here — not the
+ * bearer token clients present, not a Coolify token.
+ */
+function serveBanner(url: string, connections: number): string {
+  return [
+    `${PROGRAM} serving MCP over HTTP on ${url}`,
+    `  mcp     POST ${url}${MCP_PATH}`,
+    `  health  GET  ${url}${HEALTH_PATH}`,
+    `  ${connections} connection${connections === 1 ? '' : 's'} configured`,
+    '  Ctrl-C, or SIGTERM, to stop.',
+  ].join('\n');
+}
+
+/**
+ * Holds the process open until it is asked to stop, then closes the listener.
+ *
+ * SIGTERM is not an afterthought beside Ctrl-C: it is what `docker stop` sends,
+ * and it is the only notice a container gets before the grace period ends in
+ * SIGKILL. A server that ignores it is one that gets killed mid-request on every
+ * deploy, dropping whatever it was in the middle of answering — so this handler
+ * is the difference between a rolling restart and a burst of client errors on
+ * each one. That is also why the shutdown path is `close()` and not
+ * `process.exit()`.
+ *
+ * Both signals share one handler whose first act is to unregister both. That is
+ * what makes this promise unresolvable twice, and it also hands the signal back
+ * to Node's default disposition — so an impatient second Ctrl-C during a slow
+ * shutdown kills the process immediately instead of being swallowed by a handler
+ * that has already done its work.
+ *
+ * Resolves EXIT_OK even when `close()` rejects. The operator asked the process to
+ * stop and it stopped; a non-zero code would make every ordinary `docker stop`
+ * read as a crash in the restart-policy log. The error is still reported.
+ */
+function runUntilSignal(close: () => Promise<void>): Promise<number> {
+  return new Promise<number>((resolve) => {
+    const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
+      process.stderr.write(`${PROGRAM}: ${signal} received, shutting down.\n`);
+      try {
+        await close();
+      } catch (error: unknown) {
+        process.stderr.write(`${PROGRAM}: ${redact(errorText(error))}\n`);
+      }
+      resolve(EXIT_OK);
+    };
+
+    const stop = (signal: NodeJS.Signals): void => {
+      process.off('SIGINT', stop);
+      process.off('SIGTERM', stop);
+      void shutdown(signal);
+    };
+
+    process.on('SIGINT', stop);
+    process.on('SIGTERM', stop);
+  });
 }
 
 // ---------------------------------------------------------------------------

@@ -15,9 +15,9 @@ import { homedir } from 'node:os';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { resolveRegistry } from './config/resolve.js';
 import { ConfigError } from './config/schema.js';
+import { toServerConfig } from './config/server-config.js';
 import { buildServer } from './server.js';
 import { redact } from './shaping/redact.js';
-import type { ConnectionRegistry, ServerConfig } from './types.js';
 
 /** Prefixes diagnostics, so a client log holding several servers stays legible. */
 const PROGRAM = 'coolify-mcp';
@@ -32,55 +32,10 @@ const EXIT_CONFIG = 1;
  */
 const EXIT_INTERNAL = 2;
 
-const LOG_LEVELS = ['error', 'warn', 'info', 'debug'] as const;
-type LogLevel = (typeof LOG_LEVELS)[number];
-const DEFAULT_LOG_LEVEL: LogLevel = 'info';
-
 async function main(): Promise<void> {
   const registry = await resolveRegistry(process.env, process.cwd(), homedir());
-  const server = buildServer(toServerConfig(registry, process.env));
+  const server = buildServer(toServerConfig(registry, process.env, note));
   await server.connect(new StdioServerTransport());
-}
-
-/**
- * The process-wide flags, derived from the resolved connections rather than
- * re-read from the environment.
- *
- * `config/resolve.ts` has already parsed COOLIFY_READ_ONLY and
- * COOLIFY_ALLOW_DESTRUCTIVE — including refusing a value it cannot read as a
- * boolean — and stamped the outcome onto every connection, where a registry
- * file may also have set them per connection. Parsing the same two variables a
- * second time here would produce a second answer that can disagree with the
- * first, and the gate in `tools/register.ts` is not a place to hold two
- * answers.
- */
-function toServerConfig(registry: ConnectionRegistry, env: NodeJS.ProcessEnv): ServerConfig {
-  const connections = [...registry.connections.values()];
-  return {
-    registry,
-    readOnly: connections.every((connection) => connection.readOnly),
-    // A read-only connection can never destroy anything, so it does not count
-    // towards the server having the capability at all.
-    allowDestructive: connections.some(
-      (connection) => connection.allowDestructive && !connection.readOnly,
-    ),
-    logLevel: resolveLogLevel(env),
-  };
-}
-
-function resolveLogLevel(env: NodeJS.ProcessEnv): LogLevel {
-  const raw = env['COOLIFY_LOG_LEVEL']?.trim().toLowerCase();
-  if (raw === undefined || raw === '') return DEFAULT_LOG_LEVEL;
-
-  const match = LOG_LEVELS.find((level) => level === raw);
-  if (match !== undefined) return match;
-
-  // Not fatal — refusing to start over a log level would be absurd — but not
-  // silent either, or the user watches for output that never arrives.
-  note(
-    `ignoring COOLIFY_LOG_LEVEL="${raw}"; expected one of ${LOG_LEVELS.join(', ')}. Using ${DEFAULT_LOG_LEVEL}.`,
-  );
-  return DEFAULT_LOG_LEVEL;
 }
 
 /**

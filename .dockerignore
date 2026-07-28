@@ -1,0 +1,58 @@
+# Build context: default-deny.
+#
+# The usual .dockerignore is a denylist, which means every file added to the
+# repository from now on is in the build context until somebody remembers to
+# exclude it. That is the wrong default for a repository whose threat model is
+# "a credential must never end up somewhere it can be copied out of", and a
+# build context is exactly such a place: it is uploaded to the daemon whole,
+# and anything a COPY reaches lands in a layer that ships.
+#
+# So: exclude everything, then name the four things that build the package.
+# Adding a new source directory without listing it here fails the build loudly
+# at `npm run build`, which is the failure mode you want.
+*
+
+# --- what the build actually needs ---------------------------------------
+
+# The manifests. `npm ci` refuses to run without the lockfile, which is the
+# point: the image is installed from resolved versions, never re-resolved.
+!package.json
+!package-lock.json
+
+# The source, including the committed src/generated catalog. It is regenerated
+# by `npm run codegen` and verified in CI, not built here.
+!src
+
+# tsup reads both. tsconfig.json supplies the target; tsup.config.ts is what
+# marks @modelcontextprotocol/sdk external, so the runtime install in the
+# Dockerfile depends on this file being present and correct.
+!tsconfig.json
+!tsup.config.ts
+
+# --- belt and braces ------------------------------------------------------
+#
+# The rules above re-include whole directories, so a secret dropped inside one
+# of them would ride in. These re-exclude the shapes that must never be in a
+# build context regardless of where they appear, and they come last because the
+# last matching pattern wins.
+
+# Never, under any circumstance. `.env` is not read by this server anyway —
+# every credential arrives as an environment variable set by the platform.
+**/.env
+**/.env.*
+
+# Private key material and certificates. This server never terminates TLS, so
+# there is no legitimate reason for one to be in the context.
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+
+# A local registry file. It is a pointer file by schema and cannot contain a
+# token — but it does contain your base URLs, and it belongs to the machine it
+# was written on, not to an image.
+**/.coolify-mcp.json
+
+# npm pack output, which is a tarball of the package including anything the
+# host had lying around.
+**/*.tgz

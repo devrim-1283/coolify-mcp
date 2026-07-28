@@ -329,6 +329,105 @@ jobs:
 
           node .smoke/handshake.mjs .smoke/node_modules/coolify-mcp/dist/index.js
 
+      - name: MCP handshake over the HTTP transport
+        env:
+          COOLIFY_BASE_URL: https://coolify.invalid
+          COOLIFY_API_TOKEN: ci-smoke-placeholder-not-a-credential
+          # Long enough to clear the documented 32-character minimum. Not a
+          # credential: it authenticates a loopback listener that exists for the
+          # length of this step and reaches no network.
+          COOLIFY_MCP_AUTH_TOKEN: ci-smoke-http-token-0123456789abcdef
+        # The published artefact ships two transports, so the smoke test proves
+        # two. This one boots the real `serve --http` out of the installed
+        # package and drives it with the real client transport — the stdio
+        # handshake above cannot catch a routing, auth or shutdown regression,
+        # because none of those exist on a pipe.
+        run: |
+          cat > .smoke/http-handshake.mjs <<'HTTPSMOKE'
+          import { spawn } from 'node:child_process';
+          import { setTimeout as sleep } from 'node:timers/promises';
+          import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+          import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+
+          // A fixed port rather than an ephemeral one: the banner is on the
+          // server's stdout and parsing it would make this test depend on the
+          // wording of a human-facing string.
+          const PORT = 39017;
+          const BASE = `http://127.0.0.1:${PORT}`;
+          const TOKEN = process.env.COOLIFY_MCP_AUTH_TOKEN;
+
+          const child = spawn(process.execPath, [process.argv[2], 'serve', '--http', '--port', String(PORT)], {
+            stdio: ['ignore', 'pipe', 'pipe'],
+            env: process.env,
+          });
+          child.stdout.on('data', (chunk) => process.stdout.write(`[server] ${chunk}`));
+          child.stderr.on('data', (chunk) => process.stderr.write(`[server] ${chunk}`));
+
+          function fail(reason) {
+            console.error(`http smoke: ${reason}`);
+            child.kill('SIGTERM');
+            process.exit(1);
+          }
+
+          // Poll the health endpoint rather than sleeping a guessed interval.
+          let up = false;
+          for (let attempt = 0; attempt < 60 && !up; attempt += 1) {
+            try {
+              const probe = await fetch(`${BASE}/healthz`);
+              up = probe.ok;
+            } catch {
+              await sleep(500);
+            }
+          }
+          if (!up) fail('the server never became healthy');
+          console.log('healthz ok');
+
+          // Unauthenticated first: a server that answers this has no gate at all,
+          // and every assertion after it would be meaningless.
+          const refused = await fetch(`${BASE}/mcp`, { method: 'POST' });
+          if (refused.status !== 401) fail(`POST /mcp without a token returned ${refused.status}, expected 401`);
+          console.log('401 without a token ok');
+
+          const client = new Client({ name: 'coolify-mcp-http-smoke', version: '0.0.0' });
+          await client.connect(
+            new StreamableHTTPClientTransport(new URL(`${BASE}/mcp`), {
+              requestInit: { headers: { Authorization: `Bearer ${TOKEN}` } },
+            }),
+          );
+          const info = client.getServerVersion() ?? {};
+          if (info.name !== 'coolify-mcp') fail(`serverInfo.name was ${JSON.stringify(info.name)}`);
+          console.log(`initialize ok — ${info.name} ${info.version}`);
+
+          const { tools } = await client.listTools();
+          const names = tools.map((tool) => tool.name).sort();
+          console.log(`tools/list ok — ${names.length} tools`);
+          if (!names.includes('find_resources')) fail('find_resources was not registered');
+          if (names.includes('execute_destructive_operation')) {
+            fail('execute_destructive_operation is registered without COOLIFY_ALLOW_DESTRUCTIVE');
+          }
+
+          // Catalog-only, so it proves the tool path end to end without needing a
+          // Coolify instance to exist.
+          const searched = await client.callTool({ name: 'search_operations', arguments: { query: 'application' } });
+          if (searched.isError) fail(`search_operations failed: ${JSON.stringify(searched.content)}`);
+          console.log('tools/call ok');
+
+          await client.close();
+
+          // SIGTERM specifically: it is what `docker stop` sends, and a server
+          // that only dies to SIGKILL drops in-flight requests on every deploy.
+          const stopped = new Promise((resolve) => child.once('exit', resolve));
+          child.kill('SIGTERM');
+          const code = await Promise.race([stopped, sleep(10_000).then(() => 'timeout')]);
+          if (code === 'timeout') fail('the server did not exit within 10s of SIGTERM');
+          console.log(`SIGTERM ok — exit ${code}`);
+
+          console.log('http smoke ok');
+          process.exit(0);
+          HTTPSMOKE
+
+          node .smoke/http-handshake.mjs .smoke/node_modules/coolify-mcp/dist/cli.js
+
   # One required status check for branch protection, so adding a matrix cell does
   # not mean editing the protection rules. `always()` plus an explicit result
   # test is deliberate: without it a skipped or cancelled dependency reports
