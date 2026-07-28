@@ -18,6 +18,45 @@ add operations that `search_operations` did not previously return.
 
 ## [Unreleased]
 
+### Added
+
+**Streamable HTTP transport.** `coolify-mcp serve --http` runs the same server,
+the same tools and the same gates over a socket instead of a pipe, so it can run
+somewhere other than the machine the client is on — including as a container on
+Coolify itself. `Dockerfile`, `docker-compose.yml` and
+[docs/deploy.md](./docs/deploy.md) cover that deployment.
+
+This closes the one axis where Coolify's built-in `/mcp` endpoint was ahead of
+this project: living where the data is. See the comparison table in the README.
+
+- Stateless (`sessionIdGenerator: undefined`). The registered tool set is a pure
+  function of configuration decided at startup, so there is never a
+  server-initiated message to push, and `deploy(wait: true)` carries its progress
+  notifications on the originating request's own SSE response rather than
+  needing a session. Each `POST` gets a fresh server and transport.
+- `POST /mcp` requires `Authorization: Bearer`; `GET /healthz` does not, because
+  a container health check holds no token and the endpoint reveals only that a
+  process is listening.
+- `COOLIFY_MCP_AUTH_TOKEN` is **required** — minimum 32 characters, printable
+  ASCII — and the server refuses to start without it. It is compared in constant
+  time over fixed-length digests, so neither its value nor its length leaks
+  through timing. It is unrelated to `COOLIFY_API_TOKEN`: the server keeps the
+  Coolify token and never sends it to a client, so a compromised client
+  credential is not a Coolify credential and rotating either leaves the other
+  alone.
+- Binds `127.0.0.1` unless `--host` says otherwise. DNS rebinding protection is
+  on, with `--allowed-host` — or `COOLIFY_MCP_ALLOWED_HOSTS`, comma-separated —
+  for the public name a reverse proxy serves. Under a wildcard bind the derived
+  allow list is empty and Host validation is skipped, because `Host: 0.0.0.0`
+  is a header no client sends; the server says so on stderr at startup, and in
+  a container that setting is the only thing that turns the check on at all.
+  Request bodies are capped at 4 MB.
+- Access log on stderr, one line per request, with a succeeding `/healthz`
+  suppressed below `debug` — a health check every ten seconds otherwise buries
+  every request worth reading.
+- TLS is not terminated here. That is the reverse proxy's job, and on Coolify it
+  is Traefik's.
+
 ## [0.1.0] — unreleased
 
 Initial release.
