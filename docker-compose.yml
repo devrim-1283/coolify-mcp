@@ -1,0 +1,147 @@
+# coolify-mcp over Streamable HTTP.
+#
+# Consumable by Coolify's Docker Compose build pack, and by `docker compose up`
+# anywhere else. The walkthrough — generating the auth token, the domain, TLS,
+# and pointing an MCP client at the result — is in docs/deploy.md.
+#
+# No secret is written in this file and there is no .env beside it. Every
+# credential is a ${VAR} reference that the platform supplies: on Coolify those
+# are the resource's environment variables, entered once in the UI and never
+# committed. A variable marked `:?` below is required — the deploy fails with
+# that message rather than starting a half-configured server holding a live
+# Coolify token.
+
+services:
+  coolify-mcp:
+    # Built from this repository. There is no published image to point at yet.
+    # When there is, replace `build:` with `image:` at an exact version —
+    # never `:latest`. A floating tag on a server that holds a Coolify token is
+    # the same "runs code published after your review" problem that
+    # `coolify-mcp install --pin` exists to solve.
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    # `unless-stopped`, not `always`: a deliberate stop should survive a daemon
+    # restart. `always` would bring the server back up behind your back after
+    # you stopped it to rotate a token.
+    restart: unless-stopped
+
+    # There is deliberately no `command:` here. `command:` REPLACES the image's
+    # CMD rather than appending to it, so adding one flag would mean restating
+    # the interpreter, the script path, the subcommand, the host and the port —
+    # each of which then has a second spelling that can drift away from the
+    # Dockerfile's EXPOSE and HEALTHCHECK with nothing failing to announce it.
+    # The allow list arrives as an environment variable below instead.
+
+    environment:
+      # --- required ------------------------------------------------------
+      #
+      # The Coolify instance this server manages, and the token it authenticates
+      # to that instance with. This pair defines one connection, named
+      # `default`. For several instances or teams, use COOLIFY_BASE_URL_<NAME>
+      # and COOLIFY_API_TOKEN_<NAME> instead — the environment form works
+      # identically in a container. See docs/connections.md.
+      COOLIFY_BASE_URL: '${COOLIFY_BASE_URL:?the Coolify instance to manage, e.g. https://coolify.example.com}'
+      COOLIFY_API_TOKEN: '${COOLIFY_API_TOKEN:?a Coolify API token; issue a read-scoped one unless you need writes}'
+
+      # The bearer token MCP clients present to THIS server. Minimum 32
+      # characters; the server refuses to start without it or below that
+      # length, because a port bound while holding a live Coolify token and
+      # accepting anyone is not a degraded configuration, it is an incident.
+      #
+      # It is a different secret from COOLIFY_API_TOKEN on purpose. A client
+      # credential that leaks is not a Coolify credential, and rotating either
+      # one does not force rotating the other. Generate it with
+      # `openssl rand -base64 32` — see docs/deploy.md.
+      COOLIFY_MCP_AUTH_TOKEN: '${COOLIFY_MCP_AUTH_TOKEN:?generate one with openssl rand -base64 32}'
+
+      # The public hostname this is served on — what turns DNS rebinding
+      # protection back on behind a proxy.
+      #
+      # The allow list is derived from the address actually bound, and a
+      # wildcard bind derives nothing: `Host: 0.0.0.0:3000` is a header no
+      # client has ever sent. So with no value here the Host check is SKIPPED.
+      # The server says so on stderr at startup rather than leaving it to be
+      # discovered, but a deployment that silently runs with one of its two
+      # rebinding defences off is not a default worth shipping, so this file
+      # requires it. (Origin validation is unaffected and still refuses every
+      # browser-originated request; MCP clients send no Origin at all.)
+      #
+      # The hostname alone: no scheme, no path, and a port only if your clients
+      # send one — behind TLS on 443 they do not. Get it wrong and every MCP
+      # request 403s while /healthz keeps answering 200, so the container stays
+      # healthy while every client fails. Several names, comma-separated.
+      COOLIFY_MCP_ALLOWED_HOSTS: '${COOLIFY_MCP_ALLOWED_HOSTS:?set this to the public hostname this is served on, e.g. mcp.example.com}'
+
+      # --- optional ------------------------------------------------------
+      #
+      # Read-only defaults to true here, which is stricter than the server's own
+      # default of false. That is deliberate: a shared HTTP endpoint reachable
+      # by every client you hand the token to is the last place to discover you
+      # left writes on. It refuses every non-GET at the HTTP client regardless
+      # of what the Coolify token is scoped to, and when every connection is
+      # read-only the write tools are never registered at all.
+      #
+      # Pair it with a read-scoped Coolify token (`read` + `read:sensitive`).
+      # Two independent ceilings; neither one relies on the other being right.
+      COOLIFY_READ_ONLY: '${COOLIFY_READ_ONLY:-true}'
+
+      # Deletes. `false` is the same as unset in effect, and is written out so
+      # that the answer to "can this thing delete my database" is visible in the
+      # file rather than inferred from an absence. With it off,
+      # `execute_destructive_operation` is not registered — it does not appear
+      # in tools/list at all.
+      COOLIFY_ALLOW_DESTRUCTIVE: '${COOLIFY_ALLOW_DESTRUCTIVE:-false}'
+
+      # error | warn | info | debug. Logs go to stderr and Docker captures them.
+      # No log line at any level contains the Authorization header or a token.
+      COOLIFY_LOG_LEVEL: '${COOLIFY_LOG_LEVEL:-info}'
+
+      # Other knobs pass through unchanged: COOLIFY_CONNECTION,
+      # COOLIFY_TIMEOUT_MS, COOLIFY_MCP_CONFIG. See the README's Configuration
+      # section.
+
+    # Behind Coolify's Traefik nothing is published: the proxy reaches this
+    # container over the compose network, and `expose` is what tells both the
+    # proxy and the next human which port that is.
+    expose:
+      - '3000'
+
+    # For a local run with no proxy in front, publish it — and keep the
+    # 127.0.0.1 prefix. `'3000:3000'` binds every interface on the host, which
+    # puts a plaintext bearer-token endpoint holding a live Coolify credential
+    # on the network. There is no TLS in this container and there never will be.
+    # ports:
+    #   - '127.0.0.1:3000:3000'
+
+    # Restates the image's own HEALTHCHECK so the contract is visible to anyone
+    # reading only this file, including Coolify's UI. /healthz is unauthenticated
+    # by design: this check holds no bearer token and could not be given one,
+    # and the endpoint reports only that a process is listening.
+    healthcheck:
+      test:
+        ['CMD', 'wget', '--quiet', '--output-document=/dev/null', 'http://127.0.0.1:3000/healthz']
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+
+    # The server writes nothing to disk: resolved tokens are cached in memory
+    # for the process lifetime and never persisted, and logs go to stderr. A
+    # read-only root filesystem therefore costs nothing and removes "the process
+    # can rewrite its own code" from the table.
+    read_only: true
+    tmpfs:
+      - /tmp
+
+    # Nothing here needs a capability — the process listens on 3000, above the
+    # privileged range, as uid 1000. `no-new-privileges` stops any setuid binary
+    # that happens to be in the image from being a path back to root.
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+    # No `init: true`. The image already runs tini as PID 1, so signals are
+    # forwarded and orphans reaped regardless of how the container is started.
