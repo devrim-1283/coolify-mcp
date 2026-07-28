@@ -231,26 +231,33 @@ function looksLikeCredential(key: string): boolean {
   return CREDENTIAL_KEYS.has(key.toLowerCase().replace(/[-_\s]/g, ''));
 }
 
-function formatPath(path: ReadonlyArray<string | number>): string {
+/**
+ * The type of `ZodIssue['path']`.
+ *
+ * Zod widened this to `PropertyKey[]` in v4, because a schema can key on a
+ * symbol. A registry file is parsed from JSON, YAML or TOML, none of which can
+ * express one, so the symbol case below is unreachable for this codebase — but
+ * it is in the type, and rendering `[object Symbol]` into a config error a user
+ * has to act on would be worse than one line handling it.
+ */
+type IssuePath = ReadonlyArray<PropertyKey>;
+
+function formatPath(path: IssuePath): string {
   if (path.length === 0) return '<root>';
-  return path.reduce<string>(
-    (acc, segment) =>
-      typeof segment === 'number'
-        ? `${acc}[${segment}]`
-        : acc === ''
-          ? segment
-          : `${acc}.${segment}`,
-    '',
-  );
+  return path.reduce<string>((acc, segment) => {
+    if (typeof segment === 'number') return `${acc}[${segment}]`;
+    const name = typeof segment === 'symbol' ? (segment.description ?? '<symbol>') : segment;
+    return acc === '' ? name : `${acc}.${name}`;
+  }, '');
 }
 
 /** The connection name for a path like ['connections', 'prod', ...]. */
-function connectionNameAt(path: ReadonlyArray<string | number>): string | undefined {
+function connectionNameAt(path: IssuePath): string | undefined {
   const [head, name] = path;
   return head === 'connections' && typeof name === 'string' ? name : undefined;
 }
 
-function credentialKeyBlock(path: ReadonlyArray<string | number>, key: string): string {
+function credentialKeyBlock(path: IssuePath, key: string): string {
   const name = connectionNameAt(path);
   const variable = name === undefined ? 'COOLIFY_API_TOKEN' : tokenEnvVar(name);
   return [
@@ -261,7 +268,7 @@ function credentialKeyBlock(path: ReadonlyArray<string | number>, key: string): 
   ].join('\n');
 }
 
-function unknownKeyBlock(path: ReadonlyArray<string | number>, key: string): string {
+function unknownKeyBlock(path: IssuePath, key: string): string {
   const valid = connectionNameAt(path) === undefined ? undefined : CONNECTION_KEYS.join(', ');
   const lines = [`config error at ${formatPath(path)}: "${key}" is not a valid property.`];
   if (valid) lines.push(`Valid properties: ${valid}.`);
@@ -276,7 +283,14 @@ function describeIssue(issue: z.ZodIssue): string[] {
         : unknownKeyBlock(issue.path, key),
     );
   }
-  if (issue.code === z.ZodIssueCode.invalid_literal && issue.path.join('.') === 'version') {
+  // `invalid_value` rather than v3's `invalid_literal`: Zod 4 merged literal and
+  // enum mismatches into one code. The path guard is what keeps this branch
+  // aimed at the version field alone, and it did that job under v3 too — so the
+  // widened code costs nothing here.
+  //
+  // Without this branch the user is told "Invalid input: expected 1", which
+  // names Zod's model of the problem rather than theirs.
+  if (issue.code === z.ZodIssueCode.invalid_value && issue.path.join('.') === 'version') {
     return [`config error at version: must be ${CONFIG_VERSION}. This file is a v1 registry.`];
   }
   return [`config error at ${formatPath(issue.path)}: ${issue.message}`];
