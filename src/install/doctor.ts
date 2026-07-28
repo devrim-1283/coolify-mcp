@@ -304,9 +304,12 @@ export function doctorExitCode(report: DoctorReport): number {
 function dedupe(findings: DoctorFinding[]): DoctorFinding[] {
   const seen = new Set<string>();
   return findings.filter((finding) => {
-    const key = [finding.code, finding.file ?? '', (finding.keyPath ?? []).join('.'), finding.message].join(
-      ' ',
-    );
+    const key = [
+      finding.code,
+      finding.file ?? '',
+      (finding.keyPath ?? []).join('.'),
+      finding.message,
+    ].join(' ');
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
@@ -549,7 +552,13 @@ async function inspectClient(
   options.scannedFiles.add(detection.path);
 
   await checkPermissions(detection.path, ctx.platform, findings);
-  report.unscannedEntries = await scanConfigFile(adapter, detection.path, options, findings, reported);
+  report.unscannedEntries = await scanConfigFile(
+    adapter,
+    detection.path,
+    options,
+    findings,
+    reported,
+  );
   return report;
 }
 
@@ -590,7 +599,10 @@ function resolvePathSafely(adapter: McpClientAdapter, ctx: InstallCtx): string {
   }
 }
 
-async function readEntrySafely(adapter: McpClientAdapter, ctx: InstallCtx): Promise<unknown | null> {
+async function readEntrySafely(
+  adapter: McpClientAdapter,
+  ctx: InstallCtx,
+): Promise<unknown | null> {
   try {
     return await adapter.readEntry(ctx);
   } catch {
@@ -759,14 +771,18 @@ async function readAndParse(
 
   try {
     if (format === 'json') return { text, value: JSON.parse(text) as unknown };
-    if (format === 'toml') return { text, value: parseToml(text) as unknown };
+    if (format === 'toml') return { text, value: parseToml(text) };
     if (format === 'yaml') return { text, value: parseYaml(text) as unknown };
 
     const errors: ParseError[] = [];
     const value = parseJsonc(text, errors, { allowTrailingComma: true }) as unknown;
     const first = errors[0];
     if (first === undefined) return { text, value };
-    return { text, value, parseError: `${printParseErrorCode(first.error)} at offset ${first.offset}` };
+    return {
+      text,
+      value,
+      parseError: `${printParseErrorCode(first.error)} at offset ${first.offset}`,
+    };
   } catch (error: unknown) {
     // The text is still returned: an unparseable config is precisely the one
     // most likely to have been hand-edited with a token pasted into it.
@@ -1005,7 +1021,11 @@ function bearerLiteral(file: string, node: StringNode, adapter: McpClientAdapter
   };
 }
 
-function envLiteralSecret(file: string, node: StringNode, adapter: McpClientAdapter): DoctorFinding {
+function envLiteralSecret(
+  file: string,
+  node: StringNode,
+  adapter: McpClientAdapter,
+): DoctorFinding {
   return {
     code: 'env-literal-secret',
     severity: 'warn',
@@ -1093,7 +1113,8 @@ function extractPackageSpec(entry: unknown): string | undefined {
 
   const command = entry['command'];
   if (typeof command === 'string') words.push(...command.split(/\s+/));
-  else if (Array.isArray(command)) for (const part of command) if (typeof part === 'string') words.push(part);
+  else if (Array.isArray(command))
+    for (const part of command) if (typeof part === 'string') words.push(part);
 
   const args = entry['args'];
   if (Array.isArray(args)) for (const arg of args) if (typeof arg === 'string') words.push(arg);

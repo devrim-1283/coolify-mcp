@@ -4,15 +4,15 @@
 > servers is not known, and it is not guessed. Everything below is print-only
 > until someone confirms it.
 
-| | |
-|---|---|
-| Adapter id | `minimax-user` |
-| `--client` selectors | `minimax`, `minimax-cli`, `minimax-user` |
-| Config | `~/.minimax/config.yaml` |
-| Key path | **UNKNOWN** — two candidates below |
-| Format | YAML |
-| Confidence | **`unverified`** — `apply()` mechanically refuses to write |
-| Native CLI | unknown; possibly `minimax mcp` |
+|                      |                                                            |
+| -------------------- | ---------------------------------------------------------- |
+| Adapter id           | `minimax-user`                                             |
+| `--client` selectors | `minimax`, `minimax-cli`, `minimax-user`                   |
+| Config               | `~/.minimax/config.yaml`                                   |
+| Key path             | **UNKNOWN** — two candidates below                         |
+| Format               | YAML                                                       |
+| Confidence           | **`unverified`** — `apply()` mechanically refuses to write |
+| Native CLI           | unknown; possibly `minimax mcp`                            |
 
 ## Why this is not just guessed
 
@@ -121,7 +121,7 @@ single rule is what keeps unverified guesses out of users' config files.
 
 - **`detect`** — reports whether `~/.minimax/` exists, so `doctor` can tell you
   MiniMax is installed and unwritable.
-- **`readEntry`** — probes *both* candidates read-only: `mcp.coolify` in
+- **`readEntry`** — probes _both_ candidates read-only: `mcp.coolify` in
   `config.yaml`, then `mcpServers.coolify` in `~/.minimax/mcp.json`. If either
   ever returns a value on a real install, the key is settled and the probe
   reports which file and key path it came from. This is the cheapest half of the
@@ -133,12 +133,12 @@ single rule is what keeps unverified guesses out of users' config files.
 
 ## Confirmed vs unconfirmed
 
-| Item | Status |
-|---|---|
-| `~/.minimax/config.yaml` exists and is YAML | confirmed |
-| OpenCode / models.dev lineage of the file | confirmed |
-| Top-level keys are renamed relative to OpenCode | confirmed |
-| The MCP container key | **UNKNOWN** — this is the blocker |
-| Whether `~/.minimax/mcp.json` is read at all | **UNKNOWN** |
-| Existence of a `minimax mcp` subcommand | **UNKNOWN** |
-| `${VAR}` expansion | **UNKNOWN** — treated as "no expansion" |
+| Item                                            | Status                                  |
+| ----------------------------------------------- | --------------------------------------- |
+| `~/.minimax/config.yaml` exists and is YAML     | confirmed                               |
+| OpenCode / models.dev lineage of the file       | confirmed                               |
+| Top-level keys are renamed relative to OpenCode | confirmed                               |
+| The MCP container key                           | **UNKNOWN** — this is the blocker       |
+| Whether `~/.minimax/mcp.json` is read at all    | **UNKNOWN**                             |
+| Existence of a `minimax mcp` subcommand         | **UNKNOWN**                             |
+| `${VAR}` expansion                              | **UNKNOWN** — treated as "no expansion" |

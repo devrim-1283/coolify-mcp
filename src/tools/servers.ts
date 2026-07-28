@@ -49,7 +49,14 @@ const SERVER_FIELDS: ReadonlyArray<readonly [string, readonly string[]]> = [
 const SERVER_COLUMNS = SERVER_FIELDS.map(([column]) => column);
 
 /** Health first, ssh details last: a server list is read to find what is broken. */
-const SERVER_PRUNABLE = ['created_at', 'updated_at', 'description', 'user', 'port', 'is_swarm_manager'] as const;
+const SERVER_PRUNABLE = [
+  'created_at',
+  'updated_at',
+  'description',
+  'user',
+  'port',
+  'is_swarm_manager',
+] as const;
 
 function buildServerRow(raw: Row): Row {
   const row: Row = {};
@@ -94,7 +101,9 @@ export const listServers: ToolDef = {
       const unreachable = rows.filter((row) => row['is_reachable'] === false).length;
       const notes = [`${rows.length} server(s) on connection \`${connection.name}\`.`];
       if (unreachable > 0) {
-        notes.push(`is_reachable=false on ${unreachable} of them; resources on those servers will not respond.`);
+        notes.push(
+          `is_reachable=false on ${unreachable} of them; resources on those servers will not respond.`,
+        );
       }
 
       const meta: EnvelopeMeta = {

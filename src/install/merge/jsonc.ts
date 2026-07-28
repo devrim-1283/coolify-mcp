@@ -158,7 +158,8 @@ function removeProperty(text: string, path: readonly string[]): string {
   const value = nodeAt(text, path);
   const property = value?.parent;
   const container = property?.parent;
-  if (property === undefined || property.type !== 'property' || container === undefined) return text;
+  if (property === undefined || property.type !== 'property' || container === undefined)
+    return text;
 
   const edits = cutsFor(text, property, container).map((cut) => ({
     offset: cut.start,

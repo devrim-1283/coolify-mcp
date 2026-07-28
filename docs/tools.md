@@ -3,35 +3,35 @@
 Sixteen tool definitions exist. How many are **registered** depends on your
 configuration:
 
-| Configuration | Registered |
-|---|---|
-| Default | **15** — everything except `execute_destructive_operation` |
-| `COOLIFY_ALLOW_DESTRUCTIVE=true` (and a connection that allows it) | **16** |
-| `COOLIFY_READ_ONLY=true`, or every connection `readOnly` | **11** — the read surface only |
+| Configuration                                                      | Registered                                                 |
+| ------------------------------------------------------------------ | ---------------------------------------------------------- |
+| Default                                                            | **15** — everything except `execute_destructive_operation` |
+| `COOLIFY_ALLOW_DESTRUCTIVE=true` (and a connection that allows it) | **16**                                                     |
+| `COOLIFY_READ_ONLY=true`, or every connection `readOnly`           | **11** — the read surface only                             |
 
 A tool that is not registered does not appear in `tools/list` at all. It is never
 listed-and-refusing.
 
 ## The table
 
-| Tool | Class | Coolify ability | Backing call |
-|---|---|---|---|
-| `find_resources` | read | `read` | `GET /resources` (once per targeted connection) |
-| `get_resource` | read | `read` | `GET /{family}/{uuid}` |
-| `get_logs` | read | **`read:sensitive`** | `GET /{family}/{uuid}/logs` |
-| `get_environment_variables` | read | **`read:sensitive`** | `GET /{family}/{uuid}/envs` |
-| `list_deployments` | read | `read` | `GET /deployments` or `GET /deployments/applications/{uuid}` |
-| `get_deployment` | read | `read` (build log content needs `read:sensitive`) | `GET /deployments/{uuid}` |
-| `list_servers` | read | `read` | `GET /servers` |
-| `list_projects` | read | `read` | `GET /projects` |
-| `search_operations` | read | none | local catalog, no network |
-| `describe_operation` | read | none | local catalog, no network |
-| `execute_read_operation` | read | `read`, or `read:sensitive` on `/logs` and `/envs` | any catalogued GET |
-| `deploy` | write | `deploy` | `POST /deploy` (+ polling reads with `wait`) |
-| `control_resource` | write | `write` | `POST /{family}/{uuid}/{start\|stop\|restart}` |
-| `set_environment_variables` | write | `write` | `PATCH /{family}/{uuid}/envs/bulk` |
-| `execute_write_operation` | write | `write` | any catalogued POST / PATCH / PUT |
-| `execute_destructive_operation` | **destructive** | `write` (or `root`) | any catalogued DELETE, plus `POST /disable` |
+| Tool                            | Class           | Coolify ability                                    | Backing call                                                 |
+| ------------------------------- | --------------- | -------------------------------------------------- | ------------------------------------------------------------ |
+| `find_resources`                | read            | `read`                                             | `GET /resources` (once per targeted connection)              |
+| `get_resource`                  | read            | `read`                                             | `GET /{family}/{uuid}`                                       |
+| `get_logs`                      | read            | **`read:sensitive`**                               | `GET /{family}/{uuid}/logs`                                  |
+| `get_environment_variables`     | read            | **`read:sensitive`**                               | `GET /{family}/{uuid}/envs`                                  |
+| `list_deployments`              | read            | `read`                                             | `GET /deployments` or `GET /deployments/applications/{uuid}` |
+| `get_deployment`                | read            | `read` (build log content needs `read:sensitive`)  | `GET /deployments/{uuid}`                                    |
+| `list_servers`                  | read            | `read`                                             | `GET /servers`                                               |
+| `list_projects`                 | read            | `read`                                             | `GET /projects`                                              |
+| `search_operations`             | read            | none                                               | local catalog, no network                                    |
+| `describe_operation`            | read            | none                                               | local catalog, no network                                    |
+| `execute_read_operation`        | read            | `read`, or `read:sensitive` on `/logs` and `/envs` | any catalogued GET                                           |
+| `deploy`                        | write           | `deploy`                                           | `POST /deploy` (+ polling reads with `wait`)                 |
+| `control_resource`              | write           | `write`                                            | `POST /{family}/{uuid}/{start\|stop\|restart}`               |
+| `set_environment_variables`     | write           | `write`                                            | `PATCH /{family}/{uuid}/envs/bulk`                           |
+| `execute_write_operation`       | write           | `write`                                            | any catalogued POST / PATCH / PUT                            |
+| `execute_destructive_operation` | **destructive** | `write` (or `root`)                                | any catalogued DELETE, plus `POST /disable`                  |
 
 `{family}` is `applications`, `databases` or `services`, chosen by the
 `resource_type` parameter.
@@ -50,18 +50,18 @@ The entry point. Coolify UUIDs are short opaque strings that appear nowhere in a
 conversation until something lists them, so without this the model holds a set of
 resource tools it can never call.
 
-Backed by `GET /resources`, which returns applications, databases *and* services
+Backed by `GET /resources`, which returns applications, databases _and_ services
 in **one** request — cheaper than the three list calls it replaces, and the reason
 there is no `list_applications` / `list_databases` / `list_services`.
 
-| Parameter | Type | Notes |
-|---|---|---|
-| `query` | string ≤200 | Case-insensitive substring against name, uuid, fqdn, description, project name, environment name and server name. |
+| Parameter       | Type                                     | Notes                                                                                                                  |
+| --------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `query`         | string ≤200                              | Case-insensitive substring against name, uuid, fqdn, description, project name, environment name and server name.      |
 | `resource_type` | `application` \| `database` \| `service` | Coolify types databases by engine (`standalone-postgresql`), so every `standalone-*` type is classified as `database`. |
-| `status` | string ≤60 | Case-insensitive substring against the status string. |
-| `limit` | int 1–200 | Default 50. |
-| `cursor` | string | From a previous call's `meta.next_cursor`. |
-| `instance` | enum | Present only with >1 connection. Accepts `"*"`. |
+| `status`        | string ≤60                               | Case-insensitive substring against the status string.                                                                  |
+| `limit`         | int 1–200                                | Default 50.                                                                                                            |
+| `cursor`        | string                                   | From a previous call's `meta.next_cursor`.                                                                             |
+| `instance`      | enum                                     | Present only with >1 connection. Accepts `"*"`.                                                                        |
 
 Returns nine columns per row: `uuid`, `name`, `type`, `status`, `fqdn`,
 `project_name`, `environment_name`, `server_name`, `updated_at` — out of roughly
@@ -70,7 +70,7 @@ eighty Coolify returns. With `instance: "*"` an `instance` column leads.
 **`instance: "*"` is unique to this tool.** It queries every configured connection
 in parallel and tags each row with its origin. Safe to fan out precisely because
 the tool cannot write. Per-connection failures land in `meta.errors[]`; when
-*every* connection fails the result is marked `isError`, because an empty list
+_every_ connection fails the result is marked `isError`, because an empty list
 would read as "no resources" rather than "nothing answered".
 
 ### `get_resource`
@@ -78,11 +78,11 @@ would read as "no resources" rather than "nothing answered".
 The complete stored configuration of one resource: build settings, domains,
 ports, health checks, git source, server placement, timestamps.
 
-| Parameter | Type | Notes |
-|---|---|---|
-| `resource_type` | enum | **Required** — a Coolify uuid does not say which family it is in, and the wrong family returns 404. |
-| `uuid` | string | From `find_resources`. |
-| `instance` | enum | Present only with >1 connection. |
+| Parameter       | Type   | Notes                                                                                               |
+| --------------- | ------ | --------------------------------------------------------------------------------------------------- |
+| `resource_type` | enum   | **Required** — a Coolify uuid does not say which family it is in, and the wrong family returns 404. |
+| `uuid`          | string | From `find_resources`.                                                                              |
+| `instance`      | enum   | Present only with >1 connection.                                                                    |
 
 Values under credential-shaped keys are masked **unconditionally** — there is no
 `reveal` here. Environment variables are not included; they have their own tool.
@@ -93,14 +93,14 @@ Container runtime logs. ANSI colour codes are stripped (Coolify build output is
 full of them; they are zero information to a model and real token cost), and the
 output is trimmed **from the front** so the newest lines always survive.
 
-| Parameter | Type | Notes |
-|---|---|---|
-| `resource_type` | enum | Required. |
-| `uuid` | string | Required. |
-| `lines` | int 1–5000 | Default 200. Additionally capped at 60,000 bytes. |
-| `show_timestamps` | boolean | Off by default — timestamps roughly double the payload. |
-| `sub_service_name` | string ≤200 | Names one container inside a service. |
-| `instance` | enum | Present only with >1 connection. |
+| Parameter          | Type        | Notes                                                   |
+| ------------------ | ----------- | ------------------------------------------------------- |
+| `resource_type`    | enum        | Required.                                               |
+| `uuid`             | string      | Required.                                               |
+| `lines`            | int 1–5000  | Default 200. Additionally capped at 60,000 bytes.       |
+| `show_timestamps`  | boolean     | Off by default — timestamps roughly double the payload. |
+| `sub_service_name` | string ≤200 | Names one container inside a service.                   |
+| `instance`         | enum        | Present only with >1 connection.                        |
 
 **The error path that matters.** Reading logs needs `read:sensitive`. A token
 without it does not get a 403 — Coolify answers **200 with an empty body**. Left
@@ -115,12 +115,12 @@ is in `get_deployment`.
 
 ### `get_environment_variables`
 
-| Parameter | Type | Notes |
-|---|---|---|
-| `resource_type` | enum | Required. |
-| `uuid` | string | Required. |
-| `reveal` | boolean | Default false. Values are masked; keys, flags and timestamps are always shown. |
-| `instance` | enum | Present only with >1 connection. |
+| Parameter       | Type    | Notes                                                                          |
+| --------------- | ------- | ------------------------------------------------------------------------------ |
+| `resource_type` | enum    | Required.                                                                      |
+| `uuid`          | string  | Required.                                                                      |
+| `reveal`        | boolean | Default false. Values are masked; keys, flags and timestamps are always shown. |
+| `instance`      | enum    | Present only with >1 connection.                                               |
 
 Rows are sorted by key rather than left in Coolify's creation order, because an
 environment is read by scanning for a name.
@@ -131,12 +131,12 @@ hint says both.
 
 ### `list_deployments`
 
-| Parameter | Type | Notes |
-|---|---|---|
-| `application_uuid` | string | **Changes what the tool does.** Without it: deployments in progress *right now*. With it: that application's history, newest first. |
-| `limit` | int 1–100 | Default 20. |
-| `cursor` | string | From `meta.next_cursor`. |
-| `instance` | enum | Present only with >1 connection. |
+| Parameter          | Type      | Notes                                                                                                                               |
+| ------------------ | --------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `application_uuid` | string    | **Changes what the tool does.** Without it: deployments in progress _right now_. With it: that application's history, newest first. |
+| `limit`            | int 1–100 | Default 20.                                                                                                                         |
+| `cursor`           | string    | From `meta.next_cursor`.                                                                                                            |
+| `instance`         | enum      | Present only with >1 connection.                                                                                                    |
 
 Build logs are stripped from these rows — a single one can be megabytes.
 `get_deployment` returns a bounded log tail for one deployment.
@@ -151,11 +151,11 @@ full page — one wasted call at the exact end of the history is the price.
 One deployment plus a bounded tail of its build log — the record that says why a
 deployment failed.
 
-| Parameter | Type | Notes |
-|---|---|---|
-| `uuid` | string | The `deployment_uuid` from `list_deployments`, **not** the application uuid. |
-| `log_lines` | int 0–5000 | Default 200. `0` omits the log and returns the record alone. |
-| `instance` | enum | Present only with >1 connection. |
+| Parameter   | Type       | Notes                                                                        |
+| ----------- | ---------- | ---------------------------------------------------------------------------- |
+| `uuid`      | string     | The `deployment_uuid` from `list_deployments`, **not** the application uuid. |
+| `log_lines` | int 0–5000 | Default 200. `0` omits the log and returns the record alone.                 |
+| `instance`  | enum       | Present only with >1 connection.                                             |
 
 ### `list_servers`
 
@@ -183,15 +183,15 @@ an unnamed write through.
 
 ### `deploy`
 
-| Parameter | Type | Notes |
-|---|---|---|
-| `uuid` | string ≤512 | One or more UUIDs, comma-separated. Mutually exclusive with `tag`. |
-| `tag` | string ≤255 | Deploy every resource carrying this Coolify tag. |
-| `force` | boolean | Rebuild without the Docker layer cache. |
-| `pull_request_id` | int ≥1 | Deploy a PR preview instead of the production branch. Requires `uuid`. |
-| `docker_tag` | string ≤255 | For registry-image applications: the image tag to deploy. |
-| `wait` | boolean | Default false. Stay in the call until the deployment reaches a terminal status. |
-| `timeout_seconds` | int 30–900 | Default 300. Only used with `wait`. |
+| Parameter         | Type        | Notes                                                                           |
+| ----------------- | ----------- | ------------------------------------------------------------------------------- |
+| `uuid`            | string ≤512 | One or more UUIDs, comma-separated. Mutually exclusive with `tag`.              |
+| `tag`             | string ≤255 | Deploy every resource carrying this Coolify tag.                                |
+| `force`           | boolean     | Rebuild without the Docker layer cache.                                         |
+| `pull_request_id` | int ≥1      | Deploy a PR preview instead of the production branch. Requires `uuid`.          |
+| `docker_tag`      | string ≤255 | For registry-image applications: the image tag to deploy.                       |
+| `wait`            | boolean     | Default false. Stay in the call until the deployment reaches a terminal status. |
+| `timeout_seconds` | int 30–900  | Default 300. Only used with `wait`.                                             |
 
 Exactly one of `uuid` or `tag` is required. The illegal combinations are rejected
 locally — they are structural, not incidental, and a local error saves a round
@@ -216,15 +216,15 @@ two full rebuilds.
 
 ### `control_resource`
 
-| Parameter | Type | Notes |
-|---|---|---|
-| `action` | `start` \| `stop` \| `restart` | Required. |
-| `resource_type` | enum | Required. |
-| `uuid` | string ≤255 | Required. |
-| `force` | boolean | Only on `start` of an application. |
-| `instant_deploy` | boolean | Only on `start` of an application: skip the deployment queue. |
-| `docker_cleanup` | boolean | Only on `stop`: reclaim space from unused images and volumes afterwards. |
-| `latest` | boolean | Only on `restart` of a service: pull the latest image tags first. |
+| Parameter        | Type                           | Notes                                                                    |
+| ---------------- | ------------------------------ | ------------------------------------------------------------------------ |
+| `action`         | `start` \| `stop` \| `restart` | Required.                                                                |
+| `resource_type`  | enum                           | Required.                                                                |
+| `uuid`           | string ≤255                    | Required.                                                                |
+| `force`          | boolean                        | Only on `start` of an application.                                       |
+| `instant_deploy` | boolean                        | Only on `start` of an application: skip the deployment queue.            |
+| `docker_cleanup` | boolean                        | Only on `stop`: reclaim space from unused images and volumes afterwards. |
+| `latest`         | boolean                        | Only on `restart` of a service: pull the latest image tags first.        |
 
 A flag passed for a combination that does not accept it is **rejected locally**
 rather than ignored, so you learn that the request you made is not the request
@@ -235,13 +235,13 @@ that would have run.
 A reviewer will question this, so the reasoning is here rather than implied.
 
 Stopping production causes downtime, and downtime is not nothing. But
-`COOLIFY_ALLOW_DESTRUCTIVE` answers a narrower question: *can this server destroy
-something I cannot get back?* A stop destroys no data, removes no configuration,
+`COOLIFY_ALLOW_DESTRUCTIVE` answers a narrower question: _can this server destroy
+something I cannot get back?_ A stop destroys no data, removes no configuration,
 and is undone by the `start` sitting in the same enum of the same tool. Coolify's
 genuinely destructive operations — the DELETEs, and `POST /disable`, which locks
 the API token out of its own instance — are what the flag exists for.
 
-Putting stop behind the flag would change what the flag *means*. It would stop
+Putting stop behind the flag would change what the flag _means_. It would stop
 being "can I destroy data" and become "can I do anything useful", because start,
 stop, restart and deploy are the whole point of a Coolify MCP server. Users would
 then set it as a matter of course during setup, and by the time they reached a
@@ -257,11 +257,11 @@ prompts meaningful for the operations that genuinely are destructive.
 
 ### `set_environment_variables`
 
-| Parameter | Type | Notes |
-|---|---|---|
-| `resource_type` | enum | Required. |
-| `uuid` | string ≤255 | Required. |
-| `variables` | array, 1–100 | `{key, value, is_preview?, is_build_time?}` |
+| Parameter       | Type         | Notes                                       |
+| --------------- | ------------ | ------------------------------------------- |
+| `resource_type` | enum         | Required.                                   |
+| `uuid`          | string ≤255  | Required.                                   |
+| `variables`     | array, 1–100 | `{key, value, is_preview?, is_build_time?}` |
 
 `key` may not contain whitespace or `=` — both make the variable unusable in the
 container the moment it is exported, and Coolify does not reject them for you.
@@ -283,12 +283,12 @@ reachable through three steps: `search_operations` → `describe_operation` →
 The catalog is generated at build time from Coolify's OpenAPI spec and compiled
 into the package. Current contents:
 
-| | |
-|---|---|
-| Coolify version | **4.2.0** |
-| Spec sha256 | `150e9f3c…` |
-| Operations | **189** |
-| By class | 74 safe · 86 write · 29 destructive |
+|                  |                                                                                                 |
+| ---------------- | ----------------------------------------------------------------------------------------------- |
+| Coolify version  | **4.2.0**                                                                                       |
+| Spec sha256      | `150e9f3c…`                                                                                     |
+| Operations       | **189**                                                                                         |
+| By class         | 74 safe · 86 write · 29 destructive                                                             |
 | Flagged `costly` | 3 — `POST /servers/{hetzner,digitalocean,vultr}`, which provision billable cloud infrastructure |
 
 Building at release time rather than fetching at runtime is deliberate: a runtime
@@ -298,12 +298,12 @@ version anyway, and non-determinism in an MIT package — a supply-chain smell.
 
 ### `search_operations`
 
-| Parameter | Type | Notes |
-|---|---|---|
-| `query` | string | Free text against operation id, path and summary. |
-| `family` | enum | One of 16 families: `applications`, `databases`, `services`, `servers`, `projects`, `deployments`, `teams`, `security`, `destinations`, `github-apps`, `cloud-tokens`, `hetzner`, `digitalocean`, `vultr`, `tags`, `other`. |
-| `method` | enum | `GET`, `POST`, `PATCH`, `PUT`, `DELETE`. |
-| `limit` | int 1–100 | Default 20. |
+| Parameter | Type      | Notes                                                                                                                                                                                                                       |
+| --------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `query`   | string    | Free text against operation id, path and summary.                                                                                                                                                                           |
+| `family`  | enum      | One of 16 families: `applications`, `databases`, `services`, `servers`, `projects`, `deployments`, `teams`, `security`, `destinations`, `github-apps`, `cloud-tokens`, `hetzner`, `digitalocean`, `vultr`, `tags`, `other`. |
+| `method`  | enum      | `GET`, `POST`, `PATCH`, `PUT`, `DELETE`.                                                                                                                                                                                    |
+| `limit`   | int 1–100 | Default 20.                                                                                                                                                                                                                 |
 
 Whole-token matches outrank substring matches, and a small alias map covers the
 places where Coolify's vocabulary diverges from the question a person types —
@@ -336,21 +336,21 @@ catalog stops being a truthful map of what this server can do.
 
 ### `execute_read_operation` / `execute_write_operation` / `execute_destructive_operation`
 
-| Parameter | read | write | destructive |
-|---|:--:|:--:|:--:|
-| `instance` | optional, may default | required | required |
-| `operation_id` | ● | ● | ● |
-| `path_params` | ● | ● | ● |
-| `query` | ● | ● | ● |
-| `body` | — | ● | — |
-| `fields` | ● | — | — |
-| `reveal` | ● | ● | — |
+| Parameter      |         read          |  write   | destructive |
+| -------------- | :-------------------: | :------: | :---------: |
+| `instance`     | optional, may default | required |  required   |
+| `operation_id` |           ●           |    ●     |      ●      |
+| `path_params`  |           ●           |    ●     |      ●      |
+| `query`        |           ●           |    ●     |      ●      |
+| `body`         |           —           |    ●     |      —      |
+| `fields`       |           ●           |    —     |      —      |
+| `reveal`       |           ●           |    ●     |      —      |
 
 `fields` is a dot-path allowlist applied to every row of an array response —
 `["uuid", "name", "settings.is_static"]`. It exists because Coolify list
 endpoints are unpaginated and return complete records: a bare list of
 applications can be megabytes. A field absent upstream stays absent rather than
-being emitted as `null`, because `"field": null` asserts that the value *is* null,
+being emitted as `null`, because `"field": null` asserts that the value _is_ null,
 which is a different and wrong claim.
 
 #### Why three doors and not one
@@ -360,13 +360,13 @@ accepts both GET and POST/PUT/PATCH/DELETE is rejected, and documenting safe
 versus unsafe inside one description does not satisfy the rule. A `method`
 parameter satisfies it even less — it makes the danger class an argument the
 model chooses. So the danger class picks the tool, and each tool carries
-annotations that are true of *everything* it can run.
+annotations that are true of _everything_ it can run.
 
 #### Body validation is deliberately permissive
 
 `body` is `z.record(z.unknown()).optional()`. Path parameters **are** validated
 strictly — they come from the URL template, so the catalog cannot be wrong about
-them the way it can be wrong about a body schema — and query parameter *names* are
+them the way it can be wrong about a body schema — and query parameter _names_ are
 checked against the catalog, but nothing about the body is.
 
 This inverts the usual "tight schemas prevent bad calls" advice, and the
@@ -389,11 +389,11 @@ tools are where tight schemas belong; this is not that path.
 
 Three layers, one flag.
 
-| Layer | Where | What it does |
-|---|---|---|
-| **1. Registration** | `src/tools/register.ts` | With the flag off, `execute_destructive_operation` **is not registered** — absent from `tools/list` entirely. |
-| **2. Dispatch** | `src/tools/generic.ts` | Every `execute_*` handler re-checks that the operation's danger class and HTTP method match the door it arrived through. |
-| **3. Transport** | `src/http/client.ts` | Before the socket opens: destructive + `!allowDestructive` is refused, and so is any non-GET on a `readOnly` connection. |
+| Layer               | Where                   | What it does                                                                                                             |
+| ------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **1. Registration** | `src/tools/register.ts` | With the flag off, `execute_destructive_operation` **is not registered** — absent from `tools/list` entirely.            |
+| **2. Dispatch**     | `src/tools/generic.ts`  | Every `execute_*` handler re-checks that the operation's danger class and HTTP method match the door it arrived through. |
+| **3. Transport**    | `src/http/client.ts`    | Before the socket opens: destructive + `!allowDestructive` is refused, and so is any non-GET on a `readOnly` connection. |
 
 **The gate is enforced at one throat, not at each tool boundary.** Promoted tools,
 generic tools and every tool written after this file all go through the same HTTP

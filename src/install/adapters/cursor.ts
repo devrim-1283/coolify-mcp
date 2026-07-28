@@ -142,5 +142,6 @@ export const cursorProjectAdapter: McpClientAdapter = {
     { kind: 'json-remove', path: projectPath(ctx), keyPath: keyPathFor(MANAGED_SERVER_NAME) },
   ],
   readEntry: (ctx) => readEntryAt(projectPath(ctx), 'json', keyPathFor(MANAGED_SERVER_NAME)),
-  validate: (ctx) => baseValidate(PROJECT_SPEC, ctx, projectPath(ctx), keyPathFor(MANAGED_SERVER_NAME)),
+  validate: (ctx) =>
+    baseValidate(PROJECT_SPEC, ctx, projectPath(ctx), keyPathFor(MANAGED_SERVER_NAME)),
 };

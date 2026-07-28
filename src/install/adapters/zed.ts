@@ -172,5 +172,6 @@ export const zedProjectAdapter: McpClientAdapter = {
     { kind: 'jsonc-remove', path: projectPath(ctx), keyPath: keyPathFor(MANAGED_SERVER_NAME) },
   ],
   readEntry: (ctx) => readEntryAt(projectPath(ctx), 'jsonc', keyPathFor(MANAGED_SERVER_NAME)),
-  validate: (ctx) => baseValidate(PROJECT_SPEC, ctx, projectPath(ctx), keyPathFor(MANAGED_SERVER_NAME)),
+  validate: (ctx) =>
+    baseValidate(PROJECT_SPEC, ctx, projectPath(ctx), keyPathFor(MANAGED_SERVER_NAME)),
 };

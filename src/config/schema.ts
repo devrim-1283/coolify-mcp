@@ -145,11 +145,7 @@ const connectionObject = z
       .trim()
       .regex(/^[A-Za-z_][A-Za-z0-9_]*$/, 'tokenEnv must be an environment variable name')
       .optional(),
-    tokenCommand: z
-      .array(z.string().min(1))
-      .min(1)
-      .max(MAX_TOKEN_COMMAND_ARGS)
-      .optional(),
+    tokenCommand: z.array(z.string().min(1)).min(1).max(MAX_TOKEN_COMMAND_ARGS).optional(),
     tokenKeychain: tokenKeychainSchema.optional(),
 
     readOnly: z.boolean().default(false),
@@ -239,7 +235,11 @@ function formatPath(path: ReadonlyArray<string | number>): string {
   if (path.length === 0) return '<root>';
   return path.reduce<string>(
     (acc, segment) =>
-      typeof segment === 'number' ? `${acc}[${segment}]` : acc === '' ? segment : `${acc}.${segment}`,
+      typeof segment === 'number'
+        ? `${acc}[${segment}]`
+        : acc === ''
+          ? segment
+          : `${acc}.${segment}`,
     '',
   );
 }

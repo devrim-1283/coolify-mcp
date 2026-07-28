@@ -23,7 +23,13 @@
 import { describe, expect, it } from 'vitest';
 
 import { CATALOG } from '../src/generated/catalog.js';
-import { METADATA, catalogView, getOperation, isReachable, searchOperations } from '../src/catalog/index.js';
+import {
+  METADATA,
+  catalogView,
+  getOperation,
+  isReachable,
+  searchOperations,
+} from '../src/catalog/index.js';
 import type { CatalogOperation, DangerClass } from '../src/types.js';
 
 const OPEN = { allowDestructive: true, readOnly: false } as const;
@@ -54,7 +60,8 @@ describe('post_required stubs', () => {
     // Same controller, same failure: a GET that acts. /validate, /enable,
     // /disable and /deploy all route to post_required.
     const survivors = CATALOG.filter(
-      (operation) => operation.method === 'GET' && /\/(validate|enable|disable|deploy)$/.test(operation.path),
+      (operation) =>
+        operation.method === 'GET' && /\/(validate|enable|disable|deploy)$/.test(operation.path),
     );
 
     expect(ids(survivors)).toEqual([]);
@@ -86,7 +93,9 @@ describe('post_required stubs', () => {
     // The converse of stub stripping: if a GET were left classified `write` or
     // `destructive` it would have no door at all, since the read door only
     // dispatches GET.
-    const misfiled = CATALOG.filter((operation) => operation.method === 'GET' && operation.danger !== 'safe');
+    const misfiled = CATALOG.filter(
+      (operation) => operation.method === 'GET' && operation.danger !== 'safe',
+    );
 
     expect(ids(misfiled)).toEqual([]);
   });
@@ -242,7 +251,10 @@ describe('catalogView', () => {
 
 describe('searchOperations', () => {
   it('cannot return an operation the view excluded', () => {
-    const results = searchOperations(catalogView(GATED), { query: 'delete application', limit: 100 });
+    const results = searchOperations(catalogView(GATED), {
+      query: 'delete application',
+      limit: 100,
+    });
 
     expect(results.every((operation) => operation.danger !== 'destructive')).toBe(true);
   });
@@ -263,7 +275,10 @@ describe('searchOperations', () => {
     // Nothing in the id, path or summary of `list-envs-by-application-uuid`
     // contains a word anybody types, so without the alias one of the most
     // valuable reads on the surface is unreachable by search.
-    const results = searchOperations(catalogView(GATED), { query: 'environment variables', limit: 20 });
+    const results = searchOperations(catalogView(GATED), {
+      query: 'environment variables',
+      limit: 20,
+    });
 
     expect(ids(results)).toContain('list-envs-by-application-uuid');
   });

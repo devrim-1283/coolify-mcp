@@ -30,7 +30,14 @@ import {
   runRead,
   toRows,
 } from './find-resources.js';
-import { familyOf, readResourceType, resourceTypeProperty, withTypeProbe, type ResourceRef, type ResourceType } from './get-resource.js';
+import {
+  familyOf,
+  readResourceType,
+  resourceTypeProperty,
+  withTypeProbe,
+  type ResourceRef,
+  type ResourceType,
+} from './get-resource.js';
 
 const ENVS_OPERATION: Record<ResourceType, string> = {
   application: 'list-envs-by-application-uuid',
@@ -43,10 +50,29 @@ const ENVS_OPERATION: Record<ResourceType, string> = {
  * these are the columns that answer a question. Declared here, beside the tool
  * it belongs to, so it moves when the tool moves.
  */
-const ENV_FIELDS = ['uuid', 'key', 'value', 'real_value', 'is_build_time', 'is_preview', 'is_literal', 'is_multiline', 'is_shown_once', 'created_at', 'updated_at'] as const;
+const ENV_FIELDS = [
+  'uuid',
+  'key',
+  'value',
+  'real_value',
+  'is_build_time',
+  'is_preview',
+  'is_literal',
+  'is_multiline',
+  'is_shown_once',
+  'created_at',
+  'updated_at',
+] as const;
 
 /** Booleans and the resolved duplicate go first; `key`, `value` and the timestamps are the tool. */
-const ENV_PRUNABLE = ['real_value', 'is_shown_once', 'is_multiline', 'is_literal', 'is_preview', 'is_build_time'] as const;
+const ENV_PRUNABLE = [
+  'real_value',
+  'is_shown_once',
+  'is_multiline',
+  'is_literal',
+  'is_preview',
+  'is_build_time',
+] as const;
 
 /** The two columns that carry the secret itself. */
 const VALUE_FIELDS = ['value', 'real_value'] as const;
@@ -73,7 +99,7 @@ export const getEnvironmentVariables: ToolDef = {
   description:
     'List the environment variables of one application, database or service, including whether each is build-time or preview-only and when it was created and last changed. ' +
     'Values are masked unless reveal is set; keys, flags and timestamps are always shown. ' +
-    'For the rest of a resource\'s configuration use get_resource.',
+    "For the rest of a resource's configuration use get_resource.",
   annotations: {
     title: 'Get environment variables',
     readOnlyHint: true,

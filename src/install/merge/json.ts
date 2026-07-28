@@ -152,7 +152,9 @@ export function deepMerge(base: unknown, patch: unknown): unknown {
   if (!isPlainObject(base) || !isPlainObject(patch)) return patch;
   const out: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(base)) {
-    out[key] = Object.prototype.hasOwnProperty.call(patch, key) ? deepMerge(value, patch[key]) : value;
+    out[key] = Object.prototype.hasOwnProperty.call(patch, key)
+      ? deepMerge(value, patch[key])
+      : value;
   }
   for (const [key, value] of Object.entries(patch)) {
     if (!Object.prototype.hasOwnProperty.call(out, key)) out[key] = value;

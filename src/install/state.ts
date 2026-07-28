@@ -129,7 +129,12 @@ export async function writeState(homeDir: string, state: InstallState): Promise<
  * can legitimately manage several server names, and the same server name can
  * exist in several files.
  */
-function sameTarget(record: InstallRecord, adapterId: string, filePath: string, serverName: string): boolean {
+function sameTarget(
+  record: InstallRecord,
+  adapterId: string,
+  filePath: string,
+  serverName: string,
+): boolean {
   return (
     record.adapterId === adapterId && record.path === filePath && record.serverName === serverName
   );
@@ -151,7 +156,9 @@ export function upsertRecord(state: InstallState, record: InstallRecord): Instal
   );
   const installs = exists
     ? state.installs.map((candidate) =>
-        sameTarget(candidate, record.adapterId, record.path, record.serverName) ? record : candidate,
+        sameTarget(candidate, record.adapterId, record.path, record.serverName)
+          ? record
+          : candidate,
       )
     : [...state.installs, record];
 
@@ -167,7 +174,9 @@ export function removeRecord(
 ): InstallState {
   return {
     schema: INSTALL_STATE_SCHEMA,
-    installs: state.installs.filter((record) => !sameTarget(record, adapterId, filePath, serverName)),
+    installs: state.installs.filter(
+      (record) => !sameTarget(record, adapterId, filePath, serverName),
+    ),
   };
 }
 

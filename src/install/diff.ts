@@ -84,7 +84,10 @@ function toLines(text: string): Lines {
   const raw = text.split('\n');
   const endsWithNewline = raw[raw.length - 1] === '';
   if (endsWithNewline) raw.pop();
-  return { lines: raw.map((line) => (line.endsWith('\r') ? line.slice(0, -1) : line)), endsWithNewline };
+  return {
+    lines: raw.map((line) => (line.endsWith('\r') ? line.slice(0, -1) : line)),
+    endsWithNewline,
+  };
 }
 
 function header(before: string | null, after: string | null, options: DiffOptions): string {
@@ -145,7 +148,10 @@ function diffLines(a: readonly string[], b: readonly string[]): Op[] {
   return ops;
 }
 
-function middleOps(a: readonly string[], b: readonly string[]): Array<{ type: Op['type']; text: string }> {
+function middleOps(
+  a: readonly string[],
+  b: readonly string[],
+): Array<{ type: Op['type']; text: string }> {
   if (a.length === 0) return b.map((text) => ({ type: '+' as const, text }));
   if (b.length === 0) return a.map((text) => ({ type: '-' as const, text }));
 
@@ -215,7 +221,8 @@ function renderHunk(ops: readonly Op[], from: Lines, to: Lines): string {
   const first = ops[0];
   if (first === undefined) return '';
 
-  const fromStart = fromCount === 0 ? first.fromLine : (ops.find((op) => op.type !== '+')?.fromLine ?? 1);
+  const fromStart =
+    fromCount === 0 ? first.fromLine : (ops.find((op) => op.type !== '+')?.fromLine ?? 1);
   const toStart = toCount === 0 ? first.toLine : (ops.find((op) => op.type !== '-')?.toLine ?? 1);
 
   const lines = [`@@ -${fromStart},${fromCount} +${toStart},${toCount} @@`];

@@ -1,16 +1,16 @@
 # Cursor
 
-| | |
-|---|---|
-| Adapter ids | `cursor-user`, `cursor-project` |
-| `--client` selectors | `cursor`, `cursor-user`, `cursor-project` |
-| User config | `~/.cursor/mcp.json` |
-| Project config | `<projectRoot>/.cursor/mcp.json` |
-| Key path | `mcpServers.coolify` |
-| Format | JSON |
-| Transports written | `stdio` only |
-| Confidence | **verified** — paths, key and reference syntax are documented upstream |
-| Native CLI | none |
+|                      |                                                                        |
+| -------------------- | ---------------------------------------------------------------------- |
+| Adapter ids          | `cursor-user`, `cursor-project`                                        |
+| `--client` selectors | `cursor`, `cursor-user`, `cursor-project`                              |
+| User config          | `~/.cursor/mcp.json`                                                   |
+| Project config       | `<projectRoot>/.cursor/mcp.json`                                       |
+| Key path             | `mcpServers.coolify`                                                   |
+| Format               | JSON                                                                   |
+| Transports written   | `stdio` only                                                           |
+| Confidence           | **verified** — paths, key and reference syntax are documented upstream |
+| Native CLI           | none                                                                   |
 
 ## The one thing that catches everyone
 
@@ -142,13 +142,13 @@ npx coolify-mcp uninstall --client cursor
 
 ## Confirmed vs unconfirmed
 
-| Item | Status |
-|---|---|
-| `~/.cursor/mcp.json` user path | confirmed |
-| `<projectRoot>/.cursor/mcp.json` project path | confirmed |
-| `mcpServers` key | confirmed |
+| Item                                                             | Status    |
+| ---------------------------------------------------------------- | --------- |
+| `~/.cursor/mcp.json` user path                                   | confirmed |
+| `<projectRoot>/.cursor/mcp.json` project path                    | confirmed |
+| `mcpServers` key                                                 | confirmed |
 | `${env:NAME}` expansion, and the absence of a default-value form | confirmed |
-| `envFile` on stdio servers | confirmed |
+| `envFile` on stdio servers                                       | confirmed |
 
 ## A note on scope collision
 

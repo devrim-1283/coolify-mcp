@@ -99,9 +99,7 @@ export function supportsTarget(spec: AdapterSpec, target: string): boolean {
 // ---------------------------------------------------------------------------
 
 type ReadResult =
-  | { kind: 'missing' }
-  | { kind: 'unreadable'; message: string }
-  | { kind: 'text'; text: string };
+  { kind: 'missing' } | { kind: 'unreadable'; message: string } | { kind: 'text'; text: string };
 
 async function readConfigFile(path: string): Promise<ReadResult> {
   try {
@@ -223,7 +221,10 @@ export async function baseValidate(
       severity: 'warn',
       code: `${spec.client}-unverified`,
       message: `The ${spec.label} config shape has not been verified against upstream documentation, so this adapter will not write.`,
-      fix: 'Run `coolify-mcp install --client ' + spec.client + ' --print` and apply the snippet by hand after confirming the key.',
+      fix:
+        'Run `coolify-mcp install --client ' +
+        spec.client +
+        ' --print` and apply the snippet by hand after confirming the key.',
     });
   }
 

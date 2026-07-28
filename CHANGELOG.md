@@ -64,7 +64,7 @@ fails the build on upstream drift.
 - The HTTP client pins the request origin, rejects unsafe paths, and **refuses
   every redirect**, cross-host or otherwise.
 - The registry file schema has no `token` property and `additionalProperties:
-  false`, so a literal credential in a config file is a validation error.
+false`, so a literal credential in a config file is a validation error.
 - Three-layer destructive gate: registration, dispatch, and a transport-level
   refusal that no tool can route around. `readOnly` connections refuse every
   non-GET at the same chokepoint, regardless of token scope.
@@ -106,7 +106,9 @@ what it dropped in `meta.truncation`.
 
 **Packaging.** ESM, Node ≥ 20.10, bundled with tsup for cold-start speed. No
 native dependencies. Published with `npm publish --provenance` over OIDC from a
-tag, gated behind a manual approval environment.
+tag, gated behind a manual approval environment. Source maps are built but not
+published: they were two thirds of the tarball, and every MCP client unpacks
+this package through `npx` on a cold machine before it will speak a word.
 
 ### Known limitations
 

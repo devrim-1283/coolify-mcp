@@ -163,9 +163,9 @@ describe('the destructive gate', () => {
 
     expect(tools).toHaveLength(16);
     expect(tools.map((tool) => tool.name)).toContain(DESTRUCTIVE_TOOL);
-    expect(tools.filter((tool) => tool.annotations.destructiveHint).map((tool) => tool.name)).toEqual([
-      DESTRUCTIVE_TOOL,
-    ]);
+    expect(
+      tools.filter((tool) => tool.annotations.destructiveHint).map((tool) => tool.name),
+    ).toEqual([DESTRUCTIVE_TOOL]);
   });
 
   it('keeps the door shut when only the process-wide flag is on', () => {
@@ -244,7 +244,10 @@ describe('the read-only gate', () => {
 
   it('keeps the write tools while any connection can still write', () => {
     const cfg = makeConfig({
-      connections: [makeConnection({ name: 'prod', readOnly: true }), makeConnection({ name: 'lab' })],
+      connections: [
+        makeConnection({ name: 'prod', readOnly: true }),
+        makeConnection({ name: 'lab' }),
+      ],
       defaultName: 'prod',
     });
 
@@ -283,7 +286,9 @@ describe('instructions', () => {
     // Setting COOLIFY_ALLOW_DESTRUCTIVE would not enable anything here, so the
     // sentence would be false — and a false sentence in the system prompt costs
     // more than the missing one.
-    const text = buildInstructions(makeConfig({ connections: [makeConnection({ readOnly: true })] }));
+    const text = buildInstructions(
+      makeConfig({ connections: [makeConnection({ readOnly: true })] }),
+    );
 
     expect(text).toContain('read-only');
     expect(text).not.toContain('COOLIFY_ALLOW_DESTRUCTIVE');

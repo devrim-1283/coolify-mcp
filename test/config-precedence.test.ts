@@ -55,7 +55,10 @@ function writeJson(file: string, value: unknown): string {
 }
 
 /** A minimal valid registry file. */
-function registryFile(connections: Record<string, unknown>, extra: Record<string, unknown> = {}): unknown {
+function registryFile(
+  connections: Record<string, unknown>,
+  extra: Record<string, unknown> = {},
+): unknown {
   return { version: 1, connections, ...extra };
 }
 
@@ -88,7 +91,10 @@ describe('env only', () => {
   it('layer 0: two variables produce one connection named `default`', async () => {
     const t = tree();
 
-    const registry = await resolve(t, { COOLIFY_BASE_URL: 'https://coolify.example.com', COOLIFY_API_TOKEN: TOKEN });
+    const registry = await resolve(t, {
+      COOLIFY_BASE_URL: 'https://coolify.example.com',
+      COOLIFY_API_TOKEN: TOKEN,
+    });
 
     expect(registry.source).toBe('env');
     expect([...registry.connections.keys()]).toEqual(['default']);
@@ -125,7 +131,10 @@ describe('env only', () => {
   it('strips a trailing slash so paths never come out as //v1', async () => {
     const t = tree();
 
-    const registry = await resolve(t, { COOLIFY_BASE_URL: 'https://coolify.example.com///', COOLIFY_API_TOKEN: TOKEN });
+    const registry = await resolve(t, {
+      COOLIFY_BASE_URL: 'https://coolify.example.com///',
+      COOLIFY_API_TOKEN: TOKEN,
+    });
 
     expect(registry.connections.get('default')?.baseUrl).toBe('https://coolify.example.com');
   });
@@ -144,7 +153,9 @@ describe('env only', () => {
   it('refuses a base URL that embeds credentials', async () => {
     const t = tree();
 
-    const error = await failure(resolve(t, { COOLIFY_BASE_URL: 'https://u:p@coolify.example.com' }));
+    const error = await failure(
+      resolve(t, { COOLIFY_BASE_URL: 'https://u:p@coolify.example.com' }),
+    );
 
     expect(error.message).toContain('never stores credentials in config files');
   });
@@ -175,7 +186,12 @@ describe('file only', () => {
     writeJson(
       path.join(t.home, '.coolify-mcp', 'config.json'),
       registryFile({
-        prod: { baseUrl: 'https://coolify.example.com', label: 'Production', readOnly: true, timeoutMs: 5_000 },
+        prod: {
+          baseUrl: 'https://coolify.example.com',
+          label: 'Production',
+          readOnly: true,
+          timeoutMs: 5_000,
+        },
       }),
     );
 
@@ -202,7 +218,9 @@ describe('file only', () => {
 
     const registry = await resolve(t, {});
 
-    expect(registry.connections.get('acme')?.baseUrl).toBe(registry.connections.get('acme-ops')?.baseUrl);
+    expect(registry.connections.get('acme')?.baseUrl).toBe(
+      registry.connections.get('acme-ops')?.baseUrl,
+    );
     expect(registry.connections.size).toBe(2);
   });
 });
@@ -218,8 +236,14 @@ describe('file lookup order', () => {
       path.join(t.root, 'explicit.json'),
       registryFile({ chosen: { baseUrl: 'https://chosen.example.com' } }),
     );
-    writeJson(path.join(t.cwd, '.coolify-mcp.json'), registryFile({ project: { baseUrl: 'https://project.example.com' } }));
-    writeJson(path.join(t.home, '.coolify-mcp', 'config.json'), registryFile({ user: { baseUrl: 'https://user.example.com' } }));
+    writeJson(
+      path.join(t.cwd, '.coolify-mcp.json'),
+      registryFile({ project: { baseUrl: 'https://project.example.com' } }),
+    );
+    writeJson(
+      path.join(t.home, '.coolify-mcp', 'config.json'),
+      registryFile({ user: { baseUrl: 'https://user.example.com' } }),
+    );
 
     const registry = await resolve(t, { COOLIFY_MCP_CONFIG: explicit });
 
@@ -231,7 +255,10 @@ describe('file lookup order', () => {
     // Falling through to a different file the user is not looking at is how a
     // config problem becomes an hour of confusion.
     const t = tree();
-    writeJson(path.join(t.home, '.coolify-mcp', 'config.json'), registryFile({ user: { baseUrl: 'https://user.example.com' } }));
+    writeJson(
+      path.join(t.home, '.coolify-mcp', 'config.json'),
+      registryFile({ user: { baseUrl: 'https://user.example.com' } }),
+    );
 
     const error = await failure(resolve(t, { COOLIFY_MCP_CONFIG: path.join(t.root, 'nope.json') }));
 
@@ -240,8 +267,14 @@ describe('file lookup order', () => {
 
   it('the nearest .coolify-mcp.json beats the user config, and nothing is merged', async () => {
     const t = tree();
-    writeJson(path.join(t.cwd, '.coolify-mcp.json'), registryFile({ project: { baseUrl: 'https://project.example.com' } }));
-    writeJson(path.join(t.home, '.coolify-mcp', 'config.json'), registryFile({ user: { baseUrl: 'https://user.example.com' } }));
+    writeJson(
+      path.join(t.cwd, '.coolify-mcp.json'),
+      registryFile({ project: { baseUrl: 'https://project.example.com' } }),
+    );
+    writeJson(
+      path.join(t.home, '.coolify-mcp', 'config.json'),
+      registryFile({ user: { baseUrl: 'https://user.example.com' } }),
+    );
 
     const registry = await resolve(t, {});
 
@@ -251,7 +284,10 @@ describe('file lookup order', () => {
   it('walks up from cwd to find a project config', async () => {
     const t = tree();
     const parent = path.dirname(t.cwd);
-    writeJson(path.join(parent, '.coolify-mcp.json'), registryFile({ parent: { baseUrl: 'https://parent.example.com' } }));
+    writeJson(
+      path.join(parent, '.coolify-mcp.json'),
+      registryFile({ parent: { baseUrl: 'https://parent.example.com' } }),
+    );
 
     const registry = await resolve(t, {});
 
@@ -263,8 +299,14 @@ describe('file lookup order', () => {
     // the surprise the boundary exists to prevent.
     const t = tree();
     writeFileSync(path.join(t.cwd, '.git'), 'gitdir: ../.git/worktrees/x\n', 'utf8');
-    writeJson(path.join(path.dirname(t.cwd), '.coolify-mcp.json'), registryFile({ outside: { baseUrl: 'https://outside.example.com' } }));
-    writeJson(path.join(t.home, '.coolify-mcp', 'config.json'), registryFile({ user: { baseUrl: 'https://user.example.com' } }));
+    writeJson(
+      path.join(path.dirname(t.cwd), '.coolify-mcp.json'),
+      registryFile({ outside: { baseUrl: 'https://outside.example.com' } }),
+    );
+    writeJson(
+      path.join(t.home, '.coolify-mcp', 'config.json'),
+      registryFile({ user: { baseUrl: 'https://user.example.com' } }),
+    );
 
     const registry = await resolve(t, {});
 
@@ -274,8 +316,14 @@ describe('file lookup order', () => {
   it('$XDG_CONFIG_HOME beats ~/.coolify-mcp', async () => {
     const t = tree();
     const xdg = path.join(t.root, 'xdg');
-    writeJson(path.join(xdg, 'coolify-mcp', 'config.json'), registryFile({ xdg: { baseUrl: 'https://xdg.example.com' } }));
-    writeJson(path.join(t.home, '.coolify-mcp', 'config.json'), registryFile({ dotdir: { baseUrl: 'https://dotdir.example.com' } }));
+    writeJson(
+      path.join(xdg, 'coolify-mcp', 'config.json'),
+      registryFile({ xdg: { baseUrl: 'https://xdg.example.com' } }),
+    );
+    writeJson(
+      path.join(t.home, '.coolify-mcp', 'config.json'),
+      registryFile({ dotdir: { baseUrl: 'https://dotdir.example.com' } }),
+    );
 
     const registry = await resolve(t, { XDG_CONFIG_HOME: xdg });
 
@@ -290,7 +338,10 @@ describe('file lookup order', () => {
 describe('env and file together', () => {
   it('unions disjoint names and reports both sources', async () => {
     const t = tree();
-    writeJson(path.join(t.home, '.coolify-mcp', 'config.json'), registryFile({ acme: { baseUrl: 'https://coolify.acme.dev' } }));
+    writeJson(
+      path.join(t.home, '.coolify-mcp', 'config.json'),
+      registryFile({ acme: { baseUrl: 'https://coolify.acme.dev' } }),
+    );
 
     const registry = await resolve(t, {
       COOLIFY_BASE_URL_PROD: 'https://coolify.example.com',
@@ -338,7 +389,10 @@ describe('env and file together', () => {
     const t = tree();
     writeJson(
       path.join(t.home, '.coolify-mcp', 'config.json'),
-      registryFile({ open: { baseUrl: 'https://a.example.com' }, closed: { baseUrl: 'https://b.example.com', readOnly: true } }),
+      registryFile({
+        open: { baseUrl: 'https://a.example.com' },
+        closed: { baseUrl: 'https://b.example.com', readOnly: true },
+      }),
     );
 
     const tightened = await resolve(t, { COOLIFY_READ_ONLY: 'true' });
@@ -355,7 +409,10 @@ describe('env and file together', () => {
     const t = tree();
 
     const error = await failure(
-      resolve(t, { COOLIFY_BASE_URL: 'https://coolify.example.com', COOLIFY_ALLOW_DESTRUCTIVE: 'ture' }),
+      resolve(t, {
+        COOLIFY_BASE_URL: 'https://coolify.example.com',
+        COOLIFY_ALLOW_DESTRUCTIVE: 'ture',
+      }),
     );
 
     expect(error.message).toContain('COOLIFY_ALLOW_DESTRUCTIVE');
@@ -370,7 +427,10 @@ describe('default connection selection', () => {
   it('a single connection is its own default', async () => {
     const t = tree();
 
-    const registry = await resolve(t, { COOLIFY_BASE_URL: 'https://coolify.example.com', COOLIFY_API_TOKEN: TOKEN });
+    const registry = await resolve(t, {
+      COOLIFY_BASE_URL: 'https://coolify.example.com',
+      COOLIFY_API_TOKEN: TOKEN,
+    });
 
     expect(registry.defaultName).toBe('default');
   });
@@ -392,7 +452,10 @@ describe('default connection selection', () => {
     const t = tree();
     writeJson(
       path.join(t.home, '.coolify-mcp', 'config.json'),
-      registryFile({ prod: { baseUrl: 'https://a.example.com' }, acme: { baseUrl: 'https://b.example.com' } }, { defaultConnection: 'acme' }),
+      registryFile(
+        { prod: { baseUrl: 'https://a.example.com' }, acme: { baseUrl: 'https://b.example.com' } },
+        { defaultConnection: 'acme' },
+      ),
     );
 
     const registry = await resolve(t, {});
@@ -404,7 +467,10 @@ describe('default connection selection', () => {
     const t = tree();
     writeJson(
       path.join(t.home, '.coolify-mcp', 'config.json'),
-      registryFile({ prod: { baseUrl: 'https://a.example.com' }, acme: { baseUrl: 'https://b.example.com' } }, { defaultConnection: 'acme' }),
+      registryFile(
+        { prod: { baseUrl: 'https://a.example.com' }, acme: { baseUrl: 'https://b.example.com' } },
+        { defaultConnection: 'acme' },
+      ),
     );
 
     const registry = await resolve(t, { COOLIFY_CONNECTION: 'prod' });

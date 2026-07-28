@@ -82,7 +82,8 @@ export function decodeCursor(raw: string): Cursor {
   if (!isPlainObject(parsed)) throw invalidCursor();
 
   const { offset, queryHash } = parsed;
-  if (typeof offset !== 'number' || !Number.isSafeInteger(offset) || offset < 0) throw invalidCursor();
+  if (typeof offset !== 'number' || !Number.isSafeInteger(offset) || offset < 0)
+    throw invalidCursor();
   if (typeof queryHash !== 'string' || queryHash.length === 0) throw invalidCursor();
 
   return { offset, queryHash };
@@ -108,7 +109,11 @@ export function assertCursorMatches(cursor: Cursor, hash: string): void {
 }
 
 function invalidCursor(): CoolifyError {
-  return new CoolifyError('Cursor is not a valid cursor value.', 'validation', 'Re-run without cursor.');
+  return new CoolifyError(
+    'Cursor is not a valid cursor value.',
+    'validation',
+    'Re-run without cursor.',
+  );
 }
 
 /** Key order must not affect the hash, or argument order alone would invalidate a cursor. */
@@ -155,7 +160,11 @@ export interface EnvelopeMeta {
  * Each step is strictly more destructive than the last, so the cheapest one
  * that fits is the one that ships.
  */
-export function shapeResponse<T>(data: T, meta: EnvelopeMeta = {}, opts: ShapeOptions = {}): ToolEnvelope<T> {
+export function shapeResponse<T>(
+  data: T,
+  meta: EnvelopeMeta = {},
+  opts: ShapeOptions = {},
+): ToolEnvelope<T> {
   const maxBytes = opts.maxBytes ?? MAX_RESPONSE_BYTES;
   const budget = Math.max(maxBytes - META_RESERVE, MIN_BUDGET);
 
@@ -167,7 +176,8 @@ export function shapeResponse<T>(data: T, meta: EnvelopeMeta = {}, opts: ShapeOp
   let cappedValues = 0;
   let truncation: TruncationKind = null;
 
-  const measure = (candidate: unknown): number => byteLength(serialize(provisional(candidate, meta)));
+  const measure = (candidate: unknown): number =>
+    byteLength(serialize(provisional(candidate, meta)));
   const fits = (candidate: unknown): boolean => measure(candidate) <= budget;
 
   // 1. Columns. The cheapest degradation: every row survives, in order.
@@ -210,12 +220,16 @@ export function shapeResponse<T>(data: T, meta: EnvelopeMeta = {}, opts: ShapeOp
 
   const build = (): ToolEnvelope<T> => {
     const count =
-      meta.count ?? (Array.isArray(payload) ? payload.length : payload === null || payload === undefined ? 0 : 1);
+      meta.count ??
+      (Array.isArray(payload) ? payload.length : payload === null || payload === undefined ? 0 : 1);
 
     let nextCursor = meta.next_cursor;
     if (droppedRows > 0 && meta.cursor) {
       const kept = Array.isArray(payload) ? payload.length : 0;
-      nextCursor = encodeCursor({ offset: meta.cursor.offset + kept, queryHash: meta.cursor.queryHash });
+      nextCursor = encodeCursor({
+        offset: meta.cursor.offset + kept,
+        queryHash: meta.cursor.queryHash,
+      });
     }
 
     const responseMeta: ResponseMeta = {
@@ -288,7 +302,10 @@ function provisional(payload: unknown, meta: EnvelopeMeta): ToolEnvelope<unknown
 }
 
 /** Serialized size is monotonic in row count, so binary search is exact. */
-function largestFittingPrefix(rows: readonly unknown[], fits: (candidate: unknown) => boolean): number {
+function largestFittingPrefix(
+  rows: readonly unknown[],
+  fits: (candidate: unknown) => boolean,
+): number {
   let lo = 0;
   let hi = rows.length;
   while (lo < hi) {
@@ -352,7 +369,10 @@ function collectStringSizes(value: unknown): number[] {
 }
 
 /** Replaces every string at or above `threshold` bytes with its size marker. */
-function replaceStringsFrom(value: unknown, threshold: number): { payload: unknown; count: number } {
+function replaceStringsFrom(
+  value: unknown,
+  threshold: number,
+): { payload: unknown; count: number } {
   let count = 0;
   const walk = (node: unknown): unknown => {
     if (typeof node === 'string') {
@@ -388,13 +408,15 @@ function collectKeys(data: unknown): Set<string> {
 }
 
 function applyProjection(data: unknown, fields: readonly string[]): unknown {
-  if (Array.isArray(data)) return data.map((row) => (isPlainObject(row) ? projectOne(row, fields) : row));
+  if (Array.isArray(data))
+    return data.map((row) => (isPlainObject(row) ? projectOne(row, fields) : row));
   if (isPlainObject(data)) return projectOne(data, fields);
   return data;
 }
 
 function applyPrune(data: unknown, prunable: readonly string[]): unknown {
-  if (Array.isArray(data)) return data.map((row) => (isPlainObject(row) ? pruneOne(row, prunable) : row));
+  if (Array.isArray(data))
+    return data.map((row) => (isPlainObject(row) ? pruneOne(row, prunable) : row));
   if (isPlainObject(data)) return pruneOne(data, prunable);
   return data;
 }

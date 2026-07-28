@@ -196,7 +196,16 @@ async function applyTarget(
   // skipped so the exit code is non-zero and the user finds out.
   const fatal = issues.find((issue) => issue.severity === 'error');
   if (fatal !== undefined) {
-    return { result: { ...identity, status: 'blocked', error: fatal.message, issues, files: [], commands: [] } };
+    return {
+      result: {
+        ...identity,
+        status: 'blocked',
+        error: fatal.message,
+        issues,
+        files: [],
+        commands: [],
+      },
+    };
   }
 
   // --- drift protection ----------------------------------------------------
@@ -216,7 +225,14 @@ async function applyTarget(
   if (skip !== undefined) {
     issues.push(skip.issue);
     return {
-      result: { ...identity, status: 'skipped', skipped: skip.reason, issues, files: [], commands: [] },
+      result: {
+        ...identity,
+        status: 'skipped',
+        skipped: skip.reason,
+        issues,
+        files: [],
+        commands: [],
+      },
     };
   }
 
@@ -252,7 +268,14 @@ async function applyTarget(
   const writerError = issues.find((issue) => issue.severity === 'error');
   if (writerError !== undefined) {
     return {
-      result: { ...identity, status: 'blocked', error: writerError.message, issues, files: [], commands },
+      result: {
+        ...identity,
+        status: 'blocked',
+        error: writerError.message,
+        issues,
+        files: [],
+        commands,
+      },
     };
   }
 

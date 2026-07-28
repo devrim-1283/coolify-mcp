@@ -61,7 +61,10 @@ export interface InstanceOptions {
  * call. Write and destructive tools deliberately do not — that asymmetry is
  * implemented in their own modules.
  */
-export function instanceProperty(cfg: ServerConfig, opts: InstanceOptions = {}): Record<string, unknown> {
+export function instanceProperty(
+  cfg: ServerConfig,
+  opts: InstanceOptions = {},
+): Record<string, unknown> {
   const names = [...cfg.registry.connections.keys()];
   if (names.length < 2) return {};
 
@@ -108,7 +111,11 @@ export function resolveConnection(cfg: ServerConfig, raw: unknown): Connection {
   }
 
   if (typeof raw !== 'string') {
-    throw new CoolifyError('`instance` must be a connection name.', 'validation', `Configured: ${names.join(', ')}.`);
+    throw new CoolifyError(
+      '`instance` must be a connection name.',
+      'validation',
+      `Configured: ${names.join(', ')}.`,
+    );
   }
   const connection = connections.get(raw);
   if (connection === undefined) {
@@ -216,7 +223,11 @@ export interface IntegerBounds {
   max: number;
 }
 
-export function boundedInteger(args: Record<string, unknown>, key: string, bounds: IntegerBounds): number {
+export function boundedInteger(
+  args: Record<string, unknown>,
+  key: string,
+  bounds: IntegerBounds,
+): number {
   const value = args[key];
   if (value === undefined || value === null) return bounds.fallback;
 
@@ -229,7 +240,11 @@ export function boundedInteger(args: Record<string, unknown>, key: string, bound
   return Math.min(Math.max(Math.trunc(parsed), bounds.min), bounds.max);
 }
 
-export function optionalBoolean(args: Record<string, unknown>, key: string, fallback: boolean): boolean {
+export function optionalBoolean(
+  args: Record<string, unknown>,
+  key: string,
+  fallback: boolean,
+): boolean {
   const value = args[key];
   if (value === undefined || value === null) return fallback;
   if (typeof value === 'boolean') return value;
@@ -294,7 +309,10 @@ export function pickString(row: Row, paths: readonly string[]): string | undefin
  * model has no way to tell that the quotes came from us rather than from
  * Coolify.
  */
-export function pickScalar(row: Row, paths: readonly string[]): string | number | boolean | undefined {
+export function pickScalar(
+  row: Row,
+  paths: readonly string[],
+): string | number | boolean | undefined {
   for (const path of paths) {
     const value = readPath(row, path);
     if (typeof value === 'boolean') return value;
@@ -334,7 +352,10 @@ export function paginationProperties(fallback: number, max: number): Record<stri
       .optional()
       .default(fallback)
       .describe(`Rows to return, ${max} maximum.`),
-    cursor: z.string().optional().describe("Opaque cursor from a previous call's meta.next_cursor."),
+    cursor: z
+      .string()
+      .optional()
+      .describe("Opaque cursor from a previous call's meta.next_cursor."),
   };
 }
 
@@ -355,7 +376,11 @@ export function readPage(
   filters: unknown,
   bounds: { fallback: number; max: number },
 ): PageRequest {
-  const limit = boundedInteger(args, 'limit', { fallback: bounds.fallback, min: 1, max: bounds.max });
+  const limit = boundedInteger(args, 'limit', {
+    fallback: bounds.fallback,
+    min: 1,
+    max: bounds.max,
+  });
   const hash = queryHash(filters);
   const raw = optionalString(args, 'cursor');
   if (raw === undefined) return { offset: 0, limit, hash };
@@ -366,7 +391,8 @@ export function readPage(
 }
 
 export function pageHint(offset: number, shown: number, total: number): string {
-  if (shown === 0) return total === 0 ? 'Nothing matched.' : `No rows at offset ${offset} of ${total}.`;
+  if (shown === 0)
+    return total === 0 ? 'Nothing matched.' : `No rows at offset ${offset} of ${total}.`;
   return `Rows ${offset + 1}-${offset + shown} of ${total}.`;
 }
 
@@ -474,7 +500,8 @@ function matches(raw: Row, filters: Filters): boolean {
     const value = pickString(raw, ['status']);
     if (value === undefined || !value.toLowerCase().includes(filters.status)) return false;
   }
-  if (filters.kind !== undefined && classifyKind(pickString(raw, ['type'])) !== filters.kind) return false;
+  if (filters.kind !== undefined && classifyKind(pickString(raw, ['type'])) !== filters.kind)
+    return false;
   return true;
 }
 
@@ -571,7 +598,9 @@ export const findResources: ToolDef = {
       .string()
       .max(60)
       .optional()
-      .describe('Case-insensitive substring matched against the status string, e.g. "running", "exited", "degraded".'),
+      .describe(
+        'Case-insensitive substring matched against the status string, e.g. "running", "exited", "degraded".',
+      ),
     ...paginationProperties(DEFAULT_PAGE, MAX_PAGE),
     ...instanceProperty(cfg, { allowAll: true }),
   }),
@@ -579,7 +608,10 @@ export const findResources: ToolDef = {
     runRead(async () => {
       const kind = optionalString(args, 'resource_type');
       if (kind !== undefined && !(RESOURCE_KINDS as readonly string[]).includes(kind)) {
-        throw new CoolifyError(`\`resource_type\` must be one of: ${RESOURCE_KINDS.join(', ')}.`, 'validation');
+        throw new CoolifyError(
+          `\`resource_type\` must be one of: ${RESOURCE_KINDS.join(', ')}.`,
+          'validation',
+        );
       }
       const filters: Filters = {
         query: optionalString(args, 'query')?.toLowerCase(),
@@ -589,10 +621,16 @@ export const findResources: ToolDef = {
 
       const requested = args['instance'];
       const fanOut = requested === ALL_INSTANCES;
-      const targets = fanOut ? [...cfg.registry.connections.values()] : [resolveConnection(cfg, requested)];
+      const targets = fanOut
+        ? [...cfg.registry.connections.values()]
+        : [resolveConnection(cfg, requested)];
       const label = fanOut ? ALL_INSTANCES : (targets[0]?.name ?? ALL_INSTANCES);
 
-      const page = readPage(args, { ...filters, instance: label }, { fallback: DEFAULT_PAGE, max: MAX_PAGE });
+      const page = readPage(
+        args,
+        { ...filters, instance: label },
+        { fallback: DEFAULT_PAGE, max: MAX_PAGE },
+      );
       const { rows, errors } = await collect(targets, filters, fanOut, extra.signal);
 
       rows.sort((a, b) => {
@@ -608,12 +646,18 @@ export const findResources: ToolDef = {
       // "Nothing matched" would be a lie when nothing was even reached, and it
       // is the one wrong answer here that reads as a confident one.
       const notes = allFailed
-        ? [`No connection answered; every one of the ${targets.length} queried failed. See meta.errors.`]
+        ? [
+            `No connection answered; every one of the ${targets.length} queried failed. See meta.errors.`,
+          ]
         : [pageHint(page.offset, shown.length, total)];
       if (fanOut && !allFailed) {
-        notes.push(`Queried ${targets.length} connections in parallel; each row carries its origin in "instance".`);
+        notes.push(
+          `Queried ${targets.length} connections in parallel; each row carries its origin in "instance".`,
+        );
       }
-      notes.push('These fields are a projection; get_resource returns the full record for one resource.');
+      notes.push(
+        'These fields are a projection; get_resource returns the full record for one resource.',
+      );
 
       const meta: EnvelopeMeta = {
         instance: envelopeInstance(cfg, label),

@@ -33,7 +33,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getSecrets, registerSecret } from '../src/config/secrets.js';
 import { configureTransport } from '../src/http/client.js';
 import { ALL_TOOLS, selectTools } from '../src/tools/register.js';
-import type { Connection, ConnectionRegistry, ServerConfig, ToolDef, ToolResult } from '../src/types.js';
+import type {
+  Connection,
+  ConnectionRegistry,
+  ServerConfig,
+  ToolDef,
+  ToolResult,
+} from '../src/types.js';
 
 /** This connection's bearer token. */
 const OWN_TOKEN = '13|abcdefghijklmnopqrstuvwxyz0123456789ABCD';
@@ -103,14 +109,18 @@ const ARGS: Record<string, Record<string, unknown>> = {
     variables: [{ key: 'DATABASE_URL', value: 'postgres://localhost/app' }],
   },
   execute_write_operation: { operation_id: 'create-project', body: { name: 'demo' } },
-  execute_destructive_operation: { operation_id: 'delete-application-by-uuid', path_params: { uuid: UUID } },
+  execute_destructive_operation: {
+    operation_id: 'delete-application-by-uuid',
+    path_params: { uuid: UUID },
+  },
 };
 
 function argsFor(tool: ToolDef): Record<string, unknown> {
   const args = ARGS[tool.name];
   // A new tool with no entry here would otherwise be swept with `{}` and pass
   // vacuously by failing validation before it ever renders a response.
-  if (args === undefined) throw new Error(`security-redaction.test.ts has no arguments for tool "${tool.name}"`);
+  if (args === undefined)
+    throw new Error(`security-redaction.test.ts has no arguments for tool "${tool.name}"`);
   return args;
 }
 
@@ -169,8 +179,8 @@ async function capturing<T>(fn: () => Promise<T>): Promise<Captured<T>> {
     return true;
   };
 
-  const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(record as never);
-  const stderr = vi.spyOn(process.stderr, 'write').mockImplementation(record as never);
+  const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(record);
+  const stderr = vi.spyOn(process.stderr, 'write').mockImplementation(record);
   const consoles = CONSOLE_METHODS.map((method) =>
     vi.spyOn(console, method).mockImplementation((...parts: unknown[]) => {
       chunks.push(parts.map((part) => String(part)).join(' '));
@@ -261,7 +271,9 @@ describe.each(ALL_TOOLS.map((tool) => [tool.name, tool] as const))(
       // A thrown message is the one string a handler can emit without passing
       // through the envelope renderer, so it is the remaining path by which a
       // resolved token could reach the transcript.
-      fetchSpy.mockRejectedValue(new Error(`connect ECONNREFUSED while sending Bearer ${FOREIGN_TOKEN}`));
+      fetchSpy.mockRejectedValue(
+        new Error(`connect ECONNREFUSED while sending Bearer ${FOREIGN_TOKEN}`),
+      );
 
       const captured = await capturing(() => tool.handler(argsFor(tool), makeConfig(), {}));
 
@@ -288,7 +300,9 @@ describe('what redaction actually did', () => {
     // The positive control. Without it, a handler that returned an empty result
     // for every call would pass every assertion above.
     const results = await Promise.all(
-      ALL_TOOLS.map(async (tool) => renderResult(await tool.handler(argsFor(tool), makeConfig(), {}))),
+      ALL_TOOLS.map(async (tool) =>
+        renderResult(await tool.handler(argsFor(tool), makeConfig(), {})),
+      ),
     );
 
     expect(results.filter((text) => text.includes('***')).length).toBeGreaterThan(0);
@@ -312,7 +326,9 @@ describe('what redaction actually did', () => {
 
   it('masks a Sanctum-shaped token that was never registered anywhere', async () => {
     const read = ALL_TOOLS.find((tool) => tool.name === 'execute_read_operation');
-    fetchSpy.mockResolvedValue(jsonResponse(JSON.stringify([{ uuid: UUID, note: `leftover ${UNSEEN_TOKEN}` }])));
+    fetchSpy.mockResolvedValue(
+      jsonResponse(JSON.stringify([{ uuid: UUID, note: `leftover ${UNSEEN_TOKEN}` }])),
+    );
 
     const result = await read?.handler({ operation_id: 'list-applications' }, makeConfig(), {});
 
