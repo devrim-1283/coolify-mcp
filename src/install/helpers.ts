@@ -128,7 +128,9 @@ export function createMcpClientAdapter(config: McpClientAdapterConfig): McpClien
 
   const buildValue = (entry: ServerEntry, ctx: InstallCtx): unknown => {
     const effective =
-      config.windowsCmdWrapper === true && ctx.platform === 'win32' ? wrapForWindowsCmd(entry) : entry;
+      config.windowsCmdWrapper === true && ctx.platform === 'win32'
+        ? wrapForWindowsCmd(entry)
+        : entry;
     return config.buildEntry?.(effective, ctx) ?? defaultEntryValue(effective);
   };
 
@@ -198,8 +200,7 @@ export function createMcpClientAdapter(config: McpClientAdapterConfig): McpClien
       const markers = (config.installMarkers ?? []).map((spec) => resolveConfigPath(spec, ctx));
       const fallback = defaultInstallMarkers(ctx, filePath);
 
-      const installed =
-        !read.missing || (await anyExists(markers.length > 0 ? markers : fallback));
+      const installed = !read.missing || (await anyExists(markers.length > 0 ? markers : fallback));
 
       return {
         installed,
@@ -339,7 +340,8 @@ function resolveBase(base: PathBase, ctx: InstallCtx, env: NodeJS.ProcessEnv): s
           ? appData
           : path.join(ctx.homeDir, 'AppData', 'Roaming');
       }
-      if (ctx.platform === 'darwin') return path.join(ctx.homeDir, 'Library', 'Application Support');
+      if (ctx.platform === 'darwin')
+        return path.join(ctx.homeDir, 'Library', 'Application Support');
       return xdgConfigHome(ctx, env);
   }
 }

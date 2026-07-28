@@ -36,7 +36,11 @@ interface Recorder {
   close(): Promise<void>;
 }
 
-type Responder = (request: IncomingMessage) => { status: number; headers?: Record<string, string>; body?: string };
+type Responder = (request: IncomingMessage) => {
+  status: number;
+  headers?: Record<string, string>;
+  body?: string;
+};
 
 async function listen(hostname: string, responder: Responder): Promise<Recorder> {
   const received: Recorder['received'] = [];
@@ -84,7 +88,11 @@ async function refusal(promise: Promise<unknown>): Promise<CoolifyError> {
   throw new Error('expected the request to be refused, but it resolved');
 }
 
-const JSON_OK = { status: 200, headers: { 'content-type': 'application/json' }, body: '{"ok":true}' };
+const JSON_OK = {
+  status: 200,
+  headers: { 'content-type': 'application/json' },
+  body: '{"ok":true}',
+};
 
 // 127.0.0.1 and localhost resolve to the same interface but are different
 // hostnames, which is exactly the cross-host case without needing DNS.
@@ -110,7 +118,11 @@ describe('cross-host redirects', () => {
     }));
 
     const error = await refusal(
-      coolifyRequest({ connection: connectionTo(instance.origin), method: 'GET', path: '/applications' }),
+      coolifyRequest({
+        connection: connectionTo(instance.origin),
+        method: 'GET',
+        path: '/applications',
+      }),
     );
 
     expect(error.kind).toBe('network');
@@ -129,7 +141,11 @@ describe('cross-host redirects', () => {
     }));
 
     await refusal(
-      coolifyRequest({ connection: connectionTo(instance.origin), method: 'GET', path: '/applications' }),
+      coolifyRequest({
+        connection: connectionTo(instance.origin),
+        method: 'GET',
+        path: '/applications',
+      }),
     );
 
     expect(instance.received).toHaveLength(1);
@@ -145,7 +161,11 @@ describe('cross-host redirects', () => {
     }));
 
     const error = await refusal(
-      coolifyRequest({ connection: connectionTo(instance.origin), method: 'GET', path: '/applications' }),
+      coolifyRequest({
+        connection: connectionTo(instance.origin),
+        method: 'GET',
+        path: '/applications',
+      }),
     );
 
     expect(error.kind).toBe('network');
@@ -160,7 +180,11 @@ describe('cross-host redirects', () => {
     }));
 
     const error = await refusal(
-      coolifyRequest({ connection: connectionTo(instance.origin), method: 'GET', path: '/applications' }),
+      coolifyRequest({
+        connection: connectionTo(instance.origin),
+        method: 'GET',
+        path: '/applications',
+      }),
     );
 
     expect(error.hint).toContain('was not sent to the redirect target');
@@ -183,7 +207,11 @@ describe('same-host origin changes', () => {
     }));
 
     const error = await refusal(
-      coolifyRequest({ connection: connectionTo(instance.origin), method: 'GET', path: '/applications' }),
+      coolifyRequest({
+        connection: connectionTo(instance.origin),
+        method: 'GET',
+        path: '/applications',
+      }),
     );
 
     expect(error.kind).toBe('network');
@@ -197,7 +225,11 @@ describe('same-host origin changes', () => {
     instance = await listen('localhost', () => ({ status: 302, headers: { location: '/login' } }));
 
     const error = await refusal(
-      coolifyRequest({ connection: connectionTo(instance.origin), method: 'GET', path: '/applications' }),
+      coolifyRequest({
+        connection: connectionTo(instance.origin),
+        method: 'GET',
+        path: '/applications',
+      }),
     );
 
     expect(error.kind).toBe('network');
@@ -208,7 +240,11 @@ describe('same-host origin changes', () => {
     instance = await listen('localhost', () => ({ status: 302 }));
 
     const error = await refusal(
-      coolifyRequest({ connection: connectionTo(instance.origin), method: 'GET', path: '/applications' }),
+      coolifyRequest({
+        connection: connectionTo(instance.origin),
+        method: 'GET',
+        path: '/applications',
+      }),
     );
 
     expect(error.kind).toBe('network');

@@ -62,7 +62,14 @@ export function mergeYaml(
     }
   }
 
-  return finish(source, bom, body, doc.toString(STRINGIFY), before, doc.toJS({ maxAliasCount: -1 }));
+  return finish(
+    source,
+    bom,
+    body,
+    doc.toString(STRINGIFY),
+    before,
+    doc.toJS({ maxAliasCount: -1 }),
+  );
 }
 
 /** Deletes the subtree at `keyPath`, then prunes maps the delete emptied. */
@@ -93,7 +100,14 @@ export function removeYaml(
     }
   }
 
-  return finish(source, bom, body, doc.toString(STRINGIFY), before, doc.toJS({ maxAliasCount: -1 }));
+  return finish(
+    source,
+    bom,
+    body,
+    doc.toString(STRINGIFY),
+    before,
+    doc.toJS({ maxAliasCount: -1 }),
+  );
 }
 
 // ---------------------------------------------------------------------------

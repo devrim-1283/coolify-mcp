@@ -15,7 +15,7 @@ So:
 
 - A second **instance** is a second base URL, and therefore a second connection.
 - A second **team** is a second token, and therefore also a second connection —
-  with the *same* base URL.
+  with the _same_ base URL.
 
 N connections covers N instances × M teams uniformly. Nothing else is needed.
 
@@ -90,7 +90,7 @@ sources other than environment variables (`tokenCommand`, `tokenKeychain`).
 
 ### Where it is looked for
 
-**First hit wins, wholesale.** The first location that has a file *is* the
+**First hit wins, wholesale.** The first location that has a file _is_ the
 config; no other location is consulted and nothing is merged across them.
 Cross-scope merging is where configuration systems stop being explainable —
 "which of these four files set `readOnly`?" has no good answer, so the question
@@ -101,7 +101,7 @@ is never created.
    a file you are not looking at. `~/` is expanded; relative paths resolve
    against the working directory.
 2. **The nearest `.coolify-mcp.json`**, walking up from the working directory.
-   The walk stops at a directory containing `.git` (checked *after* that
+   The walk stops at a directory containing `.git` (checked _after_ that
    directory's own candidate, so a repository root's config still wins) and at
    `$HOME`. That is what stops a config in a parent project — or worse, one in
    your home directory reached by accident — from silently governing an
@@ -147,17 +147,17 @@ editors validate and autocomplete against it.
 
 ### Connection properties
 
-| Property | Type | Default | Notes |
-|---|---|---|---|
-| `baseUrl` | string | **required** | `http(s)` only. May not embed credentials. |
-| `label` | string | — | 1–120 characters. Human description; not used for matching. |
-| `tokenEnv` | string | — | Environment variable holding the token. |
-| `tokenCommand` | string[] | — | argv array, 1–32 elements. No shell. |
-| `tokenKeychain` | `{service, account}` | — | Platform keychain. See [secrets.md](./secrets.md). |
-| `readOnly` | boolean | `false` | Refuses every non-GET at the HTTP client. |
-| `allowDestructive` | boolean | *(env default)* | Can only narrow in practice — see the precedence table. |
-| `timeoutMs` | integer | `30000` | 1000–120000. |
-| `insecureTLS` | boolean | `false` | Needs the optional `undici` package to take effect. |
+| Property           | Type                 | Default         | Notes                                                       |
+| ------------------ | -------------------- | --------------- | ----------------------------------------------------------- |
+| `baseUrl`          | string               | **required**    | `http(s)` only. May not embed credentials.                  |
+| `label`            | string               | —               | 1–120 characters. Human description; not used for matching. |
+| `tokenEnv`         | string               | —               | Environment variable holding the token.                     |
+| `tokenCommand`     | string[]             | —               | argv array, 1–32 elements. No shell.                        |
+| `tokenKeychain`    | `{service, account}` | —               | Platform keychain. See [secrets.md](./secrets.md).          |
+| `readOnly`         | boolean              | `false`         | Refuses every non-GET at the HTTP client.                   |
+| `allowDestructive` | boolean              | _(env default)_ | Can only narrow in practice — see the precedence table.     |
+| `timeoutMs`        | integer              | `30000`         | 1000–120000.                                                |
+| `insecureTLS`      | boolean              | `false`         | Needs the optional `undici` package to take effect.         |
 
 At most **one** of `tokenEnv` / `tokenCommand` / `tokenKeychain` may be set. Two
 sources means two answers to "where is the token", and no rule for which wins.
@@ -193,16 +193,16 @@ as env-over-file, so every connection is described in exactly one place.
 
 ## Precedence
 
-| Question | Answer |
-|---|---|
-| A name is defined in both the environment and the file | **The environment replaces the file entry WHOLE.** No field-level merge — a half-env, half-file connection is not something anyone can hold in their head. `doctor` reports it as `env-var-shadows-file`. |
-| Which file wins | The first location that has one. No merging across locations. |
-| `COOLIFY_CONNECTION` vs `defaultConnection` | `COOLIFY_CONNECTION` wins. `COOLIFY_CONNECTION=PROD` resolves to `prod`, because the matching variable is spelled `COOLIFY_BASE_URL_PROD` and failing on that would teach nothing. Naming a connection that does not exist is an error that lists the ones that do. |
-| `COOLIFY_READ_ONLY=true` vs a file connection | **Tightens only.** It is OR-ed into every file connection's `readOnly`, so it can close a connection the file left open and can never re-open one the file closed. Read-only is a kill switch; a kill switch that an environment variable can undo is not one. |
+| Question                                                      | Answer                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A name is defined in both the environment and the file        | **The environment replaces the file entry WHOLE.** No field-level merge — a half-env, half-file connection is not something anyone can hold in their head. `doctor` reports it as `env-var-shadows-file`.                                                                                                                                |
+| Which file wins                                               | The first location that has one. No merging across locations.                                                                                                                                                                                                                                                                            |
+| `COOLIFY_CONNECTION` vs `defaultConnection`                   | `COOLIFY_CONNECTION` wins. `COOLIFY_CONNECTION=PROD` resolves to `prod`, because the matching variable is spelled `COOLIFY_BASE_URL_PROD` and failing on that would teach nothing. Naming a connection that does not exist is an error that lists the ones that do.                                                                      |
+| `COOLIFY_READ_ONLY=true` vs a file connection                 | **Tightens only.** It is OR-ed into every file connection's `readOnly`, so it can close a connection the file left open and can never re-open one the file closed. Read-only is a kill switch; a kill switch that an environment variable can undo is not one.                                                                           |
 | `COOLIFY_ALLOW_DESTRUCTIVE` vs `allowDestructive` in the file | The file value wins for that connection when present; otherwise the env value is the default. In practice this can only narrow: the destructive tool is registered from the process-wide flag, so `true` in the file without the env flag grants nothing, while `false` keeps one connection protected on a server where the flag is on. |
-| `COOLIFY_TIMEOUT_MS`, `COOLIFY_INSECURE_TLS` | Apply to **env-defined connections only**. A file connection takes `timeoutMs` and `insecureTLS` from the file, or their defaults. |
-| Several connections and no designated default | There is **no** default. Every tool requires an explicit `instance`, and the error lists the configured names. Better than guessing which Coolify a deploy was meant for. |
-| Exactly one connection | It is its own default, and `instance` is absent from every schema. |
+| `COOLIFY_TIMEOUT_MS`, `COOLIFY_INSECURE_TLS`                  | Apply to **env-defined connections only**. A file connection takes `timeoutMs` and `insecureTLS` from the file, or their defaults.                                                                                                                                                                                                       |
+| Several connections and no designated default                 | There is **no** default. Every tool requires an explicit `instance`, and the error lists the configured names. Better than guessing which Coolify a deploy was meant for.                                                                                                                                                                |
+| Exactly one connection                                        | It is its own default, and `instance` is absent from every schema.                                                                                                                                                                                                                                                                       |
 
 Booleans accept `1`/`true`/`yes`/`on` and `0`/`false`/`no`/`off`, case-insensitively.
 Anything else is a startup error rather than a silent `false` —
@@ -211,11 +211,11 @@ mid-incident.
 
 ## The `instance` parameter
 
-| Connections | Behaviour |
-|---|---|
-| 1 | `instance` is **absent** from every tool schema. |
-| >1, read tools | An enum over the configured names, defaulting to the designated connection when there is one. |
-| >1, write and destructive tools | An enum over the configured names, **required, no default.** |
+| Connections                     | Behaviour                                                                                     |
+| ------------------------------- | --------------------------------------------------------------------------------------------- |
+| 1                               | `instance` is **absent** from every tool schema.                                              |
+| >1, read tools                  | An enum over the configured names, defaulting to the designated connection when there is one. |
+| >1, write and destructive tools | An enum over the configured names, **required, no default.**                                  |
 
 The asymmetry is deliberate. Guessing wrong on a read costs one wasted call.
 Guessing wrong on a write deploys to production. An `instance` with a default on
@@ -238,7 +238,7 @@ name so the result groups by box.
 
 Safe to fan out precisely because the tool cannot write. One unreachable
 connection does not take the answer down — failures land in `meta.errors[]`
-beside the rows that did come back. When *every* connection fails, the result is
+beside the rows that did come back. When _every_ connection fails, the result is
 marked `isError` and says so, because an empty list would read as "no resources"
 rather than "nothing answered".
 

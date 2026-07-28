@@ -153,7 +153,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: package-tarball
-          path: "*.tgz"
+          path: '*.tgz'
           retention-days: 7
           if-no-files-found: error
 
@@ -201,10 +201,23 @@ jobs:
         run: npx --yes "./$TARBALL" --version
 
       - name: Install the tarball into a scratch project
+        # The manifest is written directly rather than with `npm init -y`.
+        # `init` derives the package name from the directory name, and npm
+        # refuses a name beginning with a dot — a scratch directory called
+        # `.smoke` fails with `Invalid name: ".smoke"` before a single
+        # dependency is installed. `private: true` is what keeps this throwaway
+        # manifest from ever being publishable by accident.
         run: |
           mkdir -p .smoke
+          cat > .smoke/package.json <<'MANIFEST'
+          {
+            "name": "coolify-mcp-smoke",
+            "version": "0.0.0",
+            "private": true,
+            "type": "module"
+          }
+          MANIFEST
           cd .smoke
-          npm init -y > /dev/null
           npm install --no-audit --no-fund --silent "../$TARBALL"
 
       - name: MCP initialize handshake and tools/list

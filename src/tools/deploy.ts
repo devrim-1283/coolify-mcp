@@ -42,7 +42,12 @@ const MAX_WAIT_TARGETS = 10;
  * Statuses Coolify's deployment queue settles on. `skipped` is terminal but not
  * a failure: Coolify emits it when a deployment would be a no-op.
  */
-const TERMINAL_STATUSES: ReadonlySet<string> = new Set(['finished', 'failed', 'cancelled_by_user', 'skipped']);
+const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
+  'finished',
+  'failed',
+  'cancelled_by_user',
+  'skipped',
+]);
 
 /** How many consecutive transient poll failures to absorb before giving up. */
 const MAX_TRANSIENT_POLL_FAILURES = 4;
@@ -59,8 +64,19 @@ const FAILURE_LOG_BYTES = 20_000;
  * Every field here was observed on a live 4.1.2 record.
  */
 const DEPLOYMENT_FIELDS = [
-  'deployment_uuid', 'status', 'application_name', 'server_name', 'commit', 'commit_message',
-  'is_webhook', 'is_api', 'pull_request_id', 'created_at', 'updated_at', 'finished_at', 'deployment_url',
+  'deployment_uuid',
+  'status',
+  'application_name',
+  'server_name',
+  'commit',
+  'commit_message',
+  'is_webhook',
+  'is_api',
+  'pull_request_id',
+  'created_at',
+  'updated_at',
+  'finished_at',
+  'deployment_url',
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -86,7 +102,9 @@ function instanceShape(cfg: ServerConfig): Record<string, unknown> {
   return {
     instance: z
       .enum([first, ...rest])
-      .describe('Which configured Coolify connection to deploy on. Required: write tools have no default target.'),
+      .describe(
+        'Which configured Coolify connection to deploy on. Required: write tools have no default target.',
+      ),
   };
 }
 
@@ -133,20 +151,59 @@ const ARGS = z.object({
   // Accepted whether or not `instanceShape` published it; `resolveConnection`
   // owns the "is it required" decision.
   instance: z.string().min(1).optional(),
-  uuid: z.string().min(1).max(512).optional()
-    .describe('UUID of the application, database or service to deploy. Several UUIDs may be given comma-separated. Cannot be combined with `tag`.'),
-  tag: z.string().min(1).max(255).optional()
-    .describe('Deploy every resource carrying this Coolify tag. Cannot be combined with `uuid` or `pull_request_id`.'),
-  force: z.boolean().optional()
-    .describe('Rebuild without the Docker layer cache. Slower; use when a cached layer is suspected of being stale.'),
-  pull_request_id: z.number().int().min(1).optional()
-    .describe('Deploy the preview deployment for this pull request number instead of the production branch. Requires `uuid`.'),
-  docker_tag: z.string().min(1).max(255).optional()
-    .describe('For applications deployed from a registry image: the image tag to deploy, for example "v1.4.2".'),
-  wait: z.boolean().default(false)
-    .describe('Stay in the call until the deployment reaches a terminal status (finished, failed, cancelled_by_user, skipped). Progress is reported while waiting. When false, returns as soon as Coolify has queued the build.'),
-  timeout_seconds: z.number().int().min(MIN_TIMEOUT_SECONDS).max(MAX_TIMEOUT_SECONDS).default(DEFAULT_TIMEOUT_SECONDS)
-    .describe('Only used with `wait`. How long to keep polling before returning the deployment as still running.'),
+  uuid: z
+    .string()
+    .min(1)
+    .max(512)
+    .optional()
+    .describe(
+      'UUID of the application, database or service to deploy. Several UUIDs may be given comma-separated. Cannot be combined with `tag`.',
+    ),
+  tag: z
+    .string()
+    .min(1)
+    .max(255)
+    .optional()
+    .describe(
+      'Deploy every resource carrying this Coolify tag. Cannot be combined with `uuid` or `pull_request_id`.',
+    ),
+  force: z
+    .boolean()
+    .optional()
+    .describe(
+      'Rebuild without the Docker layer cache. Slower; use when a cached layer is suspected of being stale.',
+    ),
+  pull_request_id: z
+    .number()
+    .int()
+    .min(1)
+    .optional()
+    .describe(
+      'Deploy the preview deployment for this pull request number instead of the production branch. Requires `uuid`.',
+    ),
+  docker_tag: z
+    .string()
+    .min(1)
+    .max(255)
+    .optional()
+    .describe(
+      'For applications deployed from a registry image: the image tag to deploy, for example "v1.4.2".',
+    ),
+  wait: z
+    .boolean()
+    .default(false)
+    .describe(
+      'Stay in the call until the deployment reaches a terminal status (finished, failed, cancelled_by_user, skipped). Progress is reported while waiting. When false, returns as soon as Coolify has queued the build.',
+    ),
+  timeout_seconds: z
+    .number()
+    .int()
+    .min(MIN_TIMEOUT_SECONDS)
+    .max(MAX_TIMEOUT_SECONDS)
+    .default(DEFAULT_TIMEOUT_SECONDS)
+    .describe(
+      'Only used with `wait`. How long to keep polling before returning the deployment as still running.',
+    ),
 });
 
 type DeployArgs = z.infer<typeof ARGS>;
@@ -211,11 +268,18 @@ interface QueuedDeployment {
  * empty list, which downgrades to the fallback — it never invents a deployment.
  */
 function readQueuedDeployments(data: unknown): QueuedDeployment[] {
-  const containers = [data, readField(data, 'deployments'), readField(data, 'details'), readField(data, 'data')];
+  const containers = [
+    data,
+    readField(data, 'deployments'),
+    readField(data, 'details'),
+    readField(data, 'data'),
+  ];
 
   for (const container of containers) {
     if (!Array.isArray(container)) continue;
-    const rows = container.map(readQueuedEntry).filter((entry): entry is QueuedDeployment => entry !== undefined);
+    const rows = container
+      .map(readQueuedEntry)
+      .filter((entry): entry is QueuedDeployment => entry !== undefined);
     if (rows.length > 0) return rows;
   }
 
@@ -308,28 +372,41 @@ async function resolveWaitTargets(
 
   const single = singleUuid(args.uuid);
   if (single === undefined) {
-    return cannotWait('the call targeted a tag or several UUIDs at once, so no single deployment history applies.');
+    return cannotWait(
+      'the call targeted a tag or several UUIDs at once, so no single deployment history applies.',
+    );
   }
 
   const latest = await latestDeployment(connection, single, signal);
   if (latest === undefined) {
-    return cannotWait('no deployment history is readable for this resource. History is only exposed for applications.');
+    return cannotWait(
+      'no deployment history is readable for this resource. History is only exposed for applications.',
+    );
   }
   if (baselineUuid !== undefined && latest.deploymentUuid === baselineUuid) {
-    return cannotWait('the newest deployment for this resource is the one that already existed before the request.');
+    return cannotWait(
+      'the newest deployment for this resource is the one that already existed before the request.',
+    );
   }
   return { targets: [latest], match: 'heuristic' };
 }
 
 /** `reason` completes the sentence "Coolify did not report a deployment UUID, and …". */
 function cannotWait(reason: string): WaitTargets {
-  return { targets: [], match: 'none', reason: `Coolify did not report a deployment UUID, and ${reason}` };
+  return {
+    targets: [],
+    match: 'none',
+    reason: `Coolify did not report a deployment UUID, and ${reason}`,
+  };
 }
 
 /** `undefined` unless exactly one UUID was given: the fallback cannot follow a set. */
 function singleUuid(uuid: string | undefined): string | undefined {
   if (uuid === undefined) return undefined;
-  const parts = uuid.split(',').map((part) => part.trim()).filter((part) => part.length > 0);
+  const parts = uuid
+    .split(',')
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
   return parts.length === 1 ? parts[0] : undefined;
 }
 
@@ -407,8 +484,12 @@ async function waitForDeployments(
   const states: PollState[] = targets.map((target) => ({ target }));
   const startedAt = Date.now();
   const deadline = startedAt + timeoutSeconds * 1000;
-  const finish = (timedOut: boolean, cancelled: boolean): WaitOutcome =>
-    ({ states, timedOut, cancelled, elapsedSeconds: Math.round((Date.now() - startedAt) / 1000) });
+  const finish = (timedOut: boolean, cancelled: boolean): WaitOutcome => ({
+    states,
+    timedOut,
+    cancelled,
+    elapsedSeconds: Math.round((Date.now() - startedAt) / 1000),
+  });
   let transientFailures = 0;
 
   for (;;) {
@@ -440,7 +521,8 @@ async function waitForDeployments(
         // else — auth, rate limit, a refused gate — is real and ends the wait.
         if (!isTransientPollFailure(error)) throw error;
         transientThisRound = true;
-        state.error = error instanceof Error ? error.message : 'deployment status could not be read';
+        state.error =
+          error instanceof Error ? error.message : 'deployment status could not be read';
       }
     }
     // Counted per round rather than per request: with several targets, one
@@ -466,11 +548,18 @@ function isTerminal(state: PollState): boolean {
   return state.status !== undefined && TERMINAL_STATUSES.has(state.status);
 }
 
-function reportProgress(extra: ToolExtra, states: readonly PollState[], elapsedMs: number, timeoutSeconds: number): void {
+function reportProgress(
+  extra: ToolExtra,
+  states: readonly PollState[],
+  elapsedMs: number,
+  timeoutSeconds: number,
+): void {
   if (extra.progress === undefined) return;
 
   const elapsedSeconds = Math.round(elapsedMs / 1000);
-  const summary = states.map((state) => `${state.target.deploymentUuid}: ${state.status ?? 'unknown'}`).join(', ');
+  const summary = states
+    .map((state) => `${state.target.deploymentUuid}: ${state.status ?? 'unknown'}`)
+    .join(', ');
   extra.progress(elapsedSeconds, timeoutSeconds, `${elapsedSeconds}s elapsed — ${summary}`);
 }
 
@@ -510,7 +599,8 @@ function readDeploymentRecord(data: unknown): Row | undefined {
     // `deployment_uuid` at the top level — confirmed live. The unwrapping below
     // is tolerance for a wrapper, applied only when the outer object carries
     // neither field itself.
-    if (typeof data['status'] === 'string' || typeof data['deployment_uuid'] === 'string') return data;
+    if (typeof data['status'] === 'string' || typeof data['deployment_uuid'] === 'string')
+      return data;
     const inner = data['data'];
     if (isRow(inner)) return inner;
     return data;
@@ -571,7 +661,11 @@ function buildDeploymentResult(state: PollState, includeLogs: boolean): Row {
 // Handler
 // ---------------------------------------------------------------------------
 
-async function handler(rawArgs: Record<string, unknown>, cfg: ServerConfig, extra: ToolExtra): Promise<ToolResult> {
+async function handler(
+  rawArgs: Record<string, unknown>,
+  cfg: ServerConfig,
+  extra: ToolExtra,
+): Promise<ToolResult> {
   try {
     const args = parseArgs(rawArgs);
     assertCombination(args);
@@ -584,7 +678,9 @@ async function handler(rawArgs: Record<string, unknown>, cfg: ServerConfig, extr
     // response that would make it unnecessary only arrives after the point where
     // the baseline had to be taken. One request ahead of a multi-minute build is
     // the cheaper side of that trade.
-    const baselineUuid = args.wait ? await baselineDeploymentUuid(connection, args.uuid, extra.signal) : undefined;
+    const baselineUuid = args.wait
+      ? await baselineDeploymentUuid(connection, args.uuid, extra.signal)
+      : undefined;
 
     const response = await coolifyRequest<unknown>({
       connection,
@@ -609,11 +705,14 @@ async function handler(rawArgs: Record<string, unknown>, cfg: ServerConfig, extr
 
     const queued = readQueuedDeployments(response.data);
     if (!args.wait) {
-      return ok({ queued, waited: false }, {
-        instance: connection.name,
-        count: queued.length,
-        hint: 'The deployment was queued. Its outcome is not known yet; get_deployment or deploy with wait=true report the terminal status.',
-      });
+      return ok(
+        { queued, waited: false },
+        {
+          instance: connection.name,
+          count: queued.length,
+          hint: 'The deployment was queued. Its outcome is not known yet; get_deployment or deploy with wait=true report the terminal status.',
+        },
+      );
     }
 
     return await waitAndRender(connection, args, queued, baselineUuid, extra);
@@ -642,7 +741,10 @@ async function waitAndRender(
 ): Promise<ToolResult> {
   const resolved = await resolveWaitTargets(connection, args, queued, baselineUuid, extra.signal);
   const queuedOnly = (hint: string): ToolResult =>
-    ok({ queued, waited: false, match: resolved.match }, { instance: connection.name, count: queued.length, hint });
+    ok(
+      { queued, waited: false, match: resolved.match },
+      { instance: connection.name, count: queued.length, hint },
+    );
 
   if (resolved.targets.length === 0) {
     return queuedOnly(
@@ -664,16 +766,27 @@ async function waitAndRender(
     // error result here would read as "the deploy failed", which is both untrue
     // and the more expensive of the two mistakes to make, so the queue receipt
     // goes back with the reason the watch stopped.
-    return queuedOnly(`The deployment was queued, but watching it stopped early: ${describeError(error)}`);
+    return queuedOnly(
+      `The deployment was queued, but watching it stopped early: ${describeError(error)}`,
+    );
   }
 
   // Logs accompany anything that did not finish cleanly, including a timeout —
   // the tail of a build that is still going says which step it is on, which is
   // the same question the model would otherwise ask next.
-  const deployments = outcome.states.map((state) => buildDeploymentResult(state, state.status !== 'finished'));
+  const deployments = outcome.states.map((state) =>
+    buildDeploymentResult(state, state.status !== 'finished'),
+  );
 
   return ok(
-    { queued, waited: true, match: resolved.match, timed_out: outcome.timedOut, cancelled: outcome.cancelled, deployments },
+    {
+      queued,
+      waited: true,
+      match: resolved.match,
+      timed_out: outcome.timedOut,
+      cancelled: outcome.cancelled,
+      deployments,
+    },
     {
       instance: connection.name,
       count: deployments.length,
@@ -687,9 +800,13 @@ function composeWaitHint(match: MatchMode, outcome: WaitOutcome, timeoutSeconds:
   const notes: string[] = [];
 
   if (outcome.cancelled) {
-    notes.push(`Waiting was cancelled after ${outcome.elapsedSeconds}s. The deployment itself is unaffected and continues on the server.`);
+    notes.push(
+      `Waiting was cancelled after ${outcome.elapsedSeconds}s. The deployment itself is unaffected and continues on the server.`,
+    );
   } else if (outcome.timedOut) {
-    notes.push(`The deployment had not reached a terminal status after ${timeoutSeconds}s, so polling stopped. The build continues on the server.`);
+    notes.push(
+      `The deployment had not reached a terminal status after ${timeoutSeconds}s, so polling stopped. The build continues on the server.`,
+    );
   } else {
     notes.push(`Reached a terminal status after ${outcome.elapsedSeconds}s.`);
   }
@@ -716,10 +833,7 @@ function parseArgs(raw: Record<string, unknown>): DeployArgs {
   throw new CoolifyError(`Invalid arguments: ${detail}`, 'validation');
 }
 
-function ok(
-  data: unknown,
-  meta: { instance: string; count: number; hint: string },
-): ToolResult {
+function ok(data: unknown, meta: { instance: string; count: number; hint: string }): ToolResult {
   return renderEnvelope(shapeResponse(data, meta));
 }
 

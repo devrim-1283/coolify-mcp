@@ -208,7 +208,9 @@ function assertSafePath(path: string): void {
     // A protocol-relative path resolves to a different host under URL
     // resolution rules. It never reaches the socket, but it must not survive
     // long enough to reach a future refactor that uses `new URL(path, base)`.
-    throw invalidRequest(`Request path "${path}" is protocol-relative and would leave the connection host.`);
+    throw invalidRequest(
+      `Request path "${path}" is protocol-relative and would leave the connection host.`,
+    );
   }
   if (UNSAFE_PATH_CHARS.test(path) || hasControlCharacter(path)) {
     throw invalidRequest(
@@ -245,7 +247,11 @@ function normalizeBaseUrl(connection: Connection): URL {
   }
 
   const pathname = base.pathname.replace(/\/+$/, '');
-  const suffix = pathname.endsWith(API_BASE_PATH) ? '' : pathname.endsWith('/api') ? '/v1' : API_BASE_PATH;
+  const suffix = pathname.endsWith(API_BASE_PATH)
+    ? ''
+    : pathname.endsWith('/api')
+      ? '/v1'
+      : API_BASE_PATH;
   return new URL(`${base.origin}${pathname}${suffix}`);
 }
 
@@ -259,7 +265,9 @@ function buildUrl(base: URL, req: CoolifyRequest): URL {
   // Redundant by construction. Kept as a tripwire: if this ever fires, someone
   // changed the line above to URL resolution and reopened the exfiltration path.
   if (url.origin !== base.origin) {
-    throw invalidRequest(`Refused: the request URL left the origin of connection \`${req.connection.name}\`.`);
+    throw invalidRequest(
+      `Refused: the request URL left the origin of connection \`${req.connection.name}\`.`,
+    );
   }
   // `..` segments, including percent-encoded ones, normalize during parsing.
   // This catches anything that climbed above the API prefix.
@@ -329,7 +337,7 @@ function scrubToken(text: string, token: string): string {
 function isEmptyBody(body: unknown): boolean {
   if (body === undefined || body === null) return true;
   if (Array.isArray(body)) return body.length === 0;
-  return typeof body === 'object' && Object.keys(body as object).length === 0;
+  return typeof body === 'object' && Object.keys(body).length === 0;
 }
 
 function serializeBody(body: unknown): string | undefined {
@@ -558,7 +566,11 @@ interface PreparedRequest {
   timeoutMs: number;
 }
 
-async function buildRequestInit(req: CoolifyRequest, token: string, body: string | undefined): Promise<PreparedRequest> {
+async function buildRequestInit(
+  req: CoolifyRequest,
+  token: string,
+  body: string | undefined,
+): Promise<PreparedRequest> {
   const { connection } = req;
 
   const headers: Record<string, string> = {
@@ -569,7 +581,9 @@ async function buildRequestInit(req: CoolifyRequest, token: string, body: string
   if (body !== undefined) headers['content-type'] = 'application/json';
 
   const timeoutMs =
-    Number.isFinite(connection.timeoutMs) && connection.timeoutMs > 0 ? connection.timeoutMs : DEFAULT_TIMEOUT_MS;
+    Number.isFinite(connection.timeoutMs) && connection.timeoutMs > 0
+      ? connection.timeoutMs
+      : DEFAULT_TIMEOUT_MS;
   const timeoutSignal = AbortSignal.timeout(timeoutMs);
   // Composed, so a host cancelling the tool call and our own deadline both abort
   // the same in-flight request.
@@ -593,7 +607,9 @@ async function buildRequestInit(req: CoolifyRequest, token: string, body: string
   return { init: withDispatcher, timeoutSignal, signal, timeoutMs };
 }
 
-export async function coolifyRequest<T = unknown>(req: CoolifyRequest): Promise<CoolifyResponse<T>> {
+export async function coolifyRequest<T = unknown>(
+  req: CoolifyRequest,
+): Promise<CoolifyResponse<T>> {
   const { connection } = req;
 
   // Gate 1 — destructive. Before anything else, including the URL and the token.
@@ -657,7 +673,11 @@ interface SendContext {
  * other calls in a fleet fan-out. If the wait is longer than we are willing to
  * hold the turn for, the error names it and the caller decides.
  */
-async function sendWithRateLimitRetry(url: URL, init: RequestInit, ctx: SendContext): Promise<Attempt> {
+async function sendWithRateLimitRetry(
+  url: URL,
+  init: RequestInit,
+  ctx: SendContext,
+): Promise<Attempt> {
   const first = await sendOnce(url, init, ctx);
   if (first.status !== 429) return first;
 

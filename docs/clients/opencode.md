@@ -1,29 +1,29 @@
 # OpenCode
 
-| | |
-|---|---|
-| Adapter ids | `opencode-user`, `opencode-project` |
-| `--client` selectors | `opencode`, `opencode-user`, `opencode-project` |
-| User config | `~/.config/opencode/opencode.json` — **not confirmed** |
-| Project config | `<projectRoot>/opencode.json` — confirmed |
-| Key path | `mcp.coolify` |
-| Format | JSON |
-| Transports written | `stdio` (written as OpenCode's `type: "local"`) |
-| Confidence | **verified** for the shape; the *global* path is unconfirmed |
-| Native CLI | none |
+|                      |                                                              |
+| -------------------- | ------------------------------------------------------------ |
+| Adapter ids          | `opencode-user`, `opencode-project`                          |
+| `--client` selectors | `opencode`, `opencode-user`, `opencode-project`              |
+| User config          | `~/.config/opencode/opencode.json` — **not confirmed**       |
+| Project config       | `<projectRoot>/opencode.json` — confirmed                    |
+| Key path             | `mcp.coolify`                                                |
+| Format               | JSON                                                         |
+| Transports written   | `stdio` (written as OpenCode's `type: "local"`)              |
+| Confidence           | **verified** for the shape; the _global_ path is unconfirmed |
+| Native CLI           | none                                                         |
 
 ## This is the adapter that makes a shared writer impossible
 
 Every field is spelled differently from the `mcpServers` family:
 
-| | `mcpServers` clients | OpenCode |
-|---|---|---|
-| Container key | `mcpServers` | `mcp` |
-| Executable | `"command": "npx"` | included in the array |
-| Arguments | `"args": ["-y", "…"]` | `"command": ["npx", "-y", "…"]` |
-| Environment | `"env"` | `"environment"` |
-| Kind | implicit | `"type": "local"` |
-| Enabled | implicit | `"enabled": true` |
+|               | `mcpServers` clients  | OpenCode                        |
+| ------------- | --------------------- | ------------------------------- |
+| Container key | `mcpServers`          | `mcp`                           |
+| Executable    | `"command": "npx"`    | included in the array           |
+| Arguments     | `"args": ["-y", "…"]` | `"command": ["npx", "-y", "…"]` |
+| Environment   | `"env"`               | `"environment"`                 |
+| Kind          | implicit              | `"type": "local"`               |
+| Enabled       | implicit              | `"enabled": true`               |
 
 Feed a Claude-shaped entry in here and OpenCode reads a server with no command at
 all.
@@ -112,11 +112,11 @@ npx coolify-mcp uninstall --client opencode
 
 ## Confirmed vs unconfirmed
 
-| Item | Status |
-|---|---|
-| `mcp` container key | confirmed |
-| `type: "local"`, `command` as an argv array, `enabled`, `environment` | confirmed |
-| `<projectRoot>/opencode.json` | confirmed |
-| `~/.config/opencode/opencode.json` as the global location | **not confirmed** |
-| The global path on Windows | **not confirmed** |
-| `${VAR}` expansion inside `environment` | **not verified** — treated as "no expansion" |
+| Item                                                                  | Status                                       |
+| --------------------------------------------------------------------- | -------------------------------------------- |
+| `mcp` container key                                                   | confirmed                                    |
+| `type: "local"`, `command` as an argv array, `enabled`, `environment` | confirmed                                    |
+| `<projectRoot>/opencode.json`                                         | confirmed                                    |
+| `~/.config/opencode/opencode.json` as the global location             | **not confirmed**                            |
+| The global path on Windows                                            | **not confirmed**                            |
+| `${VAR}` expansion inside `environment`                               | **not verified** — treated as "no expansion" |

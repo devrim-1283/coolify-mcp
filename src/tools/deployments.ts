@@ -22,7 +22,12 @@
 
 import { z } from 'zod';
 import { coolifyRequest } from '../http/client.js';
-import { renderEnvelope, shapeResponse, encodeCursor, type EnvelopeMeta } from '../shaping/envelope.js';
+import {
+  renderEnvelope,
+  shapeResponse,
+  encodeCursor,
+  type EnvelopeMeta,
+} from '../shaping/envelope.js';
 import { MAX_LOG_BYTES, shapeLogs } from '../shaping/logs.js';
 import type { Row } from '../shaping/project.js';
 import { CoolifyError } from '../types.js';
@@ -72,9 +77,23 @@ const DEPLOYMENT_FIELDS = [
 ] as const;
 
 /** Extra context worth carrying on a single deployment but not on every row of a list. */
-const DEPLOYMENT_DETAIL_FIELDS = [...DEPLOYMENT_FIELDS, 'deployment_url', 'git_type', 'force_rebuild', 'restart_only', 'rollback'] as const;
+const DEPLOYMENT_DETAIL_FIELDS = [
+  ...DEPLOYMENT_FIELDS,
+  'deployment_url',
+  'git_type',
+  'force_rebuild',
+  'restart_only',
+  'rollback',
+] as const;
 
-const DEPLOYMENT_PRUNABLE = ['commit_message', 'is_api', 'is_webhook', 'pull_request_id', 'updated_at', 'server_name'] as const;
+const DEPLOYMENT_PRUNABLE = [
+  'commit_message',
+  'is_api',
+  'is_webhook',
+  'pull_request_id',
+  'updated_at',
+  'server_name',
+] as const;
 
 function buildDeploymentRow(raw: Row, fields: readonly string[]): Row {
   const row: Row = {};
@@ -110,7 +129,8 @@ function renderBuildLog(raw: unknown): string {
 
 function fromEntries(parsed: unknown): string {
   if (typeof parsed === 'string') return parsed;
-  if (!Array.isArray(parsed)) return parsed === undefined || parsed === null ? '' : JSON.stringify(parsed);
+  if (!Array.isArray(parsed))
+    return parsed === undefined || parsed === null ? '' : JSON.stringify(parsed);
 
   const lines: string[] = [];
   for (const entry of parsed) {
@@ -134,7 +154,7 @@ function fromEntries(parsed: unknown): string {
 export const listDeployments: ToolDef = {
   name: 'list_deployments',
   description:
-    'List deployments. Without application_uuid it returns the deployments currently in progress on the instance; with it, that application\'s deployment history, newest first. ' +
+    "List deployments. Without application_uuid it returns the deployments currently in progress on the instance; with it, that application's deployment history, newest first. " +
     `Returns ${DEPLOYMENT_FIELDS.join(', ')} per row. ` +
     'Build logs are stripped from these rows because a single one can be megabytes — get_deployment returns a bounded log tail for one deployment.',
   annotations: {
@@ -160,7 +180,9 @@ export const listDeployments: ToolDef = {
       // Read as optional first so an empty string reads as "not given" rather
       // than as a malformed uuid.
       const application =
-        optionalString(args, 'application_uuid') === undefined ? undefined : requiredUuid(args, 'application_uuid');
+        optionalString(args, 'application_uuid') === undefined
+          ? undefined
+          : requiredUuid(args, 'application_uuid');
       const connection = resolveConnection(cfg, args['instance']);
       const page = readPage(
         args,
@@ -186,7 +208,9 @@ export const listDeployments: ToolDef = {
         });
         rows = toRows(response.data).map((raw) => buildDeploymentRow(raw, DEPLOYMENT_FIELDS));
 
-        notes.push(`Deployment history for application ${application}, newest first. Rows ${page.offset + 1}-${page.offset + rows.length}.`);
+        notes.push(
+          `Deployment history for application ${application}, newest first. Rows ${page.offset + 1}-${page.offset + rows.length}.`,
+        );
         // Carried so that if the shaping ladder drops rows to fit the budget,
         // it can recompute next_cursor from what actually shipped instead of
         // stepping over the rows it discarded.
@@ -194,7 +218,10 @@ export const listDeployments: ToolDef = {
         // Upstream reports no total, so "there is more" is inferred from a full
         // page. One wasted call at the exact end of the history is the price.
         if (rows.length === page.limit) {
-          meta.next_cursor = encodeCursor({ offset: page.offset + rows.length, queryHash: page.hash });
+          meta.next_cursor = encodeCursor({
+            offset: page.offset + rows.length,
+            queryHash: page.hash,
+          });
         }
       } else {
         const response = await coolifyRequest({
@@ -209,7 +236,9 @@ export const listDeployments: ToolDef = {
         // offset pagination coherent across the re-fetch each page performs.
         all.sort((a, b) => {
           const byDate = String(b['created_at'] ?? '').localeCompare(String(a['created_at'] ?? ''));
-          return byDate !== 0 ? byDate : String(a['deployment_uuid'] ?? '').localeCompare(String(b['deployment_uuid'] ?? ''));
+          return byDate !== 0
+            ? byDate
+            : String(a['deployment_uuid'] ?? '').localeCompare(String(b['deployment_uuid'] ?? ''));
         });
 
         rows = all.slice(page.offset, page.offset + page.limit);
@@ -218,13 +247,20 @@ export const listDeployments: ToolDef = {
         const next = nextCursor(page, rows.length, all.length);
         if (next !== undefined) meta.next_cursor = next;
 
-        notes.push('Deployments in progress right now.', pageHint(page.offset, rows.length, all.length));
+        notes.push(
+          'Deployments in progress right now.',
+          pageHint(page.offset, rows.length, all.length),
+        );
         if (all.length === 0) {
-          notes.push('Nothing is deploying. Passing application_uuid returns that application\'s finished deployments instead.');
+          notes.push(
+            "Nothing is deploying. Passing application_uuid returns that application's finished deployments instead.",
+          );
         }
       }
 
-      notes.push('Build logs are omitted from these rows; get_deployment returns the log for one deployment_uuid.');
+      notes.push(
+        'Build logs are omitted from these rows; get_deployment returns the log for one deployment_uuid.',
+      );
       meta.hint = notes.join(' ');
 
       return renderEnvelope(shapeResponse(rows, meta, { prunable: DEPLOYMENT_PRUNABLE }));
@@ -240,7 +276,7 @@ export const getDeployment: ToolDef = {
   description:
     'Return one deployment together with a bounded tail of its build log — the record that says why a deployment failed. ' +
     'The log is stripped of ANSI colour codes and trimmed from the front, so the failure at the end always survives. ' +
-    'For the list of deployments and their uuids use list_deployments; for the running container\'s output use get_logs.',
+    "For the list of deployments and their uuids use list_deployments; for the running container's output use get_logs.",
   annotations: {
     title: 'Get deployment',
     readOnlyHint: true,
@@ -250,7 +286,11 @@ export const getDeployment: ToolDef = {
   },
   surface: 'read',
   inputSchema: (cfg) => ({
-    uuid: z.string().describe('Deployment uuid — the deployment_uuid field from list_deployments, not the application uuid.'),
+    uuid: z
+      .string()
+      .describe(
+        'Deployment uuid — the deployment_uuid field from list_deployments, not the application uuid.',
+      ),
     log_lines: z
       .number()
       .int()
@@ -258,13 +298,19 @@ export const getDeployment: ToolDef = {
       .max(MAX_LOG_LINES)
       .optional()
       .default(DEFAULT_LOG_LINES)
-      .describe(`Trailing build-log lines to include, ${MAX_LOG_LINES} maximum. 0 omits the log and returns the deployment record alone.`),
+      .describe(
+        `Trailing build-log lines to include, ${MAX_LOG_LINES} maximum. 0 omits the log and returns the deployment record alone.`,
+      ),
     ...instanceProperty(cfg),
   }),
   handler: async (args, cfg, extra) =>
     runRead(async () => {
       const uuid = requiredUuid(args, 'uuid');
-      const logLines = boundedInteger(args, 'log_lines', { fallback: DEFAULT_LOG_LINES, min: 0, max: MAX_LOG_LINES });
+      const logLines = boundedInteger(args, 'log_lines', {
+        fallback: DEFAULT_LOG_LINES,
+        min: 0,
+        max: MAX_LOG_LINES,
+      });
       const connection = resolveConnection(cfg, args['instance']);
 
       const response = await coolifyRequest({
@@ -309,7 +355,9 @@ export const getDeployment: ToolDef = {
         }
       }
 
-      notes.push('This is build and deploy output. The running container\'s own logs are in get_logs.');
+      notes.push(
+        "This is build and deploy output. The running container's own logs are in get_logs.",
+      );
 
       const meta: EnvelopeMeta = {
         instance: envelopeInstance(cfg, connection.name),

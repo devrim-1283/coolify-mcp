@@ -587,7 +587,9 @@ function assertStubDetectorWorks(): void {
     ],
     [
       'operation with no success response',
-      syntheticOperation('GET', '/servers/{uuid}/anything', { responses: { '404': {}, '405': {} } }),
+      syntheticOperation('GET', '/servers/{uuid}/anything', {
+        responses: { '404': {}, '405': {} },
+      }),
     ],
     [
       'operation whose description names post_required',
@@ -658,12 +660,14 @@ function countBy<T extends string>(values: readonly T[]): Array<readonly [string
 
 function reportUnmappedSegments(rows: readonly CatalogOperation[]): void {
   const unmapped = new Set(
-    rows.filter((r) => r.family === 'other').map((r) => r.path.split('/').filter(Boolean)[0] ?? '/'),
+    rows
+      .filter((r) => r.family === 'other')
+      .map((r) => r.path.split('/').filter(Boolean)[0] ?? '/'),
   );
   if (unmapped.size === 0) return;
   process.stdout.write(
     `\n  note: filed under 'other' — ${[...unmapped].sort().join(', ')}\n` +
-      "        add a FAMILY_BY_SEGMENT entry if any of these deserve their own family.\n",
+      '        add a FAMILY_BY_SEGMENT entry if any of these deserve their own family.\n',
   );
 }
 

@@ -187,7 +187,9 @@ describe.each(WRITING)('$id — hostile', (spec: AdapterFixtureSpec) => {
 
     const after = box.read() ?? '';
     expect(after).toContain('\r\n');
-    expect(after.replace(/\r\n/g, ''), 'a bare LF was written into a CRLF file').not.toContain('\n');
+    expect(after.replace(/\r\n/g, ''), 'a bare LF was written into a CRLF file').not.toContain(
+      '\n',
+    );
   });
 
   it('keeps tab indentation', async () => {
@@ -333,14 +335,17 @@ describe.each(WRITING)('$id — conflict', (spec: AdapterFixtureSpec) => {
 describe.each(ADAPTER_FIXTURES.filter((spec) => spec.printOnly === true))(
   '$id — unverified',
   (spec: AdapterFixtureSpec) => {
-    it.each(['empty', ...FILE_CASES] as const)('writes nothing for the %s case', async (fixture) => {
-      const box = sandbox(spec, fixture);
+    it.each(['empty', ...FILE_CASES] as const)(
+      'writes nothing for the %s case',
+      async (fixture) => {
+        const box = sandbox(spec, fixture);
 
-      const result = await install(box);
+        const result = await install(box);
 
-      expect(onlyTarget(result).status).toBe('printed');
-      expect(box.read()).toBe(box.before);
-    });
+        expect(onlyTarget(result).status).toBe('printed');
+        expect(box.read()).toBe(box.before);
+      },
+    );
 
     it('refuses on confidence, not on the absence of a writer', async () => {
       const box = sandbox(spec, 'populated');
@@ -392,8 +397,16 @@ describe('config paths are resolved per platform', () => {
     ['zed-project', 'darwin', '/repo/.zed/settings.json'],
     ['opencode-project', 'linux', '/repo/opencode.json'],
     ['opencode-user', 'linux', '/home/dev/.config/opencode/opencode.json'],
-    ['claude-desktop', 'win32', 'C:\\Users\\dev\\AppData\\Roaming\\Claude\\claude_desktop_config.json'],
-    ['claude-desktop', 'darwin', '/Users/dev/Library/Application Support/Claude/claude_desktop_config.json'],
+    [
+      'claude-desktop',
+      'win32',
+      'C:\\Users\\dev\\AppData\\Roaming\\Claude\\claude_desktop_config.json',
+    ],
+    [
+      'claude-desktop',
+      'darwin',
+      '/Users/dev/Library/Application Support/Claude/claude_desktop_config.json',
+    ],
     ['claude-desktop', 'linux', '/home/dev/.config/Claude/claude_desktop_config.json'],
     ['minimax-user', 'linux', '/home/dev/.minimax/config.yaml'],
   ];
@@ -410,7 +423,12 @@ describe('Claude Desktop spawns without a shell', () => {
     const adapter = adapterFor('claude-desktop');
     const entry = { name: MANAGED_NAME, command: 'npx', args: ['-y', PACKAGE_SPEC], env: {} };
 
-    const base = { homeDir: 'C:\\Users\\dev', projectRoot: 'C:\\repo', packageSpec: PACKAGE_SPEC, transport: 'stdio' as const };
+    const base = {
+      homeDir: 'C:\\Users\\dev',
+      projectRoot: 'C:\\repo',
+      packageSpec: PACKAGE_SPEC,
+      transport: 'stdio' as const,
+    };
     const windows = adapter.planWrite(entry, { ...base, platform: 'win32' });
     const linux = adapter.planWrite(entry, {
       ...base,
@@ -421,8 +439,14 @@ describe('Claude Desktop spawns without a shell', () => {
 
     // npx on Windows is npx.cmd, which CreateProcess cannot launch directly:
     // without the wrapper the server dies with ENOENT before speaking MCP.
-    const windowsValue = at(windows.find((op) => op.kind === 'json-merge'), ['value']);
-    const linuxValue = at(linux.find((op) => op.kind === 'json-merge'), ['value']);
+    const windowsValue = at(
+      windows.find((op) => op.kind === 'json-merge'),
+      ['value'],
+    );
+    const linuxValue = at(
+      linux.find((op) => op.kind === 'json-merge'),
+      ['value'],
+    );
     expect(at(windowsValue, ['command'])).toBe('cmd');
     expect(at(windowsValue, ['args'])).toEqual(['/c', 'npx', '-y', PACKAGE_SPEC]);
     expect(at(linuxValue, ['command'])).toBe('npx');
@@ -487,7 +511,9 @@ describe('reference syntax per client', () => {
       expect(at(env, ['COOLIFY_CONNECTION'])).toBe('prod');
       // Dropping silently would be worse than writing it: the note names the
       // variable (never a value) and points at a mechanism that works.
-      expect(operations.some((op) => op.kind === 'note' && op.message.includes('COOLIFY_API_TOKEN'))).toBe(true);
+      expect(
+        operations.some((op) => op.kind === 'note' && op.message.includes('COOLIFY_API_TOKEN')),
+      ).toBe(true);
     },
   );
 
