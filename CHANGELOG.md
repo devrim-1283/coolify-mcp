@@ -18,6 +18,10 @@ add operations that `search_operations` did not previously return.
 
 ## [Unreleased]
 
+## [0.1.0] — 2026-07-28
+
+Initial release.
+
 ### Added
 
 **Streamable HTTP transport.** `coolify-mcp serve --http` runs the same server,
@@ -56,12 +60,6 @@ this project: living where the data is. See the comparison table in the README.
   every request worth reading.
 - TLS is not terminated here. That is the reverse proxy's job, and on Coolify it
   is Traefik's.
-
-## [0.1.0] — unreleased
-
-Initial release.
-
-### Added
 
 **Fleet model.** A connection is `(baseUrl, token)`. Because a Coolify API token
 is bound in the database to the team that was active when it was created and the
