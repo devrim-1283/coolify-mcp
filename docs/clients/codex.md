@@ -36,7 +36,7 @@ MCP server on the machine shares.
 ## Install
 
 ```bash
-npx coolify-mcp install --client codex
+npx @done-dynamics/coolify-mcp install --client codex
 ```
 
 ## What the installer writes
@@ -44,7 +44,7 @@ npx coolify-mcp install --client codex
 ```toml
 [mcp_servers.coolify]
 command = "npx"
-args = [ "-y", "coolify-mcp@latest" ]
+args = [ "-y", "@done-dynamics/coolify-mcp@latest" ]
 startup_timeout_sec = 60
 ```
 
@@ -55,7 +55,7 @@ With `--connection prod` a sub-table is appended:
 COOLIFY_CONNECTION = "prod"
 ```
 
-With `--pin=1.4.2`, `args` becomes `[ "-y", "coolify-mcp@1.4.2" ]`.
+With `--pin=1.4.2`, `args` becomes `[ "-y", "@done-dynamics/coolify-mcp@1.4.2" ]`.
 
 The block is produced by `smol-toml`, which owns escaping and sub-table layout —
 hand-rolling TOML is how quoting bugs get shipped into a file that must never
@@ -119,7 +119,7 @@ shares is not a repair.
 ## Verify
 
 ```bash
-npx coolify-mcp doctor
+npx @done-dynamics/coolify-mcp doctor
 codex mcp list          # if your Codex version has it
 ```
 
@@ -127,13 +127,13 @@ After installing, start Codex and confirm the `coolify` tools appear. If Codex
 starts and _no_ MCP servers work, check whether `config.toml` still parses:
 
 ```bash
-npx coolify-mcp doctor    # reports codex-config-unparseable with the offset
+npx @done-dynamics/coolify-mcp doctor    # reports codex-config-unparseable with the offset
 ```
 
 ## Uninstall
 
 ```bash
-npx coolify-mcp uninstall --client codex
+npx @done-dynamics/coolify-mcp uninstall --client codex
 ```
 
 Removes the `[mcp_servers.coolify]` section and its sub-tables.

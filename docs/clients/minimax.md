@@ -34,7 +34,7 @@ even a caller that ignored the confidence flag would have nothing to execute.
 ## Getting the snippet
 
 ```bash
-npx coolify-mcp install --client minimax --print
+npx @done-dynamics/coolify-mcp install --client minimax --print
 ```
 
 `--print` works for unverified adapters precisely because they are who it is for.
@@ -49,7 +49,7 @@ mcp:
     command:
       - npx
       - -y
-      - coolify-mcp@latest
+      - "@done-dynamics/coolify-mcp@latest"
     enabled: true
     environment: {}
 ```
@@ -65,7 +65,7 @@ Merge this into the existing `config.yaml`. Do not replace the file.
       "command": "npx",
       "args": [
         "-y",
-        "coolify-mcp@latest"
+        "@done-dynamics/coolify-mcp@latest"
       ],
       "env": {}
     }

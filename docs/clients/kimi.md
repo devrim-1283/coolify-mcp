@@ -23,7 +23,7 @@ The path Kimi actually reads is `~/.kimi/mcp.json`.
 ## Install
 
 ```bash
-npx coolify-mcp install --client kimi
+npx @done-dynamics/coolify-mcp install --client kimi
 ```
 
 ## What the installer writes
@@ -35,7 +35,7 @@ npx coolify-mcp install --client kimi
       "command": "npx",
       "args": [
         "-y",
-        "coolify-mcp@latest"
+        "@done-dynamics/coolify-mcp@latest"
       ],
       "env": {}
     }
@@ -44,14 +44,14 @@ npx coolify-mcp install --client kimi
 ```
 
 With `--connection prod`, `env` becomes `{"COOLIFY_CONNECTION": "prod"}`. With
-`--pin=1.4.2`, `args` becomes `["-y", "coolify-mcp@1.4.2"]`.
+`--pin=1.4.2`, `args` becomes `["-y", "@done-dynamics/coolify-mcp@1.4.2"]`.
 
 ### Via the native CLI
 
 When `kimi` is on PATH the installer shells out:
 
 ```bash
-kimi mcp add --transport stdio coolify -- npx -y coolify-mcp@latest
+kimi mcp add --transport stdio coolify -- npx -y @done-dynamics/coolify-mcp@latest
 ```
 
 With `--connection prod` an `-e COOLIFY_CONNECTION=prod` pair is inserted before
@@ -91,7 +91,7 @@ literal it replaced.
 ## Verify
 
 ```bash
-npx coolify-mcp doctor
+npx @done-dynamics/coolify-mcp doctor
 kimi mcp list        # if your Kimi version has it
 ```
 
@@ -114,7 +114,7 @@ to the `EXPANDS_ENV_REFERENCES` set in `src/install/doctor.ts` and lets
 ## Uninstall
 
 ```bash
-npx coolify-mcp uninstall --client kimi
+npx @done-dynamics/coolify-mcp uninstall --client kimi
 ```
 
 ## Confirmed vs unconfirmed

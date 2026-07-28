@@ -111,7 +111,7 @@ false`, so a literal credential in a config file is a validation error.
   from every output path, with the Laravel Sanctum shape matched as a backstop.
 - Response bodies are scrubbed of the bearer token before parsing.
 
-**Installer.** `npx coolify-mcp install` for eight clients across twelve adapters:
+**Installer.** `npx @done-dynamics/coolify-mcp install` for eight clients across twelve adapters:
 Claude Code (user + project), Cursor (user + project), Codex CLI, Kimi CLI, Zed
 (user + project), OpenCode (user + project) and Claude Desktop — eleven verified
 adapters — plus MiniMax, which is print-only and unverified.
