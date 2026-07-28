@@ -41,8 +41,8 @@
  * `instructions` (see `server.ts`), added exactly when it is useful.
  */
 
+import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { ZodRawShapeCompat } from '@modelcontextprotocol/sdk/server/zod-compat.js';
 import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 import type {
   CallToolResult,
@@ -151,13 +151,37 @@ export function registerTools(server: McpServer, cfg: ServerConfig): readonly To
         description: tool.description,
         // Built per config: with a single connection the `instance` parameter is
         // absent from the schema entirely rather than optional-with-a-default.
-        inputSchema: tool.inputSchema(cfg) as ZodRawShapeCompat,
+        inputSchema: toInputSchema(tool.inputSchema(cfg)),
         annotations: tool.annotations,
       },
       async (args, extra) => runTool(tool, args, cfg, extra),
     );
   }
   return tools;
+}
+
+/**
+ * Wraps a tool's parameter shape into the object schema the SDK advertises.
+ *
+ * The `.meta()` call is the whole reason this function exists, and it is
+ * repairing a regression rather than adding a feature.
+ *
+ * Under Zod 3 the SDK converted a raw shape with `zod-to-json-schema`, which
+ * emits `additionalProperties: false` for every `z.object`. Zod 4's own
+ * converter does not: it reserves that keyword for `z.strictObject`, because
+ * only a strict object actually rejects an unknown key. Handing the SDK a bare
+ * shape under Zod 4 therefore publishes a schema that invites a model to invent
+ * parameters, and every one it invents is a wasted round trip.
+ *
+ * Switching to `z.strictObject` would restore the keyword and change behaviour
+ * with it: unknown keys would start being rejected instead of dropped, and a
+ * host that decorates tool arguments with its own metadata would break on a
+ * version bump it did not ask for. `.meta()` writes the keyword into the
+ * published JSON Schema while parsing stays `strip`, which is exactly what
+ * Zod 3 did — the advertisement and the runtime are the same pair as before.
+ */
+function toInputSchema(shape: Record<string, unknown>) {
+  return z.object(shape as z.ZodRawShape).meta({ additionalProperties: false });
 }
 
 async function runTool(
