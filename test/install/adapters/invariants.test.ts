@@ -215,7 +215,7 @@ const DOC_CTX: InstallCtx = {
   homeDir: '/home/dev',
   projectRoot: '/repo',
   platform: 'linux',
-  packageSpec: 'coolify-mcp@latest',
+  packageSpec: '@done-dynamics/coolify-mcp@latest',
   transport: 'stdio',
   connection: 'prod',
 };

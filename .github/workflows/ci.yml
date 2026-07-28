@@ -327,7 +327,7 @@ jobs:
           process.exit(0);
           SMOKE
 
-          node .smoke/handshake.mjs .smoke/node_modules/coolify-mcp/dist/index.js
+          node .smoke/handshake.mjs .smoke/node_modules/@done-dynamics/coolify-mcp/dist/index.js
 
       - name: MCP handshake over the HTTP transport
         env:
@@ -426,7 +426,7 @@ jobs:
           process.exit(0);
           HTTPSMOKE
 
-          node .smoke/http-handshake.mjs .smoke/node_modules/coolify-mcp/dist/cli.js
+          node .smoke/http-handshake.mjs .smoke/node_modules/@done-dynamics/coolify-mcp/dist/cli.js
 
   # One required status check for branch protection, so adding a matrix cell does
   # not mean editing the protection rules. `always()` plus an explicit result

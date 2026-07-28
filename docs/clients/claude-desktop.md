@@ -33,7 +33,7 @@ in plaintext.
 ## Install
 
 ```bash
-npx coolify-mcp install --client claude-desktop
+npx @done-dynamics/coolify-mcp install --client claude-desktop
 ```
 
 ## What the installer writes
@@ -45,7 +45,7 @@ npx coolify-mcp install --client claude-desktop
       "command": "npx",
       "args": [
         "-y",
-        "coolify-mcp@latest"
+        "@done-dynamics/coolify-mcp@latest"
       ],
       "env": {}
     }
@@ -64,7 +64,7 @@ On **Windows** the same install produces the shell wrapper instead:
         "/c",
         "npx",
         "-y",
-        "coolify-mcp@latest"
+        "@done-dynamics/coolify-mcp@latest"
       ],
       "env": {}
     }
@@ -73,7 +73,7 @@ On **Windows** the same install produces the shell wrapper instead:
 ```
 
 With `--connection prod`, `env` becomes `{"COOLIFY_CONNECTION": "prod"}`. With
-`--pin=1.4.2`, the spec in `args` becomes `coolify-mcp@1.4.2`.
+`--pin=1.4.2`, the spec in `args` becomes `@done-dynamics/coolify-mcp@1.4.2`.
 
 Restart Claude Desktop after any change — it reads this file at launch.
 
@@ -100,7 +100,7 @@ Because the environment is not inherited, use a registry file. Save it at
 Then:
 
 ```bash
-npx coolify-mcp install --client claude-desktop --connection prod
+npx @done-dynamics/coolify-mcp install --client claude-desktop --connection prod
 ```
 
 The config entry holds one string — the connection _name_ — and the token is
@@ -117,13 +117,13 @@ so any command that prints the token works.
 Claude Desktop's `${VAR}` expansion is **not verified**, so the installer drops
 any reference rather than writing literal text. If you add values by hand they
 are literals at rest, in a file that syncs with your user profile.
-`npx coolify-mcp doctor` will flag them, correctly, as CRITICAL. Rotate the token
+`npx @done-dynamics/coolify-mcp doctor` will flag them, correctly, as CRITICAL. Rotate the token
 if you ever do this.
 
 ## Verify
 
 ```bash
-npx coolify-mcp doctor
+npx @done-dynamics/coolify-mcp doctor
 ```
 
 On Linux, when the config is absent, doctor emits a
@@ -153,7 +153,7 @@ which today it refuses to do.
 ## Uninstall
 
 ```bash
-npx coolify-mcp uninstall --client claude-desktop
+npx @done-dynamics/coolify-mcp uninstall --client claude-desktop
 ```
 
 ## Confirmed vs unconfirmed

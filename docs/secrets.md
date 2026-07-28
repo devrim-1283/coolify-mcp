@@ -27,7 +27,7 @@ That is not advice, it is enforced in three places:
 - Set `readOnly: true` on any connection you do not need to write to. It refuses
   every non-GET at the HTTP client regardless of what the token is scoped to.
 - Use `tokenCommand` for 1Password / `pass` / Vault / `gopass`.
-- Run `npx coolify-mcp doctor` on every machine that has ever had an MCP client
+- Run `npx @done-dynamics/coolify-mcp doctor` on every machine that has ever had an MCP client
   on it.
 - `chmod 600` any file that holds a credential, including a Cursor `envFile`.
 
@@ -129,7 +129,7 @@ Works with anything that prints a token:
 | Anything else | Unsupported; use `tokenCommand`.                                                   |
 
 No native modules are used, ever — a `keytar`-class dependency breaks
-`npx coolify-mcp`, which is the primary install path. So this dispatches over the
+`npx @done-dynamics/coolify-mcp`, which is the primary install path. So this dispatches over the
 platform's own CLI.
 
 #### Windows: honestly, not a keychain
@@ -240,10 +240,10 @@ the actual bug you are hunting.
 ## `doctor` — the plaintext credential scanner
 
 ```bash
-npx coolify-mcp doctor                 # your coolify entry only
-npx coolify-mcp doctor --all-servers   # every MCP server in every client config
-npx coolify-mcp doctor --json          # machine-readable
-npx coolify-mcp doctor --fix           # conservative repair, see below
+npx @done-dynamics/coolify-mcp doctor                 # your coolify entry only
+npx @done-dynamics/coolify-mcp doctor --all-servers   # every MCP server in every client config
+npx @done-dynamics/coolify-mcp doctor --json          # machine-readable
+npx @done-dynamics/coolify-mcp doctor --fix           # conservative repair, see below
 ```
 
 Exit codes: **0** clean · **1** warnings · **2** a credential was found at rest.
@@ -258,7 +258,7 @@ Exit codes: **0** clean · **1** warnings · **2** a credential was found at res
 | `world-readable-config`      | warn         | POSIX mode with any of `0o077` set.                                                                                                                                                             |
 | `acl-not-checked`            | info         | **Windows only.** Permissions were _not_ checked — Windows uses ACLs, and reporting "permissions OK" would be a claim doctor has not verified.                                                  |
 | `*-config-unparseable`       | error        | The file does not parse. Nothing will be written into it.                                                                                                                                       |
-| `unpinned-version`           | info         | A client resolves `coolify-mcp@latest` at spawn time.                                                                                                                                           |
+| `unpinned-version`           | info         | A client resolves `@done-dynamics/coolify-mcp@latest` at spawn time.                                                                                                                            |
 | `pinned-version-mismatch`    | warn/info    | Two clients disagree about which version to run.                                                                                                                                                |
 | `env-var-shadows-file`       | warn         | A connection name is defined in both places; the environment won, so file settings such as `readOnly` are not in effect.                                                                        |
 | `unverified-adapter-present` | warn         | An unverified client (MiniMax) is installed and will not be written to.                                                                                                                         |
@@ -319,7 +319,7 @@ screen share and support bundle that ever touched the file.
    replacement with the narrowest abilities that do the job.
 2. Put the replacement in an environment variable or a secret manager. Reference
    it; do not paste it.
-3. Re-run `npx coolify-mcp doctor` and confirm the finding is gone.
+3. Re-run `npx @done-dynamics/coolify-mcp doctor` and confirm the finding is gone.
 
 ## Reporting a leak in coolify-mcp itself
 

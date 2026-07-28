@@ -19,9 +19,9 @@ all: it expands `${VAR}` and `${VAR:-default}` inside `command`, `args`, `env`,
 ## Install
 
 ```bash
-npx coolify-mcp install --client claude-code                  # both scopes, filtered by detection
-npx coolify-mcp install --client claude-code --scope user     # ~/.claude.json only
-npx coolify-mcp install --client claude-code --scope project  # <projectRoot>/.mcp.json only
+npx @done-dynamics/coolify-mcp install --client claude-code                  # both scopes, filtered by detection
+npx @done-dynamics/coolify-mcp install --client claude-code --scope user     # ~/.claude.json only
+npx @done-dynamics/coolify-mcp install --client claude-code --scope project  # <projectRoot>/.mcp.json only
 ```
 
 ## What the installer writes
@@ -34,7 +34,7 @@ npx coolify-mcp install --client claude-code --scope project  # <projectRoot>/.m
       "command": "npx",
       "args": [
         "-y",
-        "coolify-mcp@latest"
+        "@done-dynamics/coolify-mcp@latest"
       ],
       "env": {}
     }
@@ -43,7 +43,7 @@ npx coolify-mcp install --client claude-code --scope project  # <projectRoot>/.m
 ```
 
 With `--connection prod`, `env` becomes `{"COOLIFY_CONNECTION": "prod"}`. With
-`--pin=1.4.2`, `args` becomes `["-y", "coolify-mcp@1.4.2"]`.
+`--pin=1.4.2`, `args` becomes `["-y", "@done-dynamics/coolify-mcp@1.4.2"]`.
 
 `"type": "stdio"` is redundant — stdio is the default whenever `command` is
 present — but it is emitted anyway so that the file writer produces output
@@ -57,7 +57,7 @@ because the client's own CLI preserves invariants we do not know about. The exac
 invocation is:
 
 ```bash
-claude mcp add-json coolify '{"type":"stdio","command":"npx","args":["-y","coolify-mcp@latest"],"env":{}}' --scope user
+claude mcp add-json coolify '{"type":"stdio","command":"npx","args":["-y","@done-dynamics/coolify-mcp@latest"],"env":{}}' --scope user
 ```
 
 Use `--no-native-cli` to force the file writer.
@@ -91,7 +91,7 @@ the value:
       "command": "npx",
       "args": [
         "-y",
-        "coolify-mcp@latest"
+        "@done-dynamics/coolify-mcp@latest"
       ],
       "env": {
         "COOLIFY_BASE_URL": "${COOLIFY_BASE_URL}",
@@ -112,7 +112,7 @@ For several instances or teams, define a
 ## Verify
 
 ```bash
-npx coolify-mcp doctor   # the CLIENTS section reports whether the entry was found and parses
+npx @done-dynamics/coolify-mcp doctor   # the CLIENTS section reports whether the entry was found and parses
 ```
 
 Then, inside Claude Code, `/mcp` should list `coolify`, and asking it to "list
@@ -124,13 +124,13 @@ If the server does not start:
   hundreds of kilobytes. The installer merges through a writer that touches only
   `mcpServers.coolify`; if you edit it by hand, keep the rest intact.
 - A `${COOLIFY_API_TOKEN}` reference resolving to an empty string produces a 401
-  that looks like a bad token. `npx coolify-mcp connections` reports whether the
+  that looks like a bad token. `npx @done-dynamics/coolify-mcp connections` reports whether the
   source actually resolves.
 
 ## Uninstall
 
 ```bash
-npx coolify-mcp uninstall --client claude-code
+npx @done-dynamics/coolify-mcp uninstall --client claude-code
 ```
 
 Removes `mcpServers.coolify` and nothing else. An entry that has been hand-edited

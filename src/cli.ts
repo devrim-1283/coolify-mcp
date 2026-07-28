@@ -105,7 +105,7 @@ OPTIONS
   --json                 machine-readable result on stdout.
 
 VERSION PINNING
-  Without --pin the entry reads coolify-mcp@latest, so every client spawn
+  Without --pin the entry reads <package>@latest, so every client spawn
   resolves the newest published version and may execute code that did not exist
   when you installed it. Convenient for one developer; unacceptable under most
   software supply-chain policies.
@@ -419,6 +419,7 @@ async function commandDoctor(values: OptionValues): Promise<number> {
     allServers: flag(values, 'all-servers'),
     fix: flag(values, 'fix'),
     packageVersion: packageVersion(),
+    packageName: packageName(),
   });
 
   if (flag(values, 'json')) emitJson(report);
@@ -782,13 +783,18 @@ function buildCtx(values: OptionValues): InstallCtx {
 }
 
 /**
- * `coolify-mcp@latest` unless the user pinned. The install help explains why the
+ * `<package>@latest` unless the user pinned. The install help explains why the
  * default is the loose one and why an organisation should not keep it.
+ *
+ * `packageName()` and not `PROGRAM` — see the note on that function. What goes
+ * into a client config is the thing `npx` downloads, which is no longer spelled
+ * the same as the command it installs.
  */
 function packageSpec(values: OptionValues): string {
   const pin = text(values, 'pin');
-  if (pin === undefined) return `${PROGRAM}@latest`;
-  return `${PROGRAM}@${pin === '' ? packageVersion() : pin}`;
+  const name = packageName();
+  if (pin === undefined) return `${name}@latest`;
+  return `${name}@${pin === '' ? packageVersion() : pin}`;
 }
 
 /**
@@ -993,6 +999,30 @@ function packageVersion(): string {
     return typeof manifest.version === 'string' ? manifest.version : 'unknown';
   } catch {
     return 'unknown';
+  }
+}
+
+/**
+ * The npm package name, read from the manifest rather than written down here.
+ *
+ * IT IS NOT `PROGRAM`. `PROGRAM` is what this binary is called — the name in the
+ * `bin` map, the prefix on every diagnostic line, the word a user types. The
+ * package name is what `npx` resolves, and since the 0.1.0 release they are
+ * different strings: npm refuses `coolify-mcp` because its similarity check
+ * strips punctuation and the result collides with an existing `coolifymcp`.
+ *
+ * The two were one constant until that refusal, which is exactly the kind of
+ * conflation that survives review — right up until the day the two concepts
+ * diverge and every generated config points `npx` at a package that is not
+ * this one. Reading it from the manifest means the installer cannot disagree
+ * with what was actually published, whatever the name becomes next.
+ */
+function packageName(): string {
+  try {
+    const manifest = createRequire(import.meta.url)('../package.json') as { name?: unknown };
+    return typeof manifest.name === 'string' ? manifest.name : PROGRAM;
+  } catch {
+    return PROGRAM;
   }
 }
 

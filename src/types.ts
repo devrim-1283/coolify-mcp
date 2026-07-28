@@ -272,7 +272,7 @@ export interface InstallCtx {
   platform: NodeJS.Platform;
   /** Bake COOLIFY_CONNECTION into the env block. */
   connection?: string;
-  /** "coolify-mcp@1.4.2" vs "coolify-mcp@latest". */
+  /** "@done-dynamics/coolify-mcp@1.4.2" vs "@done-dynamics/coolify-mcp@latest". */
   packageSpec: string;
   transport: 'stdio' | 'http';
 }
