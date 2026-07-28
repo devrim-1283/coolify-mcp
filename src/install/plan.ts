@@ -126,7 +126,8 @@ async function buildPlan(
     // we have verified. An explicit --client overrides both: the user may be
     // installing a client we cannot see, and printing an unverified entry for
     // them to paste is still useful.
-    if (selection.automatic && !(detection.installed && adapter.confidence === 'verified')) continue;
+    if (selection.automatic && !(detection.installed && adapter.confidence === 'verified'))
+      continue;
     if (action === 'uninstall' && !detection.configExists) continue;
 
     const adapterIssues = await adapter.validate(ctx);
@@ -177,7 +178,8 @@ function selectAdapters(
   clients: readonly string[] | undefined,
   scope: 'user' | 'project' | undefined,
 ): Selection {
-  const inScope = (adapter: McpClientAdapter): boolean => scope === undefined || adapter.scope === scope;
+  const inScope = (adapter: McpClientAdapter): boolean =>
+    scope === undefined || adapter.scope === scope;
 
   const named = (clients ?? []).map((client) => client.trim()).filter((client) => client !== '');
   if (named.length === 0) {

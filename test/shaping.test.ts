@@ -157,25 +157,36 @@ describe('shapeResponse', () => {
 
     const env = shapeResponse(
       rows,
-      { total: 187, cursor: { offset: 100, queryHash: hash }, next_cursor: encodeCursor({ offset: 150, queryHash: hash }) },
+      {
+        total: 187,
+        cursor: { offset: 100, queryHash: hash },
+        next_cursor: encodeCursor({ offset: 150, queryHash: hash }),
+      },
       { maxBytes: 6000 },
     );
 
     // The caller's cursor was computed before shaping; honouring it would skip
     // every row the ladder dropped.
-    expect(decodeCursor(env.meta.next_cursor ?? '')).toEqual({ offset: 100 + env.data.length, queryHash: hash });
+    expect(decodeCursor(env.meta.next_cursor ?? '')).toEqual({
+      offset: 100 + env.data.length,
+      queryHash: hash,
+    });
     expect(env.meta.hint).toContain('Pass next_cursor to continue.');
   });
 
   it('step 3: caps one oversized value in place and leaves its siblings intact', () => {
-    const rows = [{ uuid: 'a1', name: 'api', docker_compose_raw: 'services:\n  web:\n'.repeat(3000) }];
+    const rows = [
+      { uuid: 'a1', name: 'api', docker_compose_raw: 'services:\n  web:\n'.repeat(3000) },
+    ];
 
     const env = shapeResponse(rows, {}, { maxBytes: 4000 });
 
     expect(env.meta.truncation).toBe('field_value');
     expect(env.data[0]?.uuid).toBe('a1');
     expect(env.data[0]?.name).toBe('api');
-    expect(env.data[0]?.docker_compose_raw).toMatch(/^<truncated: \d+ bytes — fetch in full via execute_read_operation>$/);
+    expect(env.data[0]?.docker_compose_raw).toMatch(
+      /^<truncated: \d+ bytes — fetch in full via execute_read_operation>$/,
+    );
   });
 
   it('descends the ladder in order, keeping each earlier step applied', () => {
@@ -198,7 +209,11 @@ describe('shapeResponse', () => {
   it('never returns an envelope larger than the budget', () => {
     const listOfManySmallRows = Array.from({ length: 5000 }, (_, i) => ({ uuid: `u${i}`, n: i }));
     const oneMonstrousRow = [{ uuid: 'a1', raw: 'z'.repeat(400_000) }];
-    const singleObject = { uuid: 'a1', raw: 'z'.repeat(400_000), nested: { also_raw: 'y'.repeat(300_000) } };
+    const singleObject = {
+      uuid: 'a1',
+      raw: 'z'.repeat(400_000),
+      nested: { also_raw: 'y'.repeat(300_000) },
+    };
 
     for (const payload of [listOfManySmallRows, oneMonstrousRow, singleObject]) {
       const env = shapeResponse(payload, { hint: 'Showing 50 of 187.' }, { maxBytes: 8000 });
@@ -209,7 +224,11 @@ describe('shapeResponse', () => {
   it('states facts in the hint rather than instructing the model', () => {
     const rows = Array.from({ length: 50 }, (_, i) => ({ uuid: `u${i}`, blob: 'b'.repeat(400) }));
 
-    const env = shapeResponse(rows, { hint: 'Showing 50 of 187. Pass next_cursor to continue, or narrow with query.' }, { maxBytes: 6000 });
+    const env = shapeResponse(
+      rows,
+      { hint: 'Showing 50 of 187. Pass next_cursor to continue, or narrow with query.' },
+      { maxBytes: 6000 },
+    );
 
     expect(env.meta.hint).toMatch(/^Showing 50 of 187\./);
     expect(env.meta.hint).not.toMatch(/\byou (should|must)\b/i);
@@ -233,7 +252,9 @@ describe('cursors', () => {
   });
 
   it('rejects a cursor replayed against different filters', () => {
-    const cursor = decodeCursor(encodeCursor({ offset: 50, queryHash: queryHash({ query: 'leads' }) }));
+    const cursor = decodeCursor(
+      encodeCursor({ offset: 50, queryHash: queryHash({ query: 'leads' }) }),
+    );
 
     const error = captureError(() => assertCursorMatches(cursor, queryHash({ query: 'billing' })));
 
@@ -251,7 +272,9 @@ describe('cursors', () => {
   });
 
   it('rejects a well-formed but nonsensical cursor', () => {
-    const forged = Buffer.from(JSON.stringify({ offset: -1, queryHash: 'abc' })).toString('base64url');
+    const forged = Buffer.from(JSON.stringify({ offset: -1, queryHash: 'abc' })).toString(
+      'base64url',
+    );
 
     expect(() => decodeCursor(forged)).toThrow(CoolifyError);
   });
@@ -391,7 +414,10 @@ describe('redactObject', () => {
   });
 
   it('reveals Coolify secrets on request but never our own token', () => {
-    const out = redactObject({ password: 'hunter2', build_log: `used ${REGISTERED_TOKEN}` }, { reveal: true });
+    const out = redactObject(
+      { password: 'hunter2', build_log: `used ${REGISTERED_TOKEN}` },
+      { reveal: true },
+    );
 
     expect(out.password).toBe('hunter2');
     expect(out.build_log).not.toContain(REGISTERED_TOKEN);

@@ -1,17 +1,17 @@
 # Zed
 
-| | |
-|---|---|
-| Adapter ids | `zed-user`, `zed-project` |
-| `--client` selectors | `zed`, `zed-user`, `zed-project` |
-| User config (macOS, Linux) | `~/.config/zed/settings.json` |
-| User config (Windows) | `%USERPROFILE%\AppData\Roaming\Zed\settings.json` — **derived, not confirmed** |
-| Project config | `<projectRoot>/.zed/settings.json` |
-| Key path | `context_servers.coolify` |
-| Format | **JSONC** — comments and trailing commas are preserved |
-| Transports written | `stdio` only |
-| Confidence | **verified** for the key and shape; the Windows user path is derived |
-| Native CLI | none |
+|                            |                                                                                |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| Adapter ids                | `zed-user`, `zed-project`                                                      |
+| `--client` selectors       | `zed`, `zed-user`, `zed-project`                                               |
+| User config (macOS, Linux) | `~/.config/zed/settings.json`                                                  |
+| User config (Windows)      | `%USERPROFILE%\AppData\Roaming\Zed\settings.json` — **derived, not confirmed** |
+| Project config             | `<projectRoot>/.zed/settings.json`                                             |
+| Key path                   | `context_servers.coolify`                                                      |
+| Format                     | **JSONC** — comments and trailing commas are preserved                         |
+| Transports written         | `stdio` only                                                                   |
+| Confidence                 | **verified** for the key and shape; the Windows user path is derived           |
+| Native CLI                 | none                                                                           |
 
 ## Three things that are easy to get wrong
 
@@ -141,13 +141,13 @@ of the three invariants every adapter must satisfy, listed in
 
 ## Confirmed vs unconfirmed
 
-| Item | Status |
-|---|---|
-| `context_servers` key | confirmed |
-| `command` as a string with sibling `args` / `env` | confirmed |
-| `~/.config/zed/settings.json` on macOS and Linux | confirmed |
-| `<projectRoot>/.zed/settings.json` | confirmed |
-| Settings file is JSONC | confirmed |
-| `%APPDATA%\Zed\settings.json` on Windows | **derived from `%APPDATA%`, not confirmed** |
-| Whether `"source": "custom"` is required | **not verified** — omitted |
-| `${VAR}` expansion inside `env` | **not verified** — treated as "no expansion" |
+| Item                                              | Status                                       |
+| ------------------------------------------------- | -------------------------------------------- |
+| `context_servers` key                             | confirmed                                    |
+| `command` as a string with sibling `args` / `env` | confirmed                                    |
+| `~/.config/zed/settings.json` on macOS and Linux  | confirmed                                    |
+| `<projectRoot>/.zed/settings.json`                | confirmed                                    |
+| Settings file is JSONC                            | confirmed                                    |
+| `%APPDATA%\Zed\settings.json` on Windows          | **derived from `%APPDATA%`, not confirmed**  |
+| Whether `"source": "custom"` is required          | **not verified** — omitted                   |
+| `${VAR}` expansion inside `env`                   | **not verified** — treated as "no expansion" |

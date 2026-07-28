@@ -104,7 +104,9 @@ function instanceShape(cfg: ServerConfig): Record<string, unknown> {
   return {
     instance: z
       .enum([first, ...rest])
-      .describe('Which configured Coolify connection to act on. Required: write tools have no default target.'),
+      .describe(
+        'Which configured Coolify connection to act on. Required: write tools have no default target.',
+      ),
   };
 }
 
@@ -147,12 +149,20 @@ const ARGS = z.object({
     ),
   resource_type: z
     .enum(RESOURCE_TYPES)
-    .describe('Which Coolify family the UUID belongs to. find_resources reports the type alongside each UUID.'),
-  uuid: z.string().min(1).max(255).describe('UUID of the application, database or service to act on.'),
+    .describe(
+      'Which Coolify family the UUID belongs to. find_resources reports the type alongside each UUID.',
+    ),
+  uuid: z
+    .string()
+    .min(1)
+    .max(255)
+    .describe('UUID of the application, database or service to act on.'),
   force: z
     .boolean()
     .optional()
-    .describe('Only on start of an application: start even when Coolify considers the resource already running.'),
+    .describe(
+      'Only on start of an application: start even when Coolify considers the resource already running.',
+    ),
   instant_deploy: z
     .boolean()
     .optional()
@@ -160,11 +170,15 @@ const ARGS = z.object({
   docker_cleanup: z
     .boolean()
     .optional()
-    .describe('Only on stop: run Docker cleanup on the host afterwards, reclaiming space from unused images and volumes.'),
+    .describe(
+      'Only on stop: run Docker cleanup on the host afterwards, reclaiming space from unused images and volumes.',
+    ),
   latest: z
     .boolean()
     .optional()
-    .describe('Only on restart of a service: pull the latest image tags before restarting instead of reusing the current ones.'),
+    .describe(
+      'Only on restart of a service: pull the latest image tags before restarting instead of reusing the current ones.',
+    ),
 });
 
 type ControlArgs = z.infer<typeof ARGS>;
@@ -200,7 +214,11 @@ function buildQuery(args: ControlArgs): Record<string, boolean | undefined> {
 // Handler
 // ---------------------------------------------------------------------------
 
-async function handler(rawArgs: Record<string, unknown>, cfg: ServerConfig, extra: ToolExtra): Promise<ToolResult> {
+async function handler(
+  rawArgs: Record<string, unknown>,
+  cfg: ServerConfig,
+  extra: ToolExtra,
+): Promise<ToolResult> {
   try {
     const args = parseArgs(rawArgs);
     const connection = resolveConnection(cfg, args.instance);

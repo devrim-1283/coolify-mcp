@@ -77,7 +77,9 @@ function instanceShape(cfg: ServerConfig): Record<string, unknown> {
   return {
     instance: z
       .enum([first, ...rest])
-      .describe('Which configured Coolify connection to write to. Required: write tools have no default target.'),
+      .describe(
+        'Which configured Coolify connection to write to. Required: write tools have no default target.',
+      ),
   };
 }
 
@@ -139,11 +141,15 @@ const VARIABLE = z.object({
   is_build_time: z
     .boolean()
     .optional()
-    .describe('Expose the variable to the build as well as the running container. Needed by build-time frameworks such as Next.js and Vite.'),
+    .describe(
+      'Expose the variable to the build as well as the running container. Needed by build-time frameworks such as Next.js and Vite.',
+    ),
   is_literal: z
     .boolean()
     .optional()
-    .describe('Treat the value literally, with no escaping or variable expansion. Use for values containing $ or backslashes.'),
+    .describe(
+      'Treat the value literally, with no escaping or variable expansion. Use for values containing $ or backslashes.',
+    ),
   is_multiline: z
     .boolean()
     .optional()
@@ -156,13 +162,21 @@ const ARGS = z.object({
   instance: z.string().min(1).optional(),
   resource_type: z
     .enum(RESOURCE_TYPES)
-    .describe('Which Coolify family the UUID belongs to. find_resources reports the type alongside each UUID.'),
-  uuid: z.string().min(1).max(255).describe('UUID of the application, database or service whose variables to set.'),
+    .describe(
+      'Which Coolify family the UUID belongs to. find_resources reports the type alongside each UUID.',
+    ),
+  uuid: z
+    .string()
+    .min(1)
+    .max(255)
+    .describe('UUID of the application, database or service whose variables to set.'),
   variables: z
     .array(VARIABLE)
     .min(1)
     .max(MAX_VARIABLES)
-    .describe('Variables to set, in one request. Existing keys are updated in place; keys not listed are left untouched.'),
+    .describe(
+      'Variables to set, in one request. Existing keys are updated in place; keys not listed are left untouched.',
+    ),
 });
 
 type SetEnvArgs = z.infer<typeof ARGS>;
@@ -235,7 +249,11 @@ function maskValues(node: unknown): unknown {
 // Handler
 // ---------------------------------------------------------------------------
 
-async function handler(rawArgs: Record<string, unknown>, cfg: ServerConfig, extra: ToolExtra): Promise<ToolResult> {
+async function handler(
+  rawArgs: Record<string, unknown>,
+  cfg: ServerConfig,
+  extra: ToolExtra,
+): Promise<ToolResult> {
   try {
     const args = parseArgs(rawArgs);
     assertUniqueKeys(args.variables);

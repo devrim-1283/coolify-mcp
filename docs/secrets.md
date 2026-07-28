@@ -13,7 +13,7 @@ That is not advice, it is enforced in three places:
 2. `baseUrl` rejects embedded credentials (`https://user:pass@host`), which is
    the one string field that could otherwise smuggle one in.
 3. The installer builds **pointer config only** — a command, its arguments, and
-   at most a connection *name*. When a client cannot expand a `${VAR}` reference,
+   at most a connection _name_. When a client cannot expand a `${VAR}` reference,
    the installer **drops the variable** rather than writing its value. The worst
    outcome an adapter is allowed to produce is a missing variable, never a leaked
    credential.
@@ -46,13 +46,13 @@ That is not advice, it is enforced in three places:
 
 Coolify's Sanctum abilities, and what each unlocks here:
 
-| Ability | Unlocks |
-|---|---|
-| `read` | Everything read-only except the sensitive set below. |
+| Ability          | Unlocks                                                                                                                                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read`           | Everything read-only except the sensitive set below.                                                                                                                                                            |
 | `read:sensitive` | Environment variable **values**, passwords, **logs**. Without it `get_logs` returns 200 with an empty body — not a 403 — which is why this server treats an empty log body as a failure and says so explicitly. |
-| `write` | Creates, updates, starts, stops, restarts, deletes. |
-| `deploy` | `POST /v1/deploy`. **Exclusive**: a `deploy` token carries this *instead of* the others. |
-| `root` | Everything. **Exclusive.** This is what a homelab install usually hands out, and it is why `get_resource` masks credential-shaped values unconditionally — Coolify itself will not redact for a root token. |
+| `write`          | Creates, updates, starts, stops, restarts, deletes.                                                                                                                                                             |
+| `deploy`         | `POST /v1/deploy`. **Exclusive**: a `deploy` token carries this _instead of_ the others.                                                                                                                        |
+| `root`           | Everything. **Exclusive.** This is what a homelab install usually hands out, and it is why `get_resource` masks credential-shaped values unconditionally — Coolify itself will not redact for a root token.     |
 
 Abilities are fixed when a token is created. A token without `read:sensitive`
 cannot gain it; it has to be replaced.
@@ -121,12 +121,12 @@ Works with anything that prints a token:
 { "baseUrl": "…", "tokenKeychain": { "service": "coolify-mcp", "account": "prod" } }
 ```
 
-| Platform | Backend |
-|---|---|
-| macOS | `security find-generic-password -s <service> -a <account> -w` |
-| Linux | `secret-tool lookup service <service> account <account>` (needs `libsecret-tools`) |
-| Windows | **DPAPI at rest — see below.** Not Credential Manager. |
-| Anything else | Unsupported; use `tokenCommand`. |
+| Platform      | Backend                                                                            |
+| ------------- | ---------------------------------------------------------------------------------- |
+| macOS         | `security find-generic-password -s <service> -a <account> -w`                      |
+| Linux         | `secret-tool lookup service <service> account <account>` (needs `libsecret-tools`) |
+| Windows       | **DPAPI at rest — see below.** Not Credential Manager.                             |
+| Anything else | Unsupported; use `tokenCommand`.                                                   |
 
 No native modules are used, ever — a `keytar`-class dependency breaks
 `npx coolify-mcp`, which is the primary install path. So this dispatches over the
@@ -134,7 +134,7 @@ platform's own CLI.
 
 #### Windows: honestly, not a keychain
 
-No first-party Windows CLI returns a generic credential's *secret*. `cmdkey`
+No first-party Windows CLI returns a generic credential's _secret_. `cmdkey`
 lists entries but never prints the blob, and reading it means `CredRead()` through
 P/Invoke — a native dependency this project will not take.
 
@@ -197,7 +197,7 @@ instances at one credential.
 ## What happens to a resolved token
 
 - **It is cached for the process lifetime and never written to disk.** The cache
-  holds the *promise*, so a fan-out across connections does not spawn one
+  holds the _promise_, so a fan-out across connections does not spawn one
   `op read` per concurrent call. A failed resolution is evicted — the usual cause
   is a locked vault, and the fix is to unlock and retry, which must not require
   restarting the server.
@@ -224,9 +224,9 @@ instances at one credential.
 
 Two different mechanisms, easy to confuse:
 
-| | What it hides | Revealable? |
-|---|---|---|
-| `redact()` | **Our** bearer tokens | **Never.** |
+|                  | What it hides                                                                                            | Revealable?                                                                                  |
+| ---------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `redact()`       | **Our** bearer tokens                                                                                    | **Never.**                                                                                   |
 | `redactObject()` | **Coolify's** secrets — values under keys matching `password`, `secret`, `token`, `private_key`, `*_key` | Yes, per tool: `get_environment_variables` and `execute_read_operation` take `reveal: true`. |
 
 `get_resource` masks unconditionally with no `reveal` parameter: environment
@@ -250,18 +250,18 @@ Exit codes: **0** clean · **1** warnings · **2** a credential was found at res
 
 ### What it looks for
 
-| Code | Severity | Rule |
-|---|---|---|
-| `plaintext-credential` | **critical** | The Laravel Sanctum shape `\b\d+\|[A-Za-z0-9]{40}\b`. Forty base62 characters behind a pipe behind an integer does not occur in a config file by accident, so this is reported with no hedging. |
-| `bearer-literal` | warn | A literal `Bearer <credential>` in a `headers` block that is not an env reference or an obvious placeholder. |
-| `env-literal-secret` | warn | A key matching `TOKEN\|KEY\|SECRET\|PASSWORD` set to a literal value inside an `env` / `environment` block. |
-| `world-readable-config` | warn | POSIX mode with any of `0o077` set. |
-| `acl-not-checked` | info | **Windows only.** Permissions were *not* checked — Windows uses ACLs, and reporting "permissions OK" would be a claim doctor has not verified. |
-| `*-config-unparseable` | error | The file does not parse. Nothing will be written into it. |
-| `unpinned-version` | info | A client resolves `coolify-mcp@latest` at spawn time. |
-| `pinned-version-mismatch` | warn/info | Two clients disagree about which version to run. |
-| `env-var-shadows-file` | warn | A connection name is defined in both places; the environment won, so file settings such as `readOnly` are not in effect. |
-| `unverified-adapter-present` | warn | An unverified client (MiniMax) is installed and will not be written to. |
+| Code                         | Severity     | Rule                                                                                                                                                                                            |
+| ---------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plaintext-credential`       | **critical** | The Laravel Sanctum shape `\b\d+\|[A-Za-z0-9]{40}\b`. Forty base62 characters behind a pipe behind an integer does not occur in a config file by accident, so this is reported with no hedging. |
+| `bearer-literal`             | warn         | A literal `Bearer <credential>` in a `headers` block that is not an env reference or an obvious placeholder.                                                                                    |
+| `env-literal-secret`         | warn         | A key matching `TOKEN\|KEY\|SECRET\|PASSWORD` set to a literal value inside an `env` / `environment` block.                                                                                     |
+| `world-readable-config`      | warn         | POSIX mode with any of `0o077` set.                                                                                                                                                             |
+| `acl-not-checked`            | info         | **Windows only.** Permissions were _not_ checked — Windows uses ACLs, and reporting "permissions OK" would be a claim doctor has not verified.                                                  |
+| `*-config-unparseable`       | error        | The file does not parse. Nothing will be written into it.                                                                                                                                       |
+| `unpinned-version`           | info         | A client resolves `coolify-mcp@latest` at spawn time.                                                                                                                                           |
+| `pinned-version-mismatch`    | warn/info    | Two clients disagree about which version to run.                                                                                                                                                |
+| `env-var-shadows-file`       | warn         | A connection name is defined in both places; the environment won, so file settings such as `readOnly` are not in effect.                                                                        |
+| `unverified-adapter-present` | warn         | An unverified client (MiniMax) is installed and will not be written to.                                                                                                                         |
 
 At most **one** finding is emitted per string, most precise rule first: a literal
 Sanctum token in `headers.Authorization` satisfies all three credential rules, and
@@ -294,7 +294,7 @@ It rewrites a literal to `${VAR}` **only when all of these hold**:
 
 It **never** invents a variable. Setting one durably means editing a shell
 profile, a launchd plist or a Windows user environment this process cannot see,
-and a "fixed" config referencing a variable that is unset at spawn time is *worse*
+and a "fixed" config referencing a variable that is unset at spawn time is _worse_
 than the literal it replaced: it now fails inside the client, where you have no
 diagnostics.
 
