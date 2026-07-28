@@ -70,14 +70,15 @@ honest account of both, and of the one axis where neither competes.
 
 |                       | Coolify's built-in `/mcp`    | `@masonator/coolify-mcp` | **coolify-mcp** (this project)                                      |
 | --------------------- | ---------------------------- | ------------------------ | ------------------------------------------------------------------- |
-| Where it runs         | Inside your Coolify instance | Local process            | Local process                                                       |
+| Where it runs         | Inside your Coolify instance | Local process            | Local process, **or remote over HTTP**                              |
 | Tools                 | 10                           | ~42, hand-curated        | 15 by default (16 with destructive enabled) + 189-operation catalog |
 | Writes                | No — all 10 are read-only    | Yes                      | Yes, behind flags                                                   |
 | Instances per process | 1                            | 1                        | **N**                                                               |
 | Teams reachable       | The token's team             | The token's team         | **M — one connection per (instance, team)**                         |
 | Cross-instance search | No                           | No                       | **Yes — `find_resources instance:"*"`**                             |
 | API coverage          | Curated subset               | Curated subset           | **Full published surface** via `search_operations` → `execute_*`    |
-| Install               | Nothing to install           | npm                      | npm, with an installer for 8 clients                                |
+| Transport             | HTTP, remote                 | stdio, local             | **stdio and HTTP**                                                  |
+| Install               | Nothing to install           | npm                      | npm, an installer for 8 clients, or a container                     |
 | License               | Coolify's                    | MIT                      | MIT                                                                 |
 
 **Coolify's own `/mcp` endpoint** is the lowest-friction option by a mile:
@@ -86,6 +87,11 @@ read-only and scoped to the token's team. Upstream
 [PR #11000](https://github.com/coollabsio/coolify/pull/11000) would expand it
 considerably; if it lands and you run one instance and one team, you may not
 need this project at all.
+
+Its remaining advantage over this project used to be that last clause — living
+where the data is. `coolify-mcp serve --http` closes it: the same server, the
+same fleet model, deployed as a container on Coolify itself and reached over
+HTTP from any client on any machine. See [docs/deploy.md](./docs/deploy.md).
 
 **[@masonator/coolify-mcp](https://github.com/StuMason/coolify-mcp)** is the
 established third-party server and genuinely good — around 42 curated,
@@ -297,6 +303,47 @@ configuration. The adapter is marked `confidence: 'unverified'`, which makes
 `apply()` refuse to write. `--print` shows both plausible shapes plus the
 procedure for settling which is correct.
 [Details →](./docs/clients/minimax.md)
+
+---
+
+## Run it over HTTP
+
+Everything above installs coolify-mcp as a local process your client spawns over
+stdio. It also speaks Streamable HTTP, which means it can run once — on the
+Coolify box, in a container — and serve every client you own.
+
+```bash
+export COOLIFY_MCP_AUTH_TOKEN="$(openssl rand -base64 32)"
+npx coolify-mcp serve --http --port 3000
+```
+
+|                     | stdio                 | HTTP                        |
+| ------------------- | --------------------- | --------------------------- |
+| Started by          | your MCP client       | you, or a container runtime |
+| Runs on             | every machine you use | one machine                 |
+| Coolify token lives | on every machine      | on the server only          |
+| Client needs        | the package           | a URL and a bearer token    |
+
+The second and third rows are the point. With stdio, a laptop that talks to
+Coolify is a laptop holding a live Coolify API token. Over HTTP the server holds
+it and clients present an unrelated bearer token, so a compromised client
+credential is not a Coolify credential and rotating one does not force rotating
+the other.
+
+Two endpoints: `POST /mcp` requires `Authorization: Bearer`, and `GET /healthz`
+does not — a container health check has no token, and the endpoint reveals only
+that a process is listening.
+
+`COOLIFY_MCP_AUTH_TOKEN` is **required**, minimum 32 characters, and the server
+refuses to start without it. A process that binds a port while holding a live
+Coolify token and accepts anyone is not a degraded configuration.
+
+The server binds `127.0.0.1` unless you type `--host 0.0.0.0`, and DNS rebinding
+protection means the public hostname your reverse proxy serves has to be named
+with `--allowed-host`. It does not terminate TLS — put a proxy in front of it;
+on Coolify that is Traefik and it is already there.
+
+[Deploying on Coolify →](./docs/deploy.md)
 
 ---
 
@@ -626,6 +673,7 @@ npx coolify-mcp uninstall [--client a,b] [--all] [--scope user|project] [--force
                           [--dry-run] [--yes] [--json]
 npx coolify-mcp connections [--json]
 npx coolify-mcp check [--connection NAME] [--json]
+npx coolify-mcp serve --http [--port N] [--host ADDR] [--allowed-host HOST]
 ```
 
 `coolify-mcp <command> --help` for per-command options.
@@ -639,6 +687,7 @@ npx coolify-mcp check [--connection NAME] [--json]
 | [docs/connections.md](./docs/connections.md) | Connections, instances, teams, the registry file, precedence   |
 | [docs/secrets.md](./docs/secrets.md)         | Token sources, doctor, rotation                                |
 | [docs/tools.md](./docs/tools.md)             | Every tool, every parameter, the danger gate, response shaping |
+| [docs/deploy.md](./docs/deploy.md)           | Running it over HTTP, in a container, on Coolify itself        |
 | [docs/clients/](./docs/clients/)             | One page per client: exact file, exact snippet, what to verify |
 | [SECURITY.md](./SECURITY.md)                 | Threat model and disclosure                                    |
 | [CONTRIBUTING.md](./CONTRIBUTING.md)         | Dev loop, and how to add a client adapter                      |
