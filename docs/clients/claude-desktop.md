@@ -45,7 +45,9 @@ npx @done-dynamics/coolify-mcp install --client claude-desktop
       "command": "npx",
       "args": [
         "-y",
-        "@done-dynamics/coolify-mcp@latest"
+        "-p",
+        "@done-dynamics/coolify-mcp@latest",
+        "coolify-mcp-server"
       ],
       "env": {}
     }
@@ -64,7 +66,9 @@ On **Windows** the same install produces the shell wrapper instead:
         "/c",
         "npx",
         "-y",
-        "@done-dynamics/coolify-mcp@latest"
+        "-p",
+        "@done-dynamics/coolify-mcp@latest",
+        "coolify-mcp-server"
       ],
       "env": {}
     }

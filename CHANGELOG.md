@@ -18,6 +18,33 @@ add operations that `search_operations` did not previously return.
 
 ## [Unreleased]
 
+### Fixed
+
+**`install` wrote an entry that could never start the server.** Every client
+configured by 0.1.0 — and every snippet in the README and `docs/clients/` —
+pointed at `npx -y @done-dynamics/coolify-mcp@latest`. `npx` runs the bin whose
+name matches the package's _unscoped_ name, which since the 0.1.0 rename is
+`coolify-mcp`: the CLI. It printed usage to stderr and exited before speaking a
+byte of JSON-RPC, so every client reported a connection failure with nothing in
+the config that looked wrong.
+
+The entry now names its command explicitly:
+
+```
+npx -y -p @done-dynamics/coolify-mcp@latest coolify-mcp-server
+```
+
+Existing installs are not repaired in place — re-run `install --update`, or add
+`-p <spec> coolify-mcp-server` to the entry by hand.
+
+**The docs-parity invariant could not fail.** `invariants.test.ts` compared each
+documented snippet against a hand-written copy of the entry rather than against
+`buildServerEntry`, so when the real argv named the wrong bin the copy named it
+too, and eight client documents stayed green while all eight were unusable. The
+fixture is now derived from the installer. A new `test/install/server-entry.test.ts`
+resolves the written argv against `package.json`'s `bin` map and asserts it lands
+on the stdio server, so renaming either bin breaks a test.
+
 ## [0.1.0] — 2026-07-28
 
 Initial release.
