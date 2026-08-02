@@ -18,6 +18,8 @@ add operations that `search_operations` did not previously return.
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-08-02
+
 ### Fixed
 
 **`install` wrote an entry that could never start the server.** Every client
