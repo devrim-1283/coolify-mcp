@@ -34,7 +34,9 @@ npx @done-dynamics/coolify-mcp install --client claude-code --scope project  # <
       "command": "npx",
       "args": [
         "-y",
-        "@done-dynamics/coolify-mcp@latest"
+        "-p",
+        "@done-dynamics/coolify-mcp@latest",
+        "coolify-mcp-server"
       ],
       "env": {}
     }
@@ -57,7 +59,7 @@ because the client's own CLI preserves invariants we do not know about. The exac
 invocation is:
 
 ```bash
-claude mcp add-json coolify '{"type":"stdio","command":"npx","args":["-y","@done-dynamics/coolify-mcp@latest"],"env":{}}' --scope user
+claude mcp add-json coolify '{"type":"stdio","command":"npx","args":["-y","-p","@done-dynamics/coolify-mcp@latest","coolify-mcp-server"],"env":{}}' --scope user
 ```
 
 Use `--no-native-cli` to force the file writer.
@@ -91,7 +93,9 @@ the value:
       "command": "npx",
       "args": [
         "-y",
-        "@done-dynamics/coolify-mcp@latest"
+        "-p",
+        "@done-dynamics/coolify-mcp@latest",
+        "coolify-mcp-server"
       ],
       "env": {
         "COOLIFY_BASE_URL": "${COOLIFY_BASE_URL}",

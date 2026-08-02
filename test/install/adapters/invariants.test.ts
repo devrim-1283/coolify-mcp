@@ -23,6 +23,7 @@ import { fileURLToPath } from 'node:url';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { buildServerEntry } from '../../../src/install/plan.js';
 import type { InstallCtx, Operation, ServerEntry } from '../../../src/types.js';
 import {
   ADAPTER_FIXTURES,
@@ -220,12 +221,17 @@ const DOC_CTX: InstallCtx = {
   connection: 'prod',
 };
 
-const DOC_ENTRY: ServerEntry = {
-  name: MANAGED_NAME,
-  command: 'npx',
-  args: ['-y', DOC_CTX.packageSpec],
-  env: { COOLIFY_CONNECTION: 'prod' },
-};
+/**
+ * BUILT BY THE INSTALLER, never restated here.
+ *
+ * This was a hand-written literal that mirrored `buildServerEntry`, and it could
+ * therefore never fail. When the installer's argv named the wrong bin, the copy
+ * named the wrong bin too, so docs-parity compared two copies of one mistake and
+ * stayed green while every documented snippet was unusable. Deriving it means a
+ * change to the real argv surfaces here as a documentation diff, which is the
+ * only thing this invariant was ever for.
+ */
+const DOC_ENTRY: ServerEntry = buildServerEntry(DOC_CTX);
 
 /**
  * The entry the installer would produce, read back out of its own plan.

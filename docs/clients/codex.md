@@ -44,7 +44,7 @@ npx @done-dynamics/coolify-mcp install --client codex
 ```toml
 [mcp_servers.coolify]
 command = "npx"
-args = [ "-y", "@done-dynamics/coolify-mcp@latest" ]
+args = [ "-y", "-p", "@done-dynamics/coolify-mcp@latest", "coolify-mcp-server" ]
 startup_timeout_sec = 60
 ```
 

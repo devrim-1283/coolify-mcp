@@ -49,7 +49,9 @@ mcp:
     command:
       - npx
       - -y
+      - -p
       - "@done-dynamics/coolify-mcp@latest"
+      - coolify-mcp-server
     enabled: true
     environment: {}
 ```
@@ -65,7 +67,9 @@ Merge this into the existing `config.yaml`. Do not replace the file.
       "command": "npx",
       "args": [
         "-y",
-        "@done-dynamics/coolify-mcp@latest"
+        "-p",
+        "@done-dynamics/coolify-mcp@latest",
+        "coolify-mcp-server"
       ],
       "env": {}
     }
