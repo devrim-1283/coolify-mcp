@@ -48,7 +48,9 @@ npx @done-dynamics/coolify-mcp install --client cursor --scope project
       "command": "npx",
       "args": [
         "-y",
-        "@done-dynamics/coolify-mcp@latest"
+        "-p",
+        "@done-dynamics/coolify-mcp@latest",
+        "coolify-mcp-server"
       ],
       "env": {}
     }
@@ -77,7 +79,9 @@ that fails to start.
       "command": "npx",
       "args": [
         "-y",
-        "@done-dynamics/coolify-mcp@latest"
+        "-p",
+        "@done-dynamics/coolify-mcp@latest",
+        "coolify-mcp-server"
       ],
       "envFile": "/absolute/path/to/coolify.env",
       "env": {}
@@ -101,7 +105,9 @@ COOLIFY_API_TOKEN=13|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
       "command": "npx",
       "args": [
         "-y",
-        "@done-dynamics/coolify-mcp@latest"
+        "-p",
+        "@done-dynamics/coolify-mcp@latest",
+        "coolify-mcp-server"
       ],
       "env": {
         "COOLIFY_BASE_URL": "${env:COOLIFY_BASE_URL}",

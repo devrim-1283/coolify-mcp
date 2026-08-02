@@ -46,7 +46,7 @@ npx @done-dynamics/coolify-mcp doctor     # config health, and a scan for creden
 ### One thing to know before you start
 
 **The installer writes pointer config only — never a credential.** The entry it
-writes into your client config is `npx -y @done-dynamics/coolify-mcp@latest` and, at most, a
+writes into your client config is `npx -y -p @done-dynamics/coolify-mcp@latest coolify-mcp-server` and, at most, a
 connection _name_. It never writes `COOLIFY_BASE_URL` or `COOLIFY_API_TOKEN`
 into a file.
 
@@ -135,7 +135,9 @@ npx @done-dynamics/coolify-mcp install --client claude-code
       "command": "npx",
       "args": [
         "-y",
-        "@done-dynamics/coolify-mcp@latest"
+        "-p",
+        "@done-dynamics/coolify-mcp@latest",
+        "coolify-mcp-server"
       ],
       "env": {}
     }
@@ -160,7 +162,9 @@ npx @done-dynamics/coolify-mcp install --client cursor
       "command": "npx",
       "args": [
         "-y",
-        "@done-dynamics/coolify-mcp@latest"
+        "-p",
+        "@done-dynamics/coolify-mcp@latest",
+        "coolify-mcp-server"
       ],
       "env": {}
     }
@@ -181,7 +185,7 @@ npx @done-dynamics/coolify-mcp install --client codex
 ```toml
 [mcp_servers.coolify]
 command = "npx"
-args = [ "-y", "@done-dynamics/coolify-mcp@latest" ]
+args = [ "-y", "-p", "@done-dynamics/coolify-mcp@latest", "coolify-mcp-server" ]
 startup_timeout_sec = 60
 ```
 
@@ -202,7 +206,9 @@ npx @done-dynamics/coolify-mcp install --client kimi
       "command": "npx",
       "args": [
         "-y",
-        "@done-dynamics/coolify-mcp@latest"
+        "-p",
+        "@done-dynamics/coolify-mcp@latest",
+        "coolify-mcp-server"
       ],
       "env": {}
     }
@@ -225,7 +231,9 @@ npx @done-dynamics/coolify-mcp install --client zed
       "command": "npx",
       "args": [
         "-y",
-        "@done-dynamics/coolify-mcp@latest"
+        "-p",
+        "@done-dynamics/coolify-mcp@latest",
+        "coolify-mcp-server"
       ],
       "env": {}
     }
@@ -251,7 +259,9 @@ npx @done-dynamics/coolify-mcp install --client opencode --scope project
       "command": [
         "npx",
         "-y",
-        "@done-dynamics/coolify-mcp@latest"
+        "-p",
+        "@done-dynamics/coolify-mcp@latest",
+        "coolify-mcp-server"
       ],
       "enabled": true,
       "environment": {}
@@ -277,7 +287,9 @@ npx @done-dynamics/coolify-mcp install --client claude-desktop
       "command": "npx",
       "args": [
         "-y",
-        "@done-dynamics/coolify-mcp@latest"
+        "-p",
+        "@done-dynamics/coolify-mcp@latest",
+        "coolify-mcp-server"
       ],
       "env": {}
     }
@@ -286,7 +298,7 @@ npx @done-dynamics/coolify-mcp install --client claude-desktop
 ```
 
 On Windows the installer emits `"command": "cmd"` with
-`"args": ["/c", "npx", "-y", "@done-dynamics/coolify-mcp@latest"]`, because Claude Desktop
+`"args": ["/c", "npx", "-y", "-p", "@done-dynamics/coolify-mcp@latest", "coolify-mcp-server"]`, because Claude Desktop
 spawns without a shell and `npx.cmd` cannot be executed directly. Claude Desktop
 also does not inherit your shell environment — see
 [details →](./docs/clients/claude-desktop.md).

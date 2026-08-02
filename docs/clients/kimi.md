@@ -35,7 +35,9 @@ npx @done-dynamics/coolify-mcp install --client kimi
       "command": "npx",
       "args": [
         "-y",
-        "@done-dynamics/coolify-mcp@latest"
+        "-p",
+        "@done-dynamics/coolify-mcp@latest",
+        "coolify-mcp-server"
       ],
       "env": {}
     }
@@ -51,7 +53,7 @@ With `--connection prod`, `env` becomes `{"COOLIFY_CONNECTION": "prod"}`. With
 When `kimi` is on PATH the installer shells out:
 
 ```bash
-kimi mcp add --transport stdio coolify -- npx -y @done-dynamics/coolify-mcp@latest
+kimi mcp add --transport stdio coolify -- npx -y -p @done-dynamics/coolify-mcp@latest coolify-mcp-server
 ```
 
 With `--connection prod` an `-e COOLIFY_CONNECTION=prod` pair is inserted before

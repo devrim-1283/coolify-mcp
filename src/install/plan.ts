@@ -25,6 +25,16 @@ import { DEFAULT_SERVER_NAME } from './helpers.js';
 import { splitDottedKey } from './merge/toml.js';
 import { ADAPTERS, findAdapters, knownTargets } from './registry.js';
 
+/**
+ * The bin that speaks stdio JSON-RPC, as declared in package.json.
+ *
+ * It has to be named explicitly in the argv. `npx <spec>` runs the bin matching
+ * the package's UNSCOPED name, which for `@done-dynamics/coolify-mcp` is
+ * `coolify-mcp` — the CLI, which prints usage and exits without ever speaking
+ * the protocol. `npx -p <spec> coolify-mcp-server` is what reaches this one.
+ */
+const STDIO_BIN = 'coolify-mcp-server';
+
 export type PlanAction = 'install' | 'uninstall';
 
 export interface TargetPlan {
@@ -83,7 +93,9 @@ export function buildServerEntry(ctx: InstallCtx): ServerEntry {
     command: 'npx',
     // `-y` so a first run does not stall on npx's install prompt with no
     // terminal attached — the client would just see a server that never speaks.
-    args: ['-y', ctx.packageSpec],
+    // `-p <spec> <bin>` because the package installs two bins and the one npx
+    // would pick by name is the CLI — see STDIO_BIN.
+    args: ['-y', '-p', ctx.packageSpec, STDIO_BIN],
     env,
   };
 }

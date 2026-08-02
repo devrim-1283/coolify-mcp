@@ -48,7 +48,9 @@ global one is not.
       "command": [
         "npx",
         "-y",
-        "@done-dynamics/coolify-mcp@latest"
+        "-p",
+        "@done-dynamics/coolify-mcp@latest",
+        "coolify-mcp-server"
       ],
       "enabled": true,
       "environment": {}
