@@ -33,9 +33,9 @@ forbids.
 ## Install
 
 ```bash
-npx @done-dynamics/coolify-mcp install --client zed
-npx @done-dynamics/coolify-mcp install --client zed --scope user
-npx @done-dynamics/coolify-mcp install --client zed --scope project
+npx @donedynamics/coolify-mcp install --client zed
+npx @donedynamics/coolify-mcp install --client zed --scope user
+npx @donedynamics/coolify-mcp install --client zed --scope project
 ```
 
 ## What the installer writes
@@ -48,7 +48,7 @@ npx @done-dynamics/coolify-mcp install --client zed --scope project
       "args": [
         "-y",
         "-p",
-        "@done-dynamics/coolify-mcp@latest",
+        "@donedynamics/coolify-mcp@latest",
         "coolify-mcp-server"
       ],
       "env": {}
@@ -58,7 +58,7 @@ npx @done-dynamics/coolify-mcp install --client zed --scope project
 ```
 
 With `--connection prod`, `env` becomes `{"COOLIFY_CONNECTION": "prod"}`. With
-`--pin=1.4.2`, `args` becomes `["-y", "@done-dynamics/coolify-mcp@1.4.2"]`.
+`--pin=1.4.2`, `args` becomes `["-y", "@donedynamics/coolify-mcp@1.4.2"]`.
 
 ### About `"source": "custom"`
 
@@ -101,7 +101,7 @@ environment at all:
 Save it at `~/.coolify-mcp/config.json`, then:
 
 ```bash
-npx @done-dynamics/coolify-mcp install --client zed --connection prod
+npx @donedynamics/coolify-mcp install --client zed --connection prod
 ```
 
 The config entry then holds one string — the connection name — and the token is
@@ -110,7 +110,7 @@ fetched from your secret manager when the server starts.
 ## Verify
 
 ```bash
-npx @done-dynamics/coolify-mcp doctor
+npx @donedynamics/coolify-mcp doctor
 ```
 
 When the Windows user settings file is absent, doctor emits a
@@ -132,7 +132,7 @@ entry written without it will fail to start, and that is worth knowing.
 ## Uninstall
 
 ```bash
-npx @done-dynamics/coolify-mcp uninstall --client zed
+npx @donedynamics/coolify-mcp uninstall --client zed
 ```
 
 Removes `context_servers.coolify` through the JSONC writer, so your comments and

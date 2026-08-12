@@ -18,7 +18,26 @@ add operations that `search_operations` did not previously return.
 
 ## [Unreleased]
 
-## [0.1.1] — 2026-08-02
+## [0.1.1] — 2026-08-12
+
+### Changed
+
+**The package is now `@donedynamics/coolify-mcp`.** 0.1.0 was published under
+`@done-dynamics`, a scope belonging to a different npm account than the one that
+owns this project. Nothing about the code changes with the move — the unscoped
+name, both bin names and every tool are identical — but the old coordinates stop
+receiving updates at 0.1.0, which is the release this one exists to fix.
+
+Update the package name wherever it is pinned:
+
+```
+npx -y -p @donedynamics/coolify-mcp@latest coolify-mcp-server
+```
+
+Re-running `install --update` rewrites client entries with the new name.
+`@done-dynamics/coolify-mcp@0.1.0` stays on npm so existing pins keep resolving;
+it is not republished and should not be relied on, since the entry it installs
+cannot start the server.
 
 ### Fixed
 
@@ -33,7 +52,7 @@ the config that looked wrong.
 The entry now names its command explicitly:
 
 ```
-npx -y -p @done-dynamics/coolify-mcp@latest coolify-mcp-server
+npx -y -p @donedynamics/coolify-mcp@latest coolify-mcp-server
 ```
 
 Existing installs are not repaired in place — re-run `install --update`, or add

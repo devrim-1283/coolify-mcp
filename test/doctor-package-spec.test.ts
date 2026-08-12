@@ -1,7 +1,7 @@
 /**
  * Regression cover for doctor reading the package spec out of a client config.
  *
- * The 0.1.0 release had to be published as `@done-dynamics/coolify-mcp`: npm's
+ * The 0.1.0 release had to be published as `@donedynamics/coolify-mcp`: npm's
  * similarity check strips punctuation, so `coolify-mcp` normalises to
  * `coolifymcp`, which already exists and belongs to somebody else. The command
  * this package installs is still `coolify-mcp`, so from that release onward the
@@ -63,7 +63,7 @@ async function scanWithSpec(spec: string) {
     cwd: sandbox(),
     env: {},
     packageVersion: '1.4.2',
-    packageName: '@done-dynamics/coolify-mcp',
+    packageName: '@donedynamics/coolify-mcp',
   });
 }
 
@@ -73,8 +73,8 @@ function coolifyClients(report: Awaited<ReturnType<typeof scanWithSpec>>) {
 
 describe('reading the installed spec back out of a config', () => {
   it.each([
-    ['the scoped name it publishes under now', '@done-dynamics/coolify-mcp@latest'],
-    ['a pinned scoped version', '@done-dynamics/coolify-mcp@1.4.2'],
+    ['the scoped name it publishes under now', '@donedynamics/coolify-mcp@latest'],
+    ['a pinned scoped version', '@donedynamics/coolify-mcp@1.4.2'],
     ['the unscoped name written before 0.1.0', 'coolify-mcp@latest'],
     ['an unscoped pin', 'coolify-mcp@0.9.0'],
     ['a bare name with no version at all', 'coolify-mcp'],

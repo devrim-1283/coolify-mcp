@@ -114,7 +114,7 @@ smuggle one in.
 ### 4. The installer writes pointer config, never credentials
 
 `buildServerEntry` produces exactly: a command (`npx`), its arguments
-(`-y @done-dynamics/coolify-mcp@<spec>`), and at most a connection **name**. Nothing resolved
+(`-y @donedynamics/coolify-mcp@<spec>`), and at most a connection **name**. Nothing resolved
 from a secret store, no base URL, no token.
 
 When a client cannot expand a `${VAR}` reference, the installer **drops the

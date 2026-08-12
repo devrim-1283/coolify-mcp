@@ -31,8 +31,8 @@ all.
 ## Install
 
 ```bash
-npx @done-dynamics/coolify-mcp install --client opencode --scope project   # recommended
-npx @done-dynamics/coolify-mcp install --client opencode --scope user
+npx @donedynamics/coolify-mcp install --client opencode --scope project   # recommended
+npx @donedynamics/coolify-mcp install --client opencode --scope user
 ```
 
 `--scope project` is recommended because the project path is confirmed and the
@@ -49,7 +49,7 @@ global one is not.
         "npx",
         "-y",
         "-p",
-        "@done-dynamics/coolify-mcp@latest",
+        "@donedynamics/coolify-mcp@latest",
         "coolify-mcp-server"
       ],
       "enabled": true,
@@ -61,7 +61,7 @@ global one is not.
 
 With `--connection prod`, `environment` becomes `{"COOLIFY_CONNECTION": "prod"}`.
 With `--pin=1.4.2`, `command` becomes
-`["npx", "-y", "@done-dynamics/coolify-mcp@1.4.2"]`.
+`["npx", "-y", "@donedynamics/coolify-mcp@1.4.2"]`.
 
 ## Supplying credentials
 
@@ -84,7 +84,7 @@ git history forever, and `doctor` will flag it as CRITICAL.
 ## Verify
 
 ```bash
-npx @done-dynamics/coolify-mcp doctor
+npx @donedynamics/coolify-mcp doctor
 ```
 
 When the global config is absent, doctor emits an `opencode-path-unconfirmed`
@@ -109,7 +109,7 @@ Until then, `--scope project` is the path we can stand behind.
 ## Uninstall
 
 ```bash
-npx @done-dynamics/coolify-mcp uninstall --client opencode
+npx @donedynamics/coolify-mcp uninstall --client opencode
 ```
 
 ## Confirmed vs unconfirmed
