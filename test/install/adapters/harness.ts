@@ -36,7 +36,7 @@ import { planInstall, planUninstall } from '../../../src/install/plan.js';
 import { hashEntry, stateFilePath, INSTALL_STATE_SCHEMA } from '../../../src/install/state.js';
 import type { InstallCtx, InstallRecord, McpClientAdapter } from '../../../src/types.js';
 
-export const PACKAGE_SPEC = '@done-dynamics/coolify-mcp@1.4.2';
+export const PACKAGE_SPEC = '@donedynamics/coolify-mcp@1.4.2';
 export const MANAGED_NAME = 'coolify';
 
 export type FixtureCase = 'empty' | 'populated' | 'hostile' | 'conflict';
