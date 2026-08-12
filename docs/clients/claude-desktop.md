@@ -33,7 +33,7 @@ in plaintext.
 ## Install
 
 ```bash
-npx @done-dynamics/coolify-mcp install --client claude-desktop
+npx @donedynamics/coolify-mcp install --client claude-desktop
 ```
 
 ## What the installer writes
@@ -46,7 +46,7 @@ npx @done-dynamics/coolify-mcp install --client claude-desktop
       "args": [
         "-y",
         "-p",
-        "@done-dynamics/coolify-mcp@latest",
+        "@donedynamics/coolify-mcp@latest",
         "coolify-mcp-server"
       ],
       "env": {}
@@ -67,7 +67,7 @@ On **Windows** the same install produces the shell wrapper instead:
         "npx",
         "-y",
         "-p",
-        "@done-dynamics/coolify-mcp@latest",
+        "@donedynamics/coolify-mcp@latest",
         "coolify-mcp-server"
       ],
       "env": {}
@@ -77,7 +77,7 @@ On **Windows** the same install produces the shell wrapper instead:
 ```
 
 With `--connection prod`, `env` becomes `{"COOLIFY_CONNECTION": "prod"}`. With
-`--pin=1.4.2`, the spec in `args` becomes `@done-dynamics/coolify-mcp@1.4.2`.
+`--pin=1.4.2`, the spec in `args` becomes `@donedynamics/coolify-mcp@1.4.2`.
 
 Restart Claude Desktop after any change — it reads this file at launch.
 
@@ -104,7 +104,7 @@ Because the environment is not inherited, use a registry file. Save it at
 Then:
 
 ```bash
-npx @done-dynamics/coolify-mcp install --client claude-desktop --connection prod
+npx @donedynamics/coolify-mcp install --client claude-desktop --connection prod
 ```
 
 The config entry holds one string — the connection _name_ — and the token is
@@ -121,13 +121,13 @@ so any command that prints the token works.
 Claude Desktop's `${VAR}` expansion is **not verified**, so the installer drops
 any reference rather than writing literal text. If you add values by hand they
 are literals at rest, in a file that syncs with your user profile.
-`npx @done-dynamics/coolify-mcp doctor` will flag them, correctly, as CRITICAL. Rotate the token
+`npx @donedynamics/coolify-mcp doctor` will flag them, correctly, as CRITICAL. Rotate the token
 if you ever do this.
 
 ## Verify
 
 ```bash
-npx @done-dynamics/coolify-mcp doctor
+npx @donedynamics/coolify-mcp doctor
 ```
 
 On Linux, when the config is absent, doctor emits a
@@ -157,7 +157,7 @@ which today it refuses to do.
 ## Uninstall
 
 ```bash
-npx @done-dynamics/coolify-mcp uninstall --client claude-desktop
+npx @donedynamics/coolify-mcp uninstall --client claude-desktop
 ```
 
 ## Confirmed vs unconfirmed

@@ -16,8 +16,8 @@
  *   coolify-mcp-server  dist/index.js   the stdio MCP server
  *
  * `npx <spec>` runs the bin whose NAME MATCHES THE PACKAGE'S UNSCOPED NAME. For
- * `@done-dynamics/coolify-mcp` that is `coolify-mcp` — the CLI. So the obvious
- * `npx -y @done-dynamics/coolify-mcp@latest` spawns the CLI, which writes usage
+ * `@donedynamics/coolify-mcp` that is `coolify-mcp` — the CLI. So the obvious
+ * `npx -y @donedynamics/coolify-mcp@latest` spawns the CLI, which writes usage
  * to stderr and exits before speaking a single byte of JSON-RPC. The client
  * reports "failed to connect" and nothing in the config looks wrong.
  *

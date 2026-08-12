@@ -29,7 +29,7 @@ import { ADAPTERS, findAdapters, knownTargets } from './registry.js';
  * The bin that speaks stdio JSON-RPC, as declared in package.json.
  *
  * It has to be named explicitly in the argv. `npx <spec>` runs the bin matching
- * the package's UNSCOPED name, which for `@done-dynamics/coolify-mcp` is
+ * the package's UNSCOPED name, which for `@donedynamics/coolify-mcp` is
  * `coolify-mcp` — the CLI, which prints usage and exits without ever speaking
  * the protocol. `npx -p <spec> coolify-mcp-server` is what reaches this one.
  */
