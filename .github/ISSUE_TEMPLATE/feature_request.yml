@@ -1,0 +1,38 @@
+name: Feature request
+description: Propose a capability this server does not have.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The generic door — `search_operations` → `describe_operation` →
+        `execute_read_operation` / `execute_write_operation` — already reaches every
+        catalogued Coolify REST operation. A dedicated tool is worth adding only when
+        a workflow is common enough that going through the generic door costs a round
+        trip every time. Please say which of those two cases this is.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do
+      description: The task, not the proposed solution.
+    validations:
+      required: true
+
+  - type: textarea
+    id: generic-door
+    attributes:
+      label: What happens through the generic door today
+      description: >
+        Which operation id, and what makes it insufficient — missing endpoint, too many
+        round trips, response too large to be useful, or something else.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed shape
+      description: Tool name, parameters, and what it returns — if you have one in mind.
+    validations:
+      required: false
