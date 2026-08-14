@@ -1,0 +1,79 @@
+name: Bug report
+description: Something behaves differently than documented.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Before you paste anything:** `doctor` and `check` output can contain a base URL
+        that identifies your infrastructure, and a misconfigured connection can echo a
+        token. Redact both. If you believe you have found a security issue, do not open
+        an issue at all — follow [SECURITY.md](../blob/main/SECURITY.md) instead.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you ran, and what came back.
+      placeholder: |
+        Ran `find_resources` with query "api" against instance "prod".
+        Expected the staging app to appear; got an empty array.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: true
+
+  - type: textarea
+    id: doctor
+    attributes:
+      label: doctor output
+      description: Output of `npx @donedynamics/coolify-mcp doctor` — with base URLs redacted.
+      render: text
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: coolify-mcp version
+      placeholder: 0.1.1
+    validations:
+      required: true
+
+  - type: input
+    id: coolify-version
+    attributes:
+      label: Coolify version
+      description: Coolify reports this in its own UI footer. The REST API changes between releases.
+      placeholder: v4.0.0-beta.420
+    validations:
+      required: true
+
+  - type: dropdown
+    id: client
+    attributes:
+      label: MCP client
+      options:
+        - Claude Code
+        - Claude Desktop
+        - Cursor
+        - Codex CLI
+        - Kimi CLI
+        - Zed
+        - OpenCode
+        - Other / direct stdio
+    validations:
+      required: true
+
+  - type: input
+    id: platform
+    attributes:
+      label: OS and Node version
+      placeholder: Windows 11, Node 22.11.0
+    validations:
+      required: true

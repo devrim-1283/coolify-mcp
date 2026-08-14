@@ -1,0 +1,16 @@
+# Every path has an owner. GitHub requests a review from them automatically.
+#
+# The ruleset on `main` does not require code owner approval today — a solo
+# maintainer cannot approve their own pull request, and a rule nobody can satisfy
+# is a rule that gets disabled. This file exists so review routing is already
+# correct the day a second maintainer arrives.
+
+* @devrim-1283
+
+# Anything that can publish, sign, or change what runs in CI.
+/.github/ @devrim-1283
+
+# Credential handling and the HTTP surface. Reviewed as security-sensitive.
+/src/config/secrets.ts @devrim-1283
+/src/http/ @devrim-1283
+/SECURITY.md @devrim-1283
