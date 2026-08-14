@@ -391,7 +391,7 @@ async function loadFile(
   const cached = files.get(filePath);
   if (cached !== undefined) return cached;
 
-  let before: string | null = null;
+  let before: string | null;
   try {
     before = await fs.readFile(filePath, 'utf8');
   } catch {
