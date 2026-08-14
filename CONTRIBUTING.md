@@ -11,7 +11,7 @@ does.
 - **Comments explain WHY, not WHAT.** Be sparing, but do explain non-obvious
   decisions and the reasoning behind them. If a reviewer would ask "why is it done
   this way", answer it in the file.
-- **No native dependencies, ever.** They break `npx @done-dynamics/coolify-mcp`, which is the
+- **No native dependencies, ever.** They break `npx @donedynamics/coolify-mcp`, which is the
   primary install path. Runtime dependencies today:
   `@modelcontextprotocol/sdk`, `zod`, `smol-toml`, `jsonc-parser`, `yaml`. Adding
   a sixth needs a good argument.
@@ -60,9 +60,9 @@ names neither the line nor the process. Diagnostics go to stderr.
 ### Testing the installer without touching your machine
 
 ```bash
-npx @done-dynamics/coolify-mcp install --dry-run          # unified diff of every file that would change
-npx @done-dynamics/coolify-mcp install --print            # the snippet, no file access
-npx @done-dynamics/coolify-mcp install --client zed --dry-run
+npx @donedynamics/coolify-mcp install --dry-run          # unified diff of every file that would change
+npx @donedynamics/coolify-mcp install --print            # the snippet, no file access
+npx @donedynamics/coolify-mcp install --client zed --dry-run
 ```
 
 `--dry-run` runs the _same_ `applyPlan` call the real install runs, with `dryRun`
@@ -171,7 +171,7 @@ The parity check needs a rule for which block to extract, so:
 
 > **The first fenced code block under the heading `## What the installer writes`
 > in `docs/clients/<x>.md` is the writer's exact output** for the default
-> invocation (`@done-dynamics/coolify-mcp@latest`, empty `env`).
+> invocation (`@donedynamics/coolify-mcp@latest`, empty `env`).
 
 Any other snippet in that file — hand-edit examples, credential wiring, alternative
 shapes — must sit under a different heading and be labelled as _not_ what the

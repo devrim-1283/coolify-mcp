@@ -46,30 +46,42 @@ jobs:
       version: ${{ steps.tag.outputs.version }}
       tag: ${{ steps.tag.outputs.tag }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.event.inputs.tag || github.ref }}
-          fetch-depth: 0
-
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 22
-          cache: npm
-
+      # Deliberately before the checkout. Validating a string needs no working
+      # tree, and doing it first means every later step — including the `ref:`
+      # this job checks out — sees a value already proven to be `v` followed by
+      # digits and dots.
+      #
+      # The raw value reaches the script through the environment rather than
+      # through `${{ }}`, because `${{ }}` in a `run:` is substituted as text
+      # before the shell parses the line. Git ref names permit `"`, `;`, `$`,
+      # `|` and backticks — `v1.0.0";id;#` is a pushable tag that matches the
+      # `v*` trigger — and `workflow_dispatch` inputs are unrestricted free
+      # text. Through `env:` the shell sees data; through `${{ }}` it saw code.
       - name: The tag must be exactly ^v[0-9]+\.[0-9]+\.[0-9]+$
         id: tag
         # `on.push.tags` globs cannot express the real rule, so it is asserted
         # here. Anything else — a prerelease suffix, a `v1.2` shorthand, a
         # `latest` pointer — is refused rather than published as a stable
         # version by accident.
+        env:
+          RAW_TAG: ${{ github.event.inputs.tag || github.ref_name }}
         run: |
-          TAG="${{ github.event.inputs.tag || github.ref_name }}"
-          if ! printf '%s' "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
-            echo "::error title=Bad release tag::'$TAG' does not match ^v[0-9]+\.[0-9]+\.[0-9]+$"
+          if ! printf '%s' "$RAW_TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error title=Bad release tag::'$RAW_TAG' does not match ^v[0-9]+\.[0-9]+\.[0-9]+$"
             exit 1
           fi
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+          echo "tag=$RAW_TAG" >> "$GITHUB_OUTPUT"
+          echo "version=${RAW_TAG#v}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.tag.outputs.tag }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
 
       - name: package.json must agree with the tag
         run: |
@@ -113,7 +125,7 @@ jobs:
     # That is what makes the manual approval real rather than decorative.
     environment:
       name: release
-      url: https://www.npmjs.com/package/@done-dynamics/coolify-mcp/v/${{ needs.verify.outputs.version }}
+      url: https://www.npmjs.com/package/@donedynamics/coolify-mcp/v/${{ needs.verify.outputs.version }}
     permissions:
       # Minting the OIDC token for provenance. Nothing else is elevated.
       id-token: write

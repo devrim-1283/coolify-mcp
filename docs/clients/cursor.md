@@ -34,9 +34,9 @@ variable name.
 ## Install
 
 ```bash
-npx @done-dynamics/coolify-mcp install --client cursor
-npx @done-dynamics/coolify-mcp install --client cursor --scope user
-npx @done-dynamics/coolify-mcp install --client cursor --scope project
+npx @donedynamics/coolify-mcp install --client cursor
+npx @donedynamics/coolify-mcp install --client cursor --scope user
+npx @donedynamics/coolify-mcp install --client cursor --scope project
 ```
 
 ## What the installer writes
@@ -49,7 +49,7 @@ npx @done-dynamics/coolify-mcp install --client cursor --scope project
       "args": [
         "-y",
         "-p",
-        "@done-dynamics/coolify-mcp@latest",
+        "@donedynamics/coolify-mcp@latest",
         "coolify-mcp-server"
       ],
       "env": {}
@@ -59,7 +59,7 @@ npx @done-dynamics/coolify-mcp install --client cursor --scope project
 ```
 
 With `--connection prod`, `env` becomes `{"COOLIFY_CONNECTION": "prod"}`. With
-`--pin=1.4.2`, `args` becomes `["-y", "@done-dynamics/coolify-mcp@1.4.2"]`.
+`--pin=1.4.2`, `args` becomes `["-y", "@donedynamics/coolify-mcp@1.4.2"]`.
 
 No `"type"` key: unlike the Claude Code adapter there is no native CLI to stay
 byte-identical with, so the entry carries only what Cursor needs.
@@ -80,7 +80,7 @@ that fails to start.
       "args": [
         "-y",
         "-p",
-        "@done-dynamics/coolify-mcp@latest",
+        "@donedynamics/coolify-mcp@latest",
         "coolify-mcp-server"
       ],
       "envFile": "/absolute/path/to/coolify.env",
@@ -106,7 +106,7 @@ COOLIFY_API_TOKEN=13|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
       "args": [
         "-y",
         "-p",
-        "@done-dynamics/coolify-mcp@latest",
+        "@donedynamics/coolify-mcp@latest",
         "coolify-mcp-server"
       ],
       "env": {
@@ -130,7 +130,7 @@ is why — use `envFile`, or a
 ## Verify
 
 ```bash
-npx @done-dynamics/coolify-mcp doctor
+npx @donedynamics/coolify-mcp doctor
 ```
 
 Doctor knows Cursor's syntax: when it finds a literal credential in a Cursor
@@ -143,7 +143,7 @@ Then, in Cursor: Settings → MCP should show `coolify` connected.
 ## Uninstall
 
 ```bash
-npx @done-dynamics/coolify-mcp uninstall --client cursor
+npx @donedynamics/coolify-mcp uninstall --client cursor
 ```
 
 ## Confirmed vs unconfirmed
