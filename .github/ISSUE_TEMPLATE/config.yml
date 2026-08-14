@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/devrim-1283/coolify-mcp/security/advisories/new
+    about: Report privately. Never in a public issue — this project handles credentials.
+  - name: Question or idea
+    url: https://github.com/devrim-1283/coolify-mcp/discussions
+    about: Setup help, client quirks, and anything not yet a confirmed bug.
+  - name: Coolify API reference
+    url: https://coolify.io/docs/api-reference
+    about: The upstream REST API this server wraps. Endpoint behaviour is documented there.
