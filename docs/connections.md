@@ -265,7 +265,7 @@ npx @donedynamics/coolify-mcp check --connection prod
 `check` makes two requests, in this order:
 
 1. `GET /api/health` — **unauthenticated**. Is the instance reachable at all?
-2. `GET /api/v1/teams/current` — **authenticated**. Does this token work, and for
+2. `GET /api/v1/team` — **authenticated**. Does this token work, and for
    which team?
 
 Split on purpose. A failure at step 1 is a URL, DNS or TLS problem; a failure at

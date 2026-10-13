@@ -137,4 +137,12 @@ describe('published tool input schemas', () => {
     expect(tools.map((tool) => tool.name)).toContain('set_environment_variables');
     expect(tools.map((tool) => tool.name)).toContain('execute_destructive_operation');
   });
+
+  it('lets execute_destructive_operation carry a body, which a database restore requires', async () => {
+    const tools = await listTools(makeConfig([makeConnection('prod', true)]));
+    const destructive = tools.find((tool) => tool.name === 'execute_destructive_operation');
+    const properties = destructive?.inputSchema['properties'] as Record<string, unknown>;
+
+    expect(Object.keys(properties)).toContain('body');
+  });
 });

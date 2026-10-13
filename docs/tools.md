@@ -285,10 +285,10 @@ into the package. Current contents:
 
 |                  |                                                                                                 |
 | ---------------- | ----------------------------------------------------------------------------------------------- |
-| Coolify version  | **4.2.0**                                                                                       |
-| Spec sha256      | `150e9f3c…`                                                                                     |
-| Operations       | **189**                                                                                         |
-| By class         | 74 safe · 86 write · 29 destructive                                                             |
+| Coolify version  | **4.4.6**                                                                                       |
+| Spec sha256      | `c60b2d15…`                                                                                     |
+| Operations       | **291**                                                                                         |
+| By class         | 105 safe · 145 write · 41 destructive                                                           |
 | Flagged `costly` | 3 — `POST /servers/{hetzner,digitalocean,vultr}`, which provision billable cloud infrastructure |
 
 Building at release time rather than fetching at runtime is deliberate: a runtime
@@ -298,12 +298,12 @@ version anyway, and non-determinism in an MIT package — a supply-chain smell.
 
 ### `search_operations`
 
-| Parameter | Type      | Notes                                                                                                                                                                                                                       |
-| --------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `query`   | string    | Free text against operation id, path and summary.                                                                                                                                                                           |
-| `family`  | enum      | One of 16 families: `applications`, `databases`, `services`, `servers`, `projects`, `deployments`, `teams`, `security`, `destinations`, `github-apps`, `cloud-tokens`, `hetzner`, `digitalocean`, `vultr`, `tags`, `other`. |
-| `method`  | enum      | `GET`, `POST`, `PATCH`, `PUT`, `DELETE`.                                                                                                                                                                                    |
-| `limit`   | int 1–100 | Default 20.                                                                                                                                                                                                                 |
+| Parameter | Type      | Notes                                                                                                                                                                                                                                                                                            |
+| --------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `query`   | string    | Free text against operation id, path and summary.                                                                                                                                                                                                                                                |
+| `family`  | enum      | One of 20 families: `applications`, `databases`, `services`, `servers`, `projects`, `deployments`, `teams`, `security`, `destinations`, `github-apps`, `gitlab-apps`, `notifications`, `s3-storages`, `cloud-init-scripts`, `cloud-tokens`, `hetzner`, `digitalocean`, `vultr`, `tags`, `other`. |
+| `method`  | enum      | `GET`, `POST`, `PATCH`, `PUT`, `DELETE`.                                                                                                                                                                                                                                                         |
+| `limit`   | int 1–100 | Default 20.                                                                                                                                                                                                                                                                                      |
 
 Whole-token matches outrank substring matches, and a small alias map covers the
 places where Coolify's vocabulary diverges from the question a person types —
@@ -342,7 +342,7 @@ catalog stops being a truthful map of what this server can do.
 | `operation_id` |           ●           |    ●     |      ●      |
 | `path_params`  |           ●           |    ●     |      ●      |
 | `query`        |           ●           |    ●     |      ●      |
-| `body`         |           —           |    ●     |      —      |
+| `body`         |           —           |    ●     |      ●      |
 | `fields`       |           ●           |    —     |      —      |
 | `reveal`       |           ●           |    ●     |      —      |
 

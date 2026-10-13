@@ -1,11 +1,90 @@
 // GENERATED FILE — DO NOT EDIT, run npm run codegen
-// Source: scripts/coolify-openapi.json (Coolify 4.2.0)
+// Source: scripts/coolify-openapi.json (Coolify 4.4.6)
 
 /**
  * Dereferenced, pruned request-body schemas keyed by operation id.
  * Absent id means the operation takes no JSON body.
  */
 export const SCHEMAS: Record<string, unknown> = {
+  'create-preview-deployment-by-application-uuid': {
+    required: ['pull_request_id'],
+    properties: {
+      pull_request_id: {
+        type: 'integer',
+        maximum: 2147483647,
+        minimum: 1,
+      },
+      pull_request_html_url: {
+        type: ['string', 'null'],
+      },
+      git_type: {
+        description: 'Git provider that hosts the pull request. Sets the ref Coolify fetches (pull/{id}/head or merge-requests/{id}/head).',
+        type: ['string', 'null'],
+        enum: ['github', 'gitlab', 'gitea', 'bitbucket'],
+      },
+      commit: {
+        description: 'Commit SHA to deploy. Required for Bitbucket.',
+        type: ['string', 'null'],
+      },
+      docker_tag: {
+        description: 'Docker image tag. Docker Image applications only.',
+        type: ['string', 'null'],
+      },
+      force: {
+        description: 'Rebuild without cache.',
+        type: 'boolean',
+        default: false,
+      },
+      instant_deploy: {
+        description: 'Queue a deployment. Set to false to only create the preview, for example to set its domains first.',
+        type: 'boolean',
+        default: true,
+      },
+    },
+    type: 'object',
+  },
+  'update-preview-domains-by-pull-request-id': {
+    properties: {
+      domains: {
+        type: ['string', 'null'],
+      },
+      docker_compose_domains: {
+        type: ['array', 'null'],
+        items: {
+          properties: {
+            name: {
+              type: 'string',
+            },
+            domain: {
+              type: ['string', 'null'],
+            },
+            redirect: {
+              type: ['string', 'null'],
+              enum: ['www', 'non-www', 'both'],
+            },
+          },
+          type: 'object',
+        },
+      },
+      force_domain_override: {
+        type: 'boolean',
+        default: false,
+      },
+    },
+    type: 'object',
+  },
+  'configure-application-secret-manager': {
+    required: ['integration_token_uuid'],
+    properties: {
+      integration_token_uuid: {
+        type: 'string',
+      },
+      settings: {
+        type: 'object',
+      },
+    },
+    type: 'object',
+  },
   'create-public-application': {
     required: [
       'project_uuid',
@@ -71,6 +150,12 @@ export const SCHEMAS: Record<string, unknown> = {
       domains: {
         type: 'string',
         description: 'The application URLs in a comma-separated list.',
+      },
+      noindex_domains: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
       },
       git_commit_sha: {
         type: 'string',
@@ -296,6 +381,12 @@ export const SCHEMAS: Record<string, unknown> = {
               type: 'string',
               description: 'Comma-separated list of URLs (e.g. "https://app.coolify.io,https://app2.coolify.io")',
             },
+            redirect: {
+              type: 'string',
+              nullable: true,
+              description: 'Per-service www/non-www redirect for this compose service.',
+              enum: ['www', 'non-www', 'both'],
+            },
           },
           type: 'object',
         },
@@ -371,6 +462,57 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Deploy the raw Docker Compose definition.',
       },
+      is_log_drain_enabled: {
+        type: 'boolean',
+        description: 'Enable log drain for the application.',
+      },
+      is_gpu_enabled: {
+        type: 'boolean',
+        description: 'Enable GPU support.',
+      },
+      gpu_driver: {
+        type: 'string',
+        nullable: true,
+        description: 'GPU driver name.',
+      },
+      gpu_count: {
+        type: 'string',
+        nullable: true,
+        description: 'Number of GPUs to allocate.',
+      },
+      gpu_device_ids: {
+        type: 'string',
+        nullable: true,
+        description: 'Comma-separated GPU device IDs.',
+      },
+      gpu_options: {
+        type: 'string',
+        nullable: true,
+        description: 'Additional GPU options.',
+      },
+      is_consistent_container_name_enabled: {
+        type: 'boolean',
+        description: 'Use a consistent container name across deployments.',
+      },
+      custom_internal_name: {
+        type: 'string',
+        nullable: true,
+        description: 'Custom internal container name. Turns is_consistent_container_name_enabled on when that field is not sent; sending it as false together with a name returns 422.',
+      },
+      custom_container_name_prefix: {
+        type: 'string',
+        nullable: true,
+        description: 'Prefix for generated container names (prefix-20260908T141530). Slugified and unique across the instance.',
+      },
+      preview_url_template: {
+        type: 'string',
+        description: 'Preview URL template.',
+      },
+      max_restart_count: {
+        type: 'integer',
+        minimum: 0,
+        description: 'Maximum container restart count before stopping.',
+      },
       is_http_basic_auth_enabled: {
         type: 'boolean',
         description: 'HTTP Basic Authentication enabled.',
@@ -396,7 +538,6 @@ export const SCHEMAS: Record<string, unknown> = {
       autogenerate_domain: {
         type: 'boolean',
         default: true,
-        description: 'If true and domains is empty, auto-generate a domain using the server\'s wildcard domain or sslip.io fallback. Default: true.',
       },
       is_container_label_escape_enabled: {
         type: 'boolean',
@@ -487,6 +628,12 @@ export const SCHEMAS: Record<string, unknown> = {
       domains: {
         type: 'string',
         description: 'The application URLs in a comma-separated list.',
+      },
+      noindex_domains: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
       },
       git_commit_sha: {
         type: 'string',
@@ -712,6 +859,12 @@ export const SCHEMAS: Record<string, unknown> = {
               type: 'string',
               description: 'Comma-separated list of URLs (e.g. "https://app.coolify.io,https://app2.coolify.io")',
             },
+            redirect: {
+              type: 'string',
+              nullable: true,
+              description: 'Per-service www/non-www redirect for this compose service.',
+              enum: ['www', 'non-www', 'both'],
+            },
           },
           type: 'object',
         },
@@ -787,6 +940,57 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Deploy the raw Docker Compose definition.',
       },
+      is_log_drain_enabled: {
+        type: 'boolean',
+        description: 'Enable log drain for the application.',
+      },
+      is_gpu_enabled: {
+        type: 'boolean',
+        description: 'Enable GPU support.',
+      },
+      gpu_driver: {
+        type: 'string',
+        nullable: true,
+        description: 'GPU driver name.',
+      },
+      gpu_count: {
+        type: 'string',
+        nullable: true,
+        description: 'Number of GPUs to allocate.',
+      },
+      gpu_device_ids: {
+        type: 'string',
+        nullable: true,
+        description: 'Comma-separated GPU device IDs.',
+      },
+      gpu_options: {
+        type: 'string',
+        nullable: true,
+        description: 'Additional GPU options.',
+      },
+      is_consistent_container_name_enabled: {
+        type: 'boolean',
+        description: 'Use a consistent container name across deployments.',
+      },
+      custom_internal_name: {
+        type: 'string',
+        nullable: true,
+        description: 'Custom internal container name. Turns is_consistent_container_name_enabled on when that field is not sent; sending it as false together with a name returns 422.',
+      },
+      custom_container_name_prefix: {
+        type: 'string',
+        nullable: true,
+        description: 'Prefix for generated container names (prefix-20260908T141530). Slugified and unique across the instance.',
+      },
+      preview_url_template: {
+        type: 'string',
+        description: 'Preview URL template.',
+      },
+      max_restart_count: {
+        type: 'integer',
+        minimum: 0,
+        description: 'Maximum container restart count before stopping.',
+      },
       is_http_basic_auth_enabled: {
         type: 'boolean',
         description: 'HTTP Basic Authentication enabled.',
@@ -812,7 +1016,6 @@ export const SCHEMAS: Record<string, unknown> = {
       autogenerate_domain: {
         type: 'boolean',
         default: true,
-        description: 'If true and domains is empty, auto-generate a domain using the server\'s wildcard domain or sslip.io fallback. Default: true.',
       },
       is_container_label_escape_enabled: {
         type: 'boolean',
@@ -903,6 +1106,12 @@ export const SCHEMAS: Record<string, unknown> = {
       domains: {
         type: 'string',
         description: 'The application URLs in a comma-separated list.',
+      },
+      noindex_domains: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
       },
       git_commit_sha: {
         type: 'string',
@@ -1128,6 +1337,12 @@ export const SCHEMAS: Record<string, unknown> = {
               type: 'string',
               description: 'Comma-separated list of URLs (e.g. "https://app.coolify.io,https://app2.coolify.io")',
             },
+            redirect: {
+              type: 'string',
+              nullable: true,
+              description: 'Per-service www/non-www redirect for this compose service.',
+              enum: ['www', 'non-www', 'both'],
+            },
           },
           type: 'object',
         },
@@ -1203,6 +1418,57 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Deploy the raw Docker Compose definition.',
       },
+      is_log_drain_enabled: {
+        type: 'boolean',
+        description: 'Enable log drain for the application.',
+      },
+      is_gpu_enabled: {
+        type: 'boolean',
+        description: 'Enable GPU support.',
+      },
+      gpu_driver: {
+        type: 'string',
+        nullable: true,
+        description: 'GPU driver name.',
+      },
+      gpu_count: {
+        type: 'string',
+        nullable: true,
+        description: 'Number of GPUs to allocate.',
+      },
+      gpu_device_ids: {
+        type: 'string',
+        nullable: true,
+        description: 'Comma-separated GPU device IDs.',
+      },
+      gpu_options: {
+        type: 'string',
+        nullable: true,
+        description: 'Additional GPU options.',
+      },
+      is_consistent_container_name_enabled: {
+        type: 'boolean',
+        description: 'Use a consistent container name across deployments.',
+      },
+      custom_internal_name: {
+        type: 'string',
+        nullable: true,
+        description: 'Custom internal container name. Turns is_consistent_container_name_enabled on when that field is not sent; sending it as false together with a name returns 422.',
+      },
+      custom_container_name_prefix: {
+        type: 'string',
+        nullable: true,
+        description: 'Prefix for generated container names (prefix-20260908T141530). Slugified and unique across the instance.',
+      },
+      preview_url_template: {
+        type: 'string',
+        description: 'Preview URL template.',
+      },
+      max_restart_count: {
+        type: 'integer',
+        minimum: 0,
+        description: 'Maximum container restart count before stopping.',
+      },
       is_http_basic_auth_enabled: {
         type: 'boolean',
         description: 'HTTP Basic Authentication enabled.',
@@ -1228,7 +1494,6 @@ export const SCHEMAS: Record<string, unknown> = {
       autogenerate_domain: {
         type: 'boolean',
         default: true,
-        description: 'If true and domains is empty, auto-generate a domain using the server\'s wildcard domain or sslip.io fallback. Default: true.',
       },
       is_container_label_escape_enabled: {
         type: 'boolean',
@@ -1302,6 +1567,12 @@ export const SCHEMAS: Record<string, unknown> = {
       domains: {
         type: 'string',
         description: 'The application URLs in a comma-separated list.',
+      },
+      noindex_domains: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
       },
       docker_registry_image_name: {
         type: 'string',
@@ -1524,6 +1795,57 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Deploy the raw Docker Compose definition.',
       },
+      is_log_drain_enabled: {
+        type: 'boolean',
+        description: 'Enable log drain for the application.',
+      },
+      is_gpu_enabled: {
+        type: 'boolean',
+        description: 'Enable GPU support.',
+      },
+      gpu_driver: {
+        type: 'string',
+        nullable: true,
+        description: 'GPU driver name.',
+      },
+      gpu_count: {
+        type: 'string',
+        nullable: true,
+        description: 'Number of GPUs to allocate.',
+      },
+      gpu_device_ids: {
+        type: 'string',
+        nullable: true,
+        description: 'Comma-separated GPU device IDs.',
+      },
+      gpu_options: {
+        type: 'string',
+        nullable: true,
+        description: 'Additional GPU options.',
+      },
+      is_consistent_container_name_enabled: {
+        type: 'boolean',
+        description: 'Use a consistent container name across deployments.',
+      },
+      custom_internal_name: {
+        type: 'string',
+        nullable: true,
+        description: 'Custom internal container name. Turns is_consistent_container_name_enabled on when that field is not sent; sending it as false together with a name returns 422.',
+      },
+      custom_container_name_prefix: {
+        type: 'string',
+        nullable: true,
+        description: 'Prefix for generated container names (prefix-20260908T141530). Slugified and unique across the instance.',
+      },
+      preview_url_template: {
+        type: 'string',
+        description: 'Preview URL template.',
+      },
+      max_restart_count: {
+        type: 'integer',
+        minimum: 0,
+        description: 'Maximum container restart count before stopping.',
+      },
       is_http_basic_auth_enabled: {
         type: 'boolean',
         description: 'HTTP Basic Authentication enabled.',
@@ -1549,7 +1871,6 @@ export const SCHEMAS: Record<string, unknown> = {
       autogenerate_domain: {
         type: 'boolean',
         default: true,
-        description: 'If true and domains is empty, auto-generate a domain using the server\'s wildcard domain or sslip.io fallback. Default: true.',
       },
       is_container_label_escape_enabled: {
         type: 'boolean',
@@ -1617,6 +1938,12 @@ export const SCHEMAS: Record<string, unknown> = {
       domains: {
         type: 'string',
         description: 'The application URLs in a comma-separated list.',
+      },
+      noindex_domains: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
       },
       ports_mappings: {
         type: 'string',
@@ -1827,6 +2154,57 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Deploy the raw Docker Compose definition.',
       },
+      is_log_drain_enabled: {
+        type: 'boolean',
+        description: 'Enable log drain for the application.',
+      },
+      is_gpu_enabled: {
+        type: 'boolean',
+        description: 'Enable GPU support.',
+      },
+      gpu_driver: {
+        type: 'string',
+        nullable: true,
+        description: 'GPU driver name.',
+      },
+      gpu_count: {
+        type: 'string',
+        nullable: true,
+        description: 'Number of GPUs to allocate.',
+      },
+      gpu_device_ids: {
+        type: 'string',
+        nullable: true,
+        description: 'Comma-separated GPU device IDs.',
+      },
+      gpu_options: {
+        type: 'string',
+        nullable: true,
+        description: 'Additional GPU options.',
+      },
+      is_consistent_container_name_enabled: {
+        type: 'boolean',
+        description: 'Use a consistent container name across deployments.',
+      },
+      custom_internal_name: {
+        type: 'string',
+        nullable: true,
+        description: 'Custom internal container name. Turns is_consistent_container_name_enabled on when that field is not sent; sending it as false together with a name returns 422.',
+      },
+      custom_container_name_prefix: {
+        type: 'string',
+        nullable: true,
+        description: 'Prefix for generated container names (prefix-20260908T141530). Slugified and unique across the instance.',
+      },
+      preview_url_template: {
+        type: 'string',
+        description: 'Preview URL template.',
+      },
+      max_restart_count: {
+        type: 'integer',
+        minimum: 0,
+        description: 'Maximum container restart count before stopping.',
+      },
       is_http_basic_auth_enabled: {
         type: 'boolean',
         description: 'HTTP Basic Authentication enabled.',
@@ -1852,7 +2230,6 @@ export const SCHEMAS: Record<string, unknown> = {
       autogenerate_domain: {
         type: 'boolean',
         default: true,
-        description: 'If true and domains is empty, auto-generate a domain using the server\'s wildcard domain or sslip.io fallback. Default: true.',
       },
       is_container_label_escape_enabled: {
         type: 'boolean',
@@ -1924,6 +2301,12 @@ export const SCHEMAS: Record<string, unknown> = {
       domains: {
         type: 'string',
         description: 'The application URLs in a comma-separated list.',
+      },
+      noindex_domains: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
       },
       git_commit_sha: {
         type: 'string',
@@ -2144,6 +2527,12 @@ export const SCHEMAS: Record<string, unknown> = {
               type: 'string',
               description: 'Comma-separated list of URLs (e.g. "https://app.coolify.io,https://app2.coolify.io")',
             },
+            redirect: {
+              type: 'string',
+              nullable: true,
+              description: 'Per-service www/non-www redirect for this compose service.',
+              enum: ['www', 'non-www', 'both'],
+            },
           },
           type: 'object',
         },
@@ -2218,6 +2607,57 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Deploy the raw Docker Compose definition.',
       },
+      is_log_drain_enabled: {
+        type: 'boolean',
+        description: 'Enable log drain for the application.',
+      },
+      is_gpu_enabled: {
+        type: 'boolean',
+        description: 'Enable GPU support.',
+      },
+      gpu_driver: {
+        type: 'string',
+        nullable: true,
+        description: 'GPU driver name.',
+      },
+      gpu_count: {
+        type: 'string',
+        nullable: true,
+        description: 'Number of GPUs to allocate.',
+      },
+      gpu_device_ids: {
+        type: 'string',
+        nullable: true,
+        description: 'Comma-separated GPU device IDs.',
+      },
+      gpu_options: {
+        type: 'string',
+        nullable: true,
+        description: 'Additional GPU options.',
+      },
+      is_consistent_container_name_enabled: {
+        type: 'boolean',
+        description: 'Use a consistent container name across deployments.',
+      },
+      custom_internal_name: {
+        type: 'string',
+        nullable: true,
+        description: 'Custom internal container name. Turns is_consistent_container_name_enabled on when that field is not sent; sending it as false together with a name returns 422.',
+      },
+      custom_container_name_prefix: {
+        type: 'string',
+        nullable: true,
+        description: 'Prefix for generated container names (prefix-20260908T141530). Slugified and unique across the instance.',
+      },
+      preview_url_template: {
+        type: 'string',
+        description: 'Preview URL template.',
+      },
+      max_restart_count: {
+        type: 'integer',
+        minimum: 0,
+        description: 'Maximum container restart count before stopping.',
+      },
       connect_to_docker_network: {
         type: 'boolean',
         description: 'The flag to connect the service to the predefined Docker network.',
@@ -2260,7 +2700,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       is_shown_once: {
         type: 'boolean',
-        description: 'The flag to indicate if the environment variable\'s value is shown on the UI.',
+        description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
       },
     },
     type: 'object',
@@ -2290,7 +2730,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       is_shown_once: {
         type: 'boolean',
-        description: 'The flag to indicate if the environment variable\'s value is shown on the UI.',
+        description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
       },
     },
     type: 'object',
@@ -2324,7 +2764,7 @@ export const SCHEMAS: Record<string, unknown> = {
             },
             is_shown_once: {
               type: 'boolean',
-              description: 'The flag to indicate if the environment variable\'s value is shown on the UI.',
+              description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
             },
           },
           type: 'object',
@@ -2339,6 +2779,21 @@ export const SCHEMAS: Record<string, unknown> = {
       environment_uuid: {
         type: 'string',
         description: 'UUID of the target environment.',
+      },
+    },
+    type: 'object',
+  },
+  'migrate-application-by-uuid': {
+    required: ['destination_uuid'],
+    properties: {
+      destination_uuid: {
+        description: 'UUID of the target destination.',
+        type: 'string',
+      },
+      migrate_volumes: {
+        description: 'Whether to transfer persistent volume data when migrating across servers.',
+        type: 'boolean',
+        default: true,
       },
     },
     type: 'object',
@@ -2359,11 +2814,6 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'The container mount path.',
       },
-      host_path: {
-        type: 'string',
-        nullable: true,
-        description: 'The host path (persistent only, optional).',
-      },
       content: {
         type: 'string',
         nullable: true,
@@ -2375,7 +2825,6 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       fs_path: {
         type: 'string',
-        description: 'Host directory path (required when is_directory is true).',
       },
     },
     type: 'object',
@@ -2409,15 +2858,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'The container mount path (not allowed for read-only storages).',
       },
-      host_path: {
-        type: 'string',
-        nullable: true,
-        description: 'The host path (persistent only, not allowed for read-only storages).',
-      },
       content: {
         type: 'string',
         nullable: true,
-        description: 'The file content (file only, not allowed for read-only storages).',
+        description: 'The file content (file only, not allowed for read-only storages). Changing the content of a file outside the resource directory needs the deploy permission.',
       },
     },
     type: 'object',
@@ -2435,6 +2879,68 @@ export const SCHEMAS: Record<string, unknown> = {
           type: 'string',
         },
         description: 'Array of tag names (each min 2 characters). Required if tag_name is not provided.',
+      },
+    },
+    type: 'object',
+  },
+  'clone-application-by-uuid': {
+    required: ['destination_uuid'],
+    properties: {
+      destination_uuid: {
+        description: 'UUID of the destination to clone into.',
+        type: 'string',
+      },
+      name: {
+        description: 'Optional name for the cloned application.',
+        type: ['string', 'null'],
+      },
+      clone_volumes: {
+        description: 'Whether to clone volume data.',
+        type: 'boolean',
+        default: false,
+      },
+    },
+    type: 'object',
+  },
+  'rollback-application-by-uuid': {
+    required: ['commit'],
+    properties: {
+      commit: {
+        description: 'Image tag / commit to roll back to.',
+        type: 'string',
+      },
+    },
+    type: 'object',
+  },
+  'add-application-destination': {
+    required: ['destination_uuid'],
+    properties: {
+      destination_uuid: {
+        type: 'string',
+      },
+    },
+    type: 'object',
+  },
+  'create-cloud-init-script': {
+    required: ['name', 'script'],
+    properties: {
+      name: {
+        type: 'string',
+      },
+      script: {
+        description: 'Bash script (#!) or cloud-config YAML.',
+        type: 'string',
+      },
+    },
+    type: 'object',
+  },
+  'update-cloud-init-script-by-uuid': {
+    properties: {
+      name: {
+        type: 'string',
+      },
+      script: {
+        type: 'string',
       },
     },
     type: 'object',
@@ -2466,6 +2972,123 @@ export const SCHEMAS: Record<string, unknown> = {
       },
     },
     type: 'object',
+  },
+  'create-database-import': {
+    type: 'object',
+    oneOf: [
+      {
+        required: ['source', 'upload_id'],
+        properties: {
+          source: {
+            type: 'string',
+            enum: ['upload'],
+          },
+          upload_id: {
+            type: 'string',
+            format: 'uuid',
+          },
+          dump_all: {
+            type: 'boolean',
+            default: false,
+          },
+          replace_existing: {
+            description: 'Drop matching PostgreSQL objects before restoring a single-database archive.',
+            type: 'boolean',
+            default: false,
+          },
+          keep_owners: {
+            description: 'Restore object owners and privileges from a single-database PostgreSQL archive. By default they are skipped, because the roles of another server usually do not exist.',
+            type: 'boolean',
+            default: false,
+          },
+          restore_mysql_users: {
+            type: 'boolean',
+            default: false,
+          },
+          sqlite_database: {
+            description: 'SQLite: the database file to restore into. Must be one of the database files. Defaults to the file named in the backup file name, else the first file.',
+            type: 'string',
+          },
+        },
+        type: 'object',
+        additionalProperties: false,
+      },
+      {
+        required: ['source', 's3_storage_uuid', 'path'],
+        properties: {
+          source: {
+            type: 'string',
+            enum: ['s3'],
+          },
+          s3_storage_uuid: {
+            type: 'string',
+          },
+          path: {
+            type: 'string',
+          },
+          dump_all: {
+            type: 'boolean',
+            default: false,
+          },
+          replace_existing: {
+            description: 'Drop matching PostgreSQL objects before restoring a single-database archive.',
+            type: 'boolean',
+            default: false,
+          },
+          keep_owners: {
+            description: 'Restore object owners and privileges from a single-database PostgreSQL archive. By default they are skipped, because the roles of another server usually do not exist.',
+            type: 'boolean',
+            default: false,
+          },
+          restore_mysql_users: {
+            type: 'boolean',
+            default: false,
+          },
+          sqlite_database: {
+            description: 'SQLite: the database file to restore into. Must be one of the database files. Defaults to the file named in the backup file name, else the first file.',
+            type: 'string',
+          },
+        },
+        type: 'object',
+        additionalProperties: false,
+      },
+      {
+        required: ['source', 'path'],
+        properties: {
+          source: {
+            type: 'string',
+            enum: ['server'],
+          },
+          path: {
+            type: 'string',
+          },
+          dump_all: {
+            type: 'boolean',
+            default: false,
+          },
+          replace_existing: {
+            description: 'Drop matching PostgreSQL objects before restoring a single-database archive.',
+            type: 'boolean',
+            default: false,
+          },
+          keep_owners: {
+            description: 'Restore object owners and privileges from a single-database PostgreSQL archive. By default they are skipped, because the roles of another server usually do not exist.',
+            type: 'boolean',
+            default: false,
+          },
+          restore_mysql_users: {
+            type: 'boolean',
+            default: false,
+          },
+          sqlite_database: {
+            description: 'SQLite: the database file to restore into. Must be one of the database files. Defaults to the file named in the backup file name, else the first file.',
+            type: 'string',
+          },
+        },
+        type: 'object',
+        additionalProperties: false,
+      },
+    ],
   },
   'create-database-backup': {
     required: ['frequency'],
@@ -2529,6 +3152,13 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'integer',
         description: 'Backup job timeout in seconds (min: 60, max: 36000)',
         default: 3600,
+      },
+      missing_backup_notification_days: {
+        type: 'integer',
+        description: 'Alert after this many days without an execution; 0 disables alerts',
+        minimum: 0,
+        maximum: 365,
+        default: 0,
       },
     },
     type: 'object',
@@ -2695,6 +3325,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'MySQL conf',
       },
+      sqlite_databases: {
+        type: 'string',
+        description: 'Comma-separated SQLite database file names',
+      },
       health_check_enabled: {
         type: 'boolean',
         description: 'Enable the database healthcheck probe.',
@@ -2785,6 +3419,12 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'integer',
         description: 'Backup job timeout in seconds (min: 60, max: 36000)',
         default: 3600,
+      },
+      missing_backup_notification_days: {
+        type: 'integer',
+        description: 'Alert after this many days without an execution; 0 disables alerts',
+        minimum: 0,
+        maximum: 365,
       },
     },
     type: 'object',
@@ -3641,12 +4281,113 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     type: 'object',
   },
+  'create-database-sqlite': {
+    required: [
+      'server_uuid',
+      'project_uuid',
+      'environment_name',
+      'environment_uuid',
+    ],
+    properties: {
+      server_uuid: {
+        type: 'string',
+        description: 'UUID of the server',
+      },
+      project_uuid: {
+        type: 'string',
+        description: 'UUID of the project',
+      },
+      environment_name: {
+        type: 'string',
+        description: 'Name of the environment. You need to provide at least one of environment_name or environment_uuid.',
+      },
+      environment_uuid: {
+        type: 'string',
+        description: 'UUID of the environment. You need to provide at least one of environment_name or environment_uuid.',
+      },
+      destination_uuid: {
+        type: 'string',
+        description: 'UUID of the destination if the server has multiple destinations',
+      },
+      sqlite_databases: {
+        type: 'string',
+        description: 'Comma-separated SQLite database file names',
+      },
+      name: {
+        type: 'string',
+        description: 'Name of the database',
+      },
+      description: {
+        type: 'string',
+        description: 'Description of the database',
+      },
+      image: {
+        type: 'string',
+        description: 'Docker Image of the database',
+      },
+      limits_memory: {
+        type: 'string',
+        description: 'Memory limit of the database',
+      },
+      limits_memory_swap: {
+        type: 'string',
+        description: 'Memory swap limit of the database',
+      },
+      limits_memory_swappiness: {
+        type: 'integer',
+        description: 'Memory swappiness of the database',
+      },
+      limits_memory_reservation: {
+        type: 'string',
+        description: 'Memory reservation of the database',
+      },
+      limits_cpus: {
+        type: 'string',
+        description: 'CPU limit of the database',
+      },
+      limits_cpuset: {
+        type: 'string',
+        description: 'CPU set of the database',
+      },
+      limits_cpu_shares: {
+        type: 'integer',
+        description: 'CPU shares of the database',
+      },
+      instant_deploy: {
+        type: 'boolean',
+        description: 'Instant deploy the database',
+      },
+      tags: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
+        description: 'Tags to assign to the database.',
+      },
+    },
+    type: 'object',
+  },
   'move-database-by-uuid': {
     required: ['environment_uuid'],
     properties: {
       environment_uuid: {
         type: 'string',
         description: 'UUID of the target environment.',
+      },
+    },
+    type: 'object',
+  },
+  'migrate-database-by-uuid': {
+    required: ['destination_uuid'],
+    properties: {
+      destination_uuid: {
+        description: 'UUID of the target destination.',
+        type: 'string',
+      },
+      migrate_volumes: {
+        description: 'Whether to transfer persistent volume data when migrating across servers.',
+        type: 'boolean',
+        default: true,
       },
     },
     type: 'object',
@@ -3671,7 +4412,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       is_shown_once: {
         type: 'boolean',
-        description: 'The flag to indicate if the environment variable\'s value is shown on the UI.',
+        description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
       },
     },
     type: 'object',
@@ -3697,7 +4438,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       is_shown_once: {
         type: 'boolean',
-        description: 'The flag to indicate if the environment variable\'s value is shown on the UI.',
+        description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
       },
     },
     type: 'object',
@@ -3727,7 +4468,7 @@ export const SCHEMAS: Record<string, unknown> = {
             },
             is_shown_once: {
               type: 'boolean',
-              description: 'The flag to indicate if the environment variable\'s value is shown on the UI.',
+              description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
             },
           },
           type: 'object',
@@ -3752,11 +4493,6 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'The container mount path.',
       },
-      host_path: {
-        type: 'string',
-        nullable: true,
-        description: 'The host path (persistent only, optional).',
-      },
       content: {
         type: 'string',
         nullable: true,
@@ -3768,7 +4504,6 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       fs_path: {
         type: 'string',
-        description: 'Host directory path (required when is_directory is true).',
       },
     },
     type: 'object',
@@ -3802,15 +4537,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'The container mount path (not allowed for read-only storages).',
       },
-      host_path: {
-        type: 'string',
-        nullable: true,
-        description: 'The host path (persistent only, not allowed for read-only storages).',
-      },
       content: {
         type: 'string',
         nullable: true,
-        description: 'The file content (file only, not allowed for read-only storages).',
+        description: 'The file content (file only, not allowed for read-only storages). Changing the content of a file outside the resource directory needs the deploy permission.',
       },
     },
     type: 'object',
@@ -3832,6 +4562,22 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     type: 'object',
   },
+  'clone-database-by-uuid': {
+    required: ['destination_uuid'],
+    properties: {
+      destination_uuid: {
+        type: 'string',
+      },
+      name: {
+        type: ['string', 'null'],
+      },
+      clone_volumes: {
+        type: 'boolean',
+        default: false,
+      },
+    },
+    type: 'object',
+  },
   'create-server-destination': {
     required: ['network'],
     properties: {
@@ -3847,6 +4593,15 @@ export const SCHEMAS: Record<string, unknown> = {
       type: {
         type: 'string',
         enum: ['standalone', 'swarm'],
+      },
+    },
+    type: 'object',
+  },
+  'update-destination-by-uuid': {
+    properties: {
+      name: {
+        type: 'string',
+        maxLength: 255,
       },
     },
     type: 'object',
@@ -3976,6 +4731,115 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     type: 'object',
   },
+  'create-gitlab-app': {
+    required: ['name', 'html_url'],
+    properties: {
+      name: {
+        type: 'string',
+        description: 'Name of the GitLab app.',
+      },
+      html_url: {
+        type: 'string',
+        description: 'GitLab instance URL (e.g., https://gitlab.com).',
+      },
+      api_url: {
+        type: 'string',
+        description: 'GitLab API URL (defaults to {html_url}/api/v4).',
+      },
+      custom_user: {
+        type: 'string',
+        description: 'Custom user for SSH access (default: git).',
+      },
+      custom_port: {
+        type: 'integer',
+        description: 'Custom port for SSH access (default: 22).',
+      },
+      group_name: {
+        type: 'string',
+        nullable: true,
+        description: 'Optional comma-separated group names to filter repositories.',
+      },
+      client_id: {
+        type: 'string',
+        nullable: true,
+        description: 'GitLab OAuth Application ID.',
+      },
+      client_secret: {
+        type: 'string',
+        nullable: true,
+        description: 'GitLab OAuth Application Secret.',
+      },
+      webhook_token: {
+        type: 'string',
+        nullable: true,
+        description: 'Webhook secret token (auto-generated when omitted).',
+      },
+      redirect_uri: {
+        type: 'string',
+        nullable: true,
+        description: 'OAuth redirect URI registered in GitLab.',
+      },
+      is_system_wide: {
+        type: 'boolean',
+        description: 'Is this app system-wide (non-cloud instances only).',
+      },
+    },
+    type: 'object',
+  },
+  updateGitlabApp: {
+    properties: {
+      name: {
+        type: 'string',
+        description: 'GitLab App name',
+      },
+      html_url: {
+        type: 'string',
+        description: 'GitLab HTML URL',
+      },
+      api_url: {
+        type: 'string',
+        description: 'GitLab API URL',
+      },
+      custom_user: {
+        type: 'string',
+        description: 'Custom user for SSH',
+      },
+      custom_port: {
+        type: 'integer',
+        description: 'Custom port for SSH',
+      },
+      group_name: {
+        type: 'string',
+        nullable: true,
+        description: 'Optional group filter',
+      },
+      client_id: {
+        type: 'string',
+        nullable: true,
+        description: 'OAuth Application ID',
+      },
+      client_secret: {
+        type: 'string',
+        nullable: true,
+        description: 'OAuth Application Secret',
+      },
+      webhook_token: {
+        type: 'string',
+        nullable: true,
+        description: 'Webhook secret token',
+      },
+      redirect_uri: {
+        type: 'string',
+        nullable: true,
+        description: 'OAuth redirect URI',
+      },
+      is_system_wide: {
+        type: 'boolean',
+        description: 'Is system wide (non-cloud instances only)',
+      },
+    },
+    type: 'object',
+  },
   'create-hetzner-server': {
     required: ['location', 'server_type', 'image', 'private_key_uuid'],
     properties: {
@@ -4052,6 +4916,25 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     type: 'object',
   },
+  'create-secret-manager-integration-token': {
+    required: ['provider', 'name', 'token'],
+    properties: {
+      provider: {
+        type: 'string',
+        enum: ['doppler', 'infisical', 'vault'],
+      },
+      name: {
+        type: 'string',
+      },
+      token: {
+        type: 'string',
+      },
+      metadata: {
+        type: 'object',
+      },
+    },
+    type: 'object',
+  },
   'create-project': {
     properties: {
       name: {
@@ -4087,6 +4970,96 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     type: 'object',
   },
+  'update-environment': {
+    properties: {
+      name: {
+        type: 'string',
+        description: 'The name of the environment.',
+      },
+      description: {
+        type: 'string',
+        description: 'The description of the environment.',
+      },
+    },
+    type: 'object',
+  },
+  'create-s3-storage': {
+    required: ['name', 'endpoint', 'bucket', 'region', 'key', 'secret'],
+    properties: {
+      name: {
+        type: 'string',
+        description: 'A friendly name for the storage.',
+      },
+      description: {
+        type: 'string',
+        nullable: true,
+        description: 'Optional description.',
+      },
+      endpoint: {
+        type: 'string',
+        description: 'S3-compatible endpoint URL.',
+      },
+      bucket: {
+        type: 'string',
+        description: 'S3 bucket name.',
+      },
+      region: {
+        type: 'string',
+        description: 'S3 region.',
+      },
+      key: {
+        type: 'string',
+        description: 'Access key.',
+      },
+      secret: {
+        type: 'string',
+        description: 'Secret key.',
+      },
+      is_usable: {
+        type: 'boolean',
+        description: 'Whether the storage is marked usable.',
+      },
+    },
+    type: 'object',
+  },
+  'update-s3-storage-by-uuid': {
+    properties: {
+      name: {
+        type: 'string',
+        description: 'A friendly name for the storage.',
+      },
+      description: {
+        type: 'string',
+        nullable: true,
+        description: 'Optional description.',
+      },
+      endpoint: {
+        type: 'string',
+        description: 'S3-compatible endpoint URL.',
+      },
+      bucket: {
+        type: 'string',
+        description: 'S3 bucket name.',
+      },
+      region: {
+        type: 'string',
+        description: 'S3 region.',
+      },
+      key: {
+        type: 'string',
+        description: 'Access key.',
+      },
+      secret: {
+        type: 'string',
+        description: 'Secret key.',
+      },
+      is_usable: {
+        type: 'boolean',
+        description: 'Whether the storage is marked usable.',
+      },
+    },
+    type: 'object',
+  },
   'create-scheduled-task-by-application-uuid': {
     required: ['name', 'command', 'frequency'],
     properties: {
@@ -4111,6 +5084,7 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'integer',
         description: 'The timeout of the scheduled task in seconds.',
         default: 300,
+        maximum: 36000,
       },
       enabled: {
         type: 'boolean',
@@ -4143,6 +5117,7 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'integer',
         description: 'The timeout of the scheduled task in seconds.',
         default: 300,
+        maximum: 36000,
       },
       enabled: {
         type: 'boolean',
@@ -4176,6 +5151,7 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'integer',
         description: 'The timeout of the scheduled task in seconds.',
         default: 300,
+        maximum: 36000,
       },
       enabled: {
         type: 'boolean',
@@ -4208,6 +5184,7 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'integer',
         description: 'The timeout of the scheduled task in seconds.',
         default: 300,
+        maximum: 36000,
       },
       enabled: {
         type: 'boolean',
@@ -4249,6 +5226,193 @@ export const SCHEMAS: Record<string, unknown> = {
     type: 'object',
     additionalProperties: false,
   },
+  'update-server-cloudflare-tunnel': {
+    properties: {
+      is_cloudflare_tunnel: {
+        type: 'boolean',
+      },
+    },
+    type: 'object',
+  },
+  'update-server-docker-cleanup': {
+    properties: {
+      docker_cleanup_frequency: {
+        description: 'Cron / human frequency expression.',
+        type: 'string',
+      },
+      docker_cleanup_threshold: {
+        type: 'integer',
+        maximum: 99,
+        minimum: 1,
+      },
+      force_docker_cleanup: {
+        type: 'boolean',
+      },
+      delete_unused_volumes: {
+        type: 'boolean',
+      },
+      delete_unused_networks: {
+        type: 'boolean',
+      },
+      disable_application_image_retention: {
+        type: 'boolean',
+      },
+    },
+    type: 'object',
+  },
+  'run-server-docker-cleanup': {
+    properties: {
+      delete_unused_volumes: {
+        type: 'boolean',
+      },
+      delete_unused_networks: {
+        type: 'boolean',
+      },
+    },
+    type: 'object',
+  },
+  'login-server-registry': {
+    required: ['registry', 'username', 'password'],
+    properties: {
+      registry: {
+        description: 'Registry host, optionally with a port. Use docker.io for Docker Hub.',
+        type: 'string',
+      },
+      username: {
+        type: 'string',
+      },
+      password: {
+        description: 'Password or access token. Never returned.',
+        type: 'string',
+      },
+    },
+    type: 'object',
+  },
+  'update-server-log-drains': {
+    properties: {
+      is_logdrain_newrelic_enabled: {
+        type: 'boolean',
+      },
+      logdrain_newrelic_license_key: {
+        type: 'string',
+      },
+      logdrain_newrelic_base_uri: {
+        type: 'string',
+      },
+      is_logdrain_axiom_enabled: {
+        type: 'boolean',
+      },
+      logdrain_axiom_dataset_name: {
+        type: 'string',
+      },
+      logdrain_axiom_api_key: {
+        type: 'string',
+      },
+      is_logdrain_custom_enabled: {
+        type: 'boolean',
+      },
+      logdrain_custom_config: {
+        type: 'string',
+      },
+      logdrain_custom_config_parser: {
+        type: 'string',
+      },
+    },
+    type: 'object',
+  },
+  'update-server-proxy': {
+    properties: {
+      redirect_enabled: {
+        type: 'boolean',
+      },
+      redirect_url: {
+        description: 'Public http(s) redirect URL, or null to clear.',
+        type: ['string', 'null'],
+      },
+      generate_exact_labels: {
+        type: 'boolean',
+      },
+      proxy_type: {
+        description: 'Proxy type (case-insensitive).',
+        type: 'string',
+        enum: ['traefik', 'caddy', 'nginx', 'none'],
+      },
+    },
+    type: 'object',
+  },
+  'save-server-proxy-configuration': {
+    required: ['configuration'],
+    properties: {
+      configuration: {
+        description: 'Proxy docker-compose YAML. Prefer base64 encoding for multi-line content.',
+        type: 'string',
+      },
+    },
+    type: 'object',
+  },
+  'update-server-sentinel': {
+    properties: {
+      is_metrics_enabled: {
+        type: 'boolean',
+      },
+      is_sentinel_debug_enabled: {
+        type: 'boolean',
+      },
+      sentinel_token: {
+        type: 'string',
+      },
+      sentinel_metrics_refresh_rate_seconds: {
+        type: 'integer',
+        minimum: 1,
+      },
+      sentinel_metrics_history_days: {
+        type: 'integer',
+        minimum: 1,
+      },
+      sentinel_push_interval_seconds: {
+        type: 'integer',
+        minimum: 10,
+      },
+      sentinel_custom_url: {
+        type: ['string', 'null'],
+      },
+      traffic_topn: {
+        type: 'integer',
+        maximum: 1000,
+        minimum: 1,
+      },
+      traffic_sample_threshold: {
+        type: 'integer',
+        minimum: 0,
+      },
+      traffic_retention_1h_days: {
+        type: 'integer',
+        maximum: 365,
+        minimum: 1,
+      },
+      traffic_retention_1d_days: {
+        type: 'integer',
+        maximum: 3650,
+        minimum: 1,
+      },
+      is_geoip_enabled: {
+        type: 'boolean',
+      },
+      geoip_refresh_days: {
+        type: 'integer',
+        minimum: 1,
+      },
+      geoip_maxmind_license_key: {
+        type: ['string', 'null'],
+      },
+      traffic_ip_mode: {
+        description: 'How Sentinel stores client IPs: full, anonymized (IPv4 /24, IPv6 /48), or off.',
+        type: 'string',
+        enum: ['full', 'anonymized', 'off'],
+      },
+    },
+    type: 'object',
+  },
   'create-server': {
     properties: {
       name: {
@@ -4275,9 +5439,15 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'The UUID of the private key.',
       },
+      server_role: {
+        type: 'string',
+        enum: ['deployment', 'build', 'both'],
+        description: 'Server role.',
+      },
       is_build_server: {
         type: 'boolean',
-        description: 'Is build server.',
+        deprecated: true,
+        description: 'Deprecated: use server_role instead. true sets server_role to build, false sets it to both. Must not conflict with server_role.',
       },
       instant_validate: {
         type: 'boolean',
@@ -4317,9 +5487,15 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'The UUID of the private key.',
       },
+      server_role: {
+        type: 'string',
+        enum: ['deployment', 'build', 'both'],
+        description: 'Server role.',
+      },
       is_build_server: {
         type: 'boolean',
-        description: 'Is build server.',
+        deprecated: true,
+        description: 'Deprecated: use server_role instead. true sets server_role to build, false changes a build server to both and leaves other roles unchanged. Must not conflict with server_role.',
       },
       instant_validate: {
         type: 'boolean',
@@ -4350,6 +5526,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'Cron expression for disk usage check frequency.',
       },
+      server_disk_usage_notification_interval_hours: {
+        type: 'integer',
+        description: 'Minimum hours between high disk usage notifications (1-720). Default: 24.',
+      },
       connection_timeout: {
         type: 'integer',
         description: 'SSH connection timeout in seconds (1-300). Default: 10.',
@@ -4373,6 +5553,13 @@ export const SCHEMAS: Record<string, unknown> = {
         description: 'Comma-separated list of URLs (e.g. "http://app.example.com:8080,https://app2.example.com"). Stored as fqdn.',
         type: ['string', 'null'],
       },
+      noindex_domains: {
+        description: 'The subset of the service application domains served with an X-Robots-Tag: noindex, nofollow response header, keeping them out of search engines. Entries that are not among the domains are ignored.',
+        type: ['array', 'null'],
+        items: {
+          type: 'string',
+        },
+      },
       human_name: {
         type: ['string', 'null'],
       },
@@ -4394,8 +5581,133 @@ export const SCHEMAS: Record<string, unknown> = {
       is_stripprefix_enabled: {
         type: ['boolean', 'null'],
       },
+      is_force_https_enabled: {
+        type: ['boolean', 'null'],
+      },
+      max_restart_count: {
+        description: 'Maximum Docker restart count before Coolify stops the container. Set to 0 to disable the limit.',
+        type: ['integer', 'null'],
+        minimum: 0,
+      },
     },
     type: 'object',
+  },
+  'create-service-database-import': {
+    type: 'object',
+    oneOf: [
+      {
+        required: ['source', 'upload_id'],
+        properties: {
+          source: {
+            type: 'string',
+            enum: ['upload'],
+          },
+          upload_id: {
+            type: 'string',
+            format: 'uuid',
+          },
+          dump_all: {
+            type: 'boolean',
+            default: false,
+          },
+          replace_existing: {
+            description: 'Drop matching PostgreSQL objects before restoring a single-database archive.',
+            type: 'boolean',
+            default: false,
+          },
+          keep_owners: {
+            description: 'Restore object owners and privileges from a single-database PostgreSQL archive. By default they are skipped, because the roles of another server usually do not exist.',
+            type: 'boolean',
+            default: false,
+          },
+          restore_mysql_users: {
+            type: 'boolean',
+            default: false,
+          },
+          sqlite_database: {
+            description: 'SQLite: the database file to restore into. Must be one of the database files. Defaults to the file named in the backup file name, else the first file.',
+            type: 'string',
+          },
+        },
+        type: 'object',
+        additionalProperties: false,
+      },
+      {
+        required: ['source', 's3_storage_uuid', 'path'],
+        properties: {
+          source: {
+            type: 'string',
+            enum: ['s3'],
+          },
+          s3_storage_uuid: {
+            type: 'string',
+          },
+          path: {
+            type: 'string',
+          },
+          dump_all: {
+            type: 'boolean',
+            default: false,
+          },
+          replace_existing: {
+            description: 'Drop matching PostgreSQL objects before restoring a single-database archive.',
+            type: 'boolean',
+            default: false,
+          },
+          keep_owners: {
+            description: 'Restore object owners and privileges from a single-database PostgreSQL archive. By default they are skipped, because the roles of another server usually do not exist.',
+            type: 'boolean',
+            default: false,
+          },
+          restore_mysql_users: {
+            type: 'boolean',
+            default: false,
+          },
+          sqlite_database: {
+            description: 'SQLite: the database file to restore into. Must be one of the database files. Defaults to the file named in the backup file name, else the first file.',
+            type: 'string',
+          },
+        },
+        type: 'object',
+        additionalProperties: false,
+      },
+      {
+        required: ['source', 'path'],
+        properties: {
+          source: {
+            type: 'string',
+            enum: ['server'],
+          },
+          path: {
+            type: 'string',
+          },
+          dump_all: {
+            type: 'boolean',
+            default: false,
+          },
+          replace_existing: {
+            description: 'Drop matching PostgreSQL objects before restoring a single-database archive.',
+            type: 'boolean',
+            default: false,
+          },
+          keep_owners: {
+            description: 'Restore object owners and privileges from a single-database PostgreSQL archive. By default they are skipped, because the roles of another server usually do not exist.',
+            type: 'boolean',
+            default: false,
+          },
+          restore_mysql_users: {
+            type: 'boolean',
+            default: false,
+          },
+          sqlite_database: {
+            description: 'SQLite: the database file to restore into. Must be one of the database files. Defaults to the file named in the backup file name, else the first file.',
+            type: 'string',
+          },
+        },
+        type: 'object',
+        additionalProperties: false,
+      },
+    ],
   },
   'patch-service-database-by-service-and-database-uuid': {
     properties: {
@@ -4595,7 +5907,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       is_shown_once: {
         type: 'boolean',
-        description: 'The flag to indicate if the environment variable\'s value is shown on the UI.',
+        description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
       },
     },
     type: 'object',
@@ -4625,7 +5937,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       is_shown_once: {
         type: 'boolean',
-        description: 'The flag to indicate if the environment variable\'s value is shown on the UI.',
+        description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
       },
     },
     type: 'object',
@@ -4659,7 +5971,7 @@ export const SCHEMAS: Record<string, unknown> = {
             },
             is_shown_once: {
               type: 'boolean',
-              description: 'The flag to indicate if the environment variable\'s value is shown on the UI.',
+              description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
             },
           },
           type: 'object',
@@ -4674,6 +5986,21 @@ export const SCHEMAS: Record<string, unknown> = {
       environment_uuid: {
         type: 'string',
         description: 'UUID of the target environment.',
+      },
+    },
+    type: 'object',
+  },
+  'migrate-service-by-uuid': {
+    required: ['destination_uuid'],
+    properties: {
+      destination_uuid: {
+        description: 'UUID of the target destination.',
+        type: 'string',
+      },
+      migrate_volumes: {
+        description: 'Whether to transfer persistent volume data when migrating across servers.',
+        type: 'boolean',
+        default: true,
       },
     },
     type: 'object',
@@ -4698,11 +6025,6 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'The container mount path.',
       },
-      host_path: {
-        type: 'string',
-        nullable: true,
-        description: 'The host path (persistent only, optional).',
-      },
       content: {
         type: 'string',
         nullable: true,
@@ -4714,7 +6036,6 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       fs_path: {
         type: 'string',
-        description: 'Host directory path (required when is_directory is true).',
       },
     },
     type: 'object',
@@ -4748,15 +6069,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'The container mount path (not allowed for read-only storages).',
       },
-      host_path: {
-        type: 'string',
-        nullable: true,
-        description: 'The host path (persistent only, not allowed for read-only storages).',
-      },
       content: {
         type: 'string',
         nullable: true,
-        description: 'The file content (file only, not allowed for read-only storages).',
+        description: 'The file content (file only, not allowed for read-only storages). Changing the content of a file outside the resource directory needs the deploy permission.',
       },
     },
     type: 'object',
@@ -4774,6 +6090,79 @@ export const SCHEMAS: Record<string, unknown> = {
           type: 'string',
         },
         description: 'Array of tag names (each min 2 characters). Required if tag_name is not provided.',
+      },
+    },
+    type: 'object',
+  },
+  'clone-service-by-uuid': {
+    required: ['destination_uuid'],
+    properties: {
+      destination_uuid: {
+        type: 'string',
+      },
+      name: {
+        type: ['string', 'null'],
+      },
+      clone_volumes: {
+        type: 'boolean',
+        default: false,
+      },
+    },
+    type: 'object',
+  },
+  'create-team-shared-env': {
+    required: ['key'],
+    properties: {
+      key: {
+        type: 'string',
+      },
+      value: {
+        type: ['string', 'null'],
+      },
+      is_literal: {
+        type: 'boolean',
+      },
+      is_multiline: {
+        type: 'boolean',
+      },
+      is_shown_once: {
+        description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
+        type: 'boolean',
+      },
+      comment: {
+        type: ['string', 'null'],
+      },
+    },
+    type: 'object',
+  },
+  'create-tag': {
+    required: ['name'],
+    properties: {
+      name: {
+        type: 'string',
+        maxLength: 255,
+        minLength: 2,
+      },
+    },
+    type: 'object',
+  },
+  'update-tag-by-uuid': {
+    required: ['name'],
+    properties: {
+      name: {
+        type: 'string',
+        maxLength: 255,
+        minLength: 2,
+      },
+    },
+    type: 'object',
+  },
+  'update-token-team': {
+    required: ['is_build_server_fallback_enabled'],
+    properties: {
+      is_build_server_fallback_enabled: {
+        type: 'boolean',
+        description: 'Whether deployments can fall back to the deployment server when no usable dedicated build server is available.',
       },
     },
     type: 'object',
@@ -4844,9 +6233,16 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       timeout: {
         type: 'integer',
-        default: 3600,
+        default: 36000,
         maximum: 36000,
         minimum: 60,
+      },
+      missing_backup_notification_days: {
+        description: 'Alert after this many days without an execution; 0 disables alerts',
+        type: 'integer',
+        default: 0,
+        maximum: 365,
+        minimum: 0,
       },
     },
     type: 'object',
@@ -4918,9 +6314,16 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       timeout: {
         type: 'integer',
-        default: 3600,
+        default: 36000,
         maximum: 36000,
         minimum: 60,
+      },
+      missing_backup_notification_days: {
+        description: 'Alert after this many days without an execution; 0 disables alerts',
+        type: 'integer',
+        default: 0,
+        maximum: 365,
+        minimum: 0,
       },
     },
     type: 'object',
@@ -4992,9 +6395,16 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       timeout: {
         type: 'integer',
-        default: 3600,
+        default: 36000,
         maximum: 36000,
         minimum: 60,
+      },
+      missing_backup_notification_days: {
+        description: 'Alert after this many days without an execution; 0 disables alerts',
+        type: 'integer',
+        default: 0,
+        maximum: 365,
+        minimum: 0,
       },
     },
     type: 'object',
