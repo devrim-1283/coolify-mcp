@@ -78,7 +78,7 @@ COMMANDS
   doctor        read-only health check: connections, client configs, credentials at rest
   uninstall     remove the entries this CLI wrote
   connections   list resolved connections and where each token comes from
-  check         live probe: GET /api/health, then /api/v1/teams/current
+  check         live probe: GET /api/health, then /api/v1/team
   serve         run the MCP server over HTTP (--http); stdio is coolify-mcp-server
 
   ${PROGRAM} <command> --help    per-command options
@@ -173,7 +173,7 @@ const CHECK_HELP = `${PROGRAM} check — live probe against a Coolify instance
 
   Two requests, in this order:
     1. GET /api/health            unauthenticated — is the instance reachable at all?
-    2. GET /api/v1/teams/current  authenticated — does this token work, and for which team?
+    2. GET /api/v1/team           authenticated — does this token work, and for which team?
 
   Split on purpose. A failure at step 1 is a URL, DNS or TLS problem; a failure
   at step 2 is a token problem. Collapsing them produces the "it doesn't work"
@@ -571,7 +571,7 @@ async function probeIdentity(connection: Connection): Promise<ProbeOutcome> {
     const response = await coolifyRequest<Record<string, unknown>>({
       connection,
       method: 'GET',
-      path: '/teams/current',
+      path: '/team',
     });
     const team = response.data ?? {};
     const name = typeof team['name'] === 'string' ? team['name'] : undefined;

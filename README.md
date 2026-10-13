@@ -7,7 +7,7 @@
 
 One MCP server that talks to every Coolify instance and every Coolify team you
 have, from one connection. Search across the fleet in a single call, read logs
-and environment variables, deploy, and reach all 189 catalogued REST operations
+and environment variables, deploy, and reach all 291 catalogued REST operations
 through a generic door.
 
 ---
@@ -71,7 +71,7 @@ honest account of both, and of the one axis where neither competes.
 |                       | Coolify's built-in `/mcp`    | `@masonator/coolify-mcp` | **coolify-mcp** (this project)                                      |
 | --------------------- | ---------------------------- | ------------------------ | ------------------------------------------------------------------- |
 | Where it runs         | Inside your Coolify instance | Local process            | Local process, **or remote over HTTP**                              |
-| Tools                 | 10                           | ~42, hand-curated        | 15 by default (16 with destructive enabled) + 189-operation catalog |
+| Tools                 | 10                           | ~42, hand-curated        | 15 by default (16 with destructive enabled) + 291-operation catalog |
 | Writes                | No — all 10 are read-only    | Yes                      | Yes, behind flags                                                   |
 | Instances per process | 1                            | 1                        | **N**                                                               |
 | Teams reachable       | The token's team             | The token's team         | **M — one connection per (instance, team)**                         |
@@ -620,14 +620,14 @@ snapshot. The one exception is
 paginate, and which `list_deployments` uses when given an `application_uuid`.
 
 **Things Coolify's API cannot do, so neither can we.** No command execution
-(Coolify's web terminal is a websocket, not REST). No notification API. No S3
-storage CRUD. No healthcheck endpoint — healthchecks are roughly fifteen fields
-on `PATCH /applications/{uuid}`. No shared environment variables. No team writes.
-We will not ship a tool that pretends otherwise.
+(Coolify's web terminal is a websocket, not REST). No healthcheck endpoint —
+healthchecks are roughly fifteen fields on `PATCH /applications/{uuid}`. No file
+upload: `POST …/imports/uploads` takes a multipart body, which a JSON tool call
+cannot carry, so database imports have to come from S3. We will not ship a tool that pretends otherwise.
 
 **The catalog is generated from a pinned spec.** It is built at release time from
-Coolify **4.2.0** (spec sha `150e9f3c…`), covering **189 operations** — 74 read,
-86 write, 29 destructive, 3 flagged as provisioning billable cloud
+Coolify **4.4.6** (spec sha `c60b2d15…`), covering **291 operations** — 105 read,
+145 write, 41 destructive, 3 flagged as provisioning billable cloud
 infrastructure. An instance newer than the catalog may expose operations we do
 not list; `search_operations` says so explicitly when nothing matches, naming the
 spec version and date. CI fails the build when `npm run codegen` produces a diff,

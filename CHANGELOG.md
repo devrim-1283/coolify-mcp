@@ -18,6 +18,35 @@ add operations that `search_operations` did not previously return.
 
 ## [Unreleased]
 
+### Added
+
+- **Catalog tracks Coolify 4.4.6** (was 4.2.0): 291 operations, up from 189.
+  New: shared environment variables (team, project, environment, server),
+  notification channels, S3 storages, GitLab apps, cloud-init scripts, server
+  proxy / Sentinel / Docker cleanup / Cloudflare Tunnel / registry logins,
+  application previews, rollback, clone and migrate for applications, databases
+  and services, database imports, storage backups and audit events.
+- New `search_operations` families: `gitlab-apps`, `notifications`,
+  `s3-storages`, `cloud-init-scripts`. `/team` files under `teams` and
+  `/audit-events` under `security`.
+
+### Changed
+
+- `create-database-import` and `create-service-database-import` are classified
+  **destructive**: a restore overwrites live data, and with `replace_existing`
+  drops the matching objects first. The HTTP client gates them by method and
+  path as well as by id, and `execute_destructive_operation` now accepts a
+  `body` so the restore's source and options can be sent.
+- `coolify-mcp check` probes identity with `GET /api/v1/team`; upstream
+  deprecated `/teams/current`, which dropped out of the spec.
+
+### Fixed
+
+- `GET /version` and `GET /health` failed with "answered with text/html instead
+  of JSON". Coolify serves both as a bare string under `text/html`; a plain-text
+  body is now returned as data, and only a markup body (a login page or proxy in
+  front of the API) is refused.
+
 ## [0.1.1] — 2026-08-12
 
 ### Changed

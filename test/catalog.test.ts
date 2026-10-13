@@ -39,6 +39,9 @@ const LOCKED = { allowDestructive: false, readOnly: true } as const;
 /** The two hand-maintained overrides the transport also carries, by id. */
 const API_KILL_SWITCHES = ['disable-api', 'disable-mcp'] as const;
 
+/** Restore a backup over a live database's data. */
+const DATA_OVERWRITES = ['create-database-import', 'create-service-database-import'] as const;
+
 function ids(rows: readonly CatalogOperation[]): string[] {
   return rows.map((row) => row.id);
 }
@@ -123,6 +126,14 @@ describe('danger classification', () => {
     expect(operation?.danger).toBe('destructive');
   });
 
+  it.each(DATA_OVERWRITES)('files %s as destructive even though it is a POST', (id) => {
+    const operation = getOperation(id);
+
+    expect(operation, `${id} is not in the catalog`).toBeDefined();
+    expect(operation?.method).toBe('POST');
+    expect(operation?.danger).toBe('destructive');
+  });
+
   it('files nothing else as destructive without being a DELETE', () => {
     // A widening here is a real change to the tool surface, so it should have to
     // be made deliberately rather than arriving with a regeneration.
@@ -130,7 +141,7 @@ describe('danger classification', () => {
       (operation) =>
         operation.danger === 'destructive' &&
         operation.method !== 'DELETE' &&
-        !(API_KILL_SWITCHES as readonly string[]).includes(operation.id),
+        ![...API_KILL_SWITCHES, ...DATA_OVERWRITES].includes(operation.id as never),
     );
 
     expect(ids(unexpected)).toEqual([]);

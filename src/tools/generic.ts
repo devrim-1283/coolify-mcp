@@ -139,6 +139,10 @@ const FAMILY_KEYS: Record<OperationFamily, true> = {
   security: true,
   destinations: true,
   'github-apps': true,
+  'gitlab-apps': true,
+  notifications: true,
+  's3-storages': true,
+  'cloud-init-scripts': true,
   'cloud-tokens': true,
   hetzner: true,
   digitalocean: true,
@@ -643,7 +647,7 @@ interface ExecuteShape {
   door: Door;
   /** Projection is offered only where responses are unbounded, i.e. on reads. */
   fields: boolean;
-  /** No catalogued destructive operation declares a request body. */
+  /** Deletes take none, but a database restore needs its source and options. */
   body: boolean;
   /** Credential-shaped values can come back from reads and from creates. */
   reveal: boolean;
@@ -654,7 +658,7 @@ const WRITE_SHAPE: ExecuteShape = { door: WRITE_DOOR, fields: false, body: true,
 const DESTRUCTIVE_SHAPE: ExecuteShape = {
   door: DESTRUCTIVE_DOOR,
   fields: false,
-  body: false,
+  body: true,
   reveal: false,
 };
 
@@ -948,9 +952,10 @@ const destructiveTool = executeTool({
   idExamples: '"delete-application-by-uuid", "delete-database-by-uuid"',
   description:
     'Run a Coolify API operation that destroys state — deleting an application, database, service, server, ' +
-    'project or key, or switching the instance API off. These are irreversible: a deleted resource cannot be ' +
-    'recovered through the API, and disabling the API locks this token out of the instance until a human turns ' +
-    'it back on in the Coolify UI. Only ids classified as destructive are accepted. Operations and their ' +
+    'project or key, restoring a backup over a live database, or switching the instance API off. These are ' +
+    'irreversible: a deleted resource or overwritten data cannot be recovered through the API, and disabling ' +
+    'the API locks this token out of the instance until a human turns it back on in the Coolify UI. Only ids ' +
+    'classified as destructive are accepted. `body` is passed to Coolify unchanged. Operations and their ' +
     `parameters are documented at ${DOCS_URL}.`,
 });
 

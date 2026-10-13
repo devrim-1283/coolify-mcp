@@ -54,17 +54,24 @@ interface DestructiveOverride {
 /**
  * Hand-maintained, and deliberately duplicated from the catalog generator.
  *
- * Neither of these is a DELETE, so a "block the DELETEs" rule misses both. They
- * switch the API off, which locks the token out of its own instance and is
- * irreversible from the token's point of view — the enable endpoint sits behind
- * the same switch.
+ * None of these is a DELETE, so a "block the DELETEs" rule misses them all. The
+ * two disables switch the API off, which locks the token out of its own
+ * instance and is irreversible from the token's point of view — the enable
+ * endpoint sits behind the same switch. The imports restore a backup over a
+ * live database, and overwritten data does not come back.
  *
- * Matched on the operation id *and* on method+path, so a caller cannot dodge
- * the gate by omitting the id or by renaming the operation.
+ * Matched on the operation id *and* on method+path template, so a caller
+ * cannot dodge the gate by omitting the id or by renaming the operation.
  */
 const DESTRUCTIVE_OVERRIDES: readonly DestructiveOverride[] = [
   { id: 'disable-api', method: 'POST', path: '/disable' },
   { id: 'disable-mcp', method: 'POST', path: '/mcp/disable' },
+  { id: 'create-database-import', method: 'POST', path: '/databases/{uuid}/imports' },
+  {
+    id: 'create-service-database-import',
+    method: 'POST',
+    path: '/services/{uuid}/databases/{database_uuid}/imports',
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -108,11 +115,24 @@ function normalizeOverridePath(path: string): string {
   return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
 }
 
+/** `{placeholder}` segments match any one non-empty segment; the rest must match exactly. */
+function matchesPathTemplate(template: string, path: string): boolean {
+  const expected = template.split('/');
+  const actual = path.split('/');
+  return (
+    expected.length === actual.length &&
+    expected.every((segment, index) =>
+      segment.startsWith('{') ? actual[index] !== '' : segment === actual[index],
+    )
+  );
+}
+
 function matchesDestructiveOverride(req: CoolifyRequest): boolean {
   const path = normalizeOverridePath(req.path);
   return DESTRUCTIVE_OVERRIDES.some(
     (override) =>
-      override.id === req.operationId || (override.method === req.method && override.path === path),
+      override.id === req.operationId ||
+      (override.method === req.method && matchesPathTemplate(override.path, path)),
   );
 }
 
@@ -533,8 +553,11 @@ function parseResponseData<T>(text: string, headers: Headers, url: URL): T {
 
   const contentType = headers.get('content-type') ?? '';
   if (!contentType.includes('json')) {
-    // Coolify answers JSON everywhere. Anything else means the request was
-    // answered by something that is not Coolify.
+    // Coolify answers JSON everywhere except /version and /health, which
+    // return a bare string under a text/html content type. A markup body means
+    // the request was answered by something that is not Coolify — a login page
+    // or a proxy.
+    if (!text.trimStart().startsWith('<')) return text.trim() as T;
     throw new CoolifyError(
       `${url.origin} answered with ${contentType || 'no content type'} instead of JSON.`,
       'unknown',

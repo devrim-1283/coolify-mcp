@@ -119,6 +119,28 @@ describe('destructive gate (transport layer)', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['create-database-import', '/databases/db-123/imports'],
+    ['create-service-database-import', '/services/svc-1/databases/db-2/imports'],
+  ])('refuses %s, a restore over live data, by path and by id', async (id, path) => {
+    const byPath = await refusal(coolifyRequest(makeRequest({ method: 'POST', path })));
+    const byId = await refusal(
+      coolifyRequest(makeRequest({ method: 'POST', path: '/something-else', operationId: id })),
+    );
+
+    expect(byPath.kind).toBe('destructive_blocked');
+    expect(byId.kind).toBe('destructive_blocked');
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('leaves the import upload, which only stages a file, as a write', async () => {
+    const response = await coolifyRequest(
+      makeRequest({ method: 'POST', path: '/databases/db-123/imports/uploads' }),
+    );
+
+    expect(response.status).toBe(200);
+  });
+
   it('tolerates the /api/v1 prefix when matching the override list', async () => {
     const error = await refusal(
       coolifyRequest(makeRequest({ method: 'POST', path: '/api/v1/disable' })),
