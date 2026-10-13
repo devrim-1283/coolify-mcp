@@ -34,7 +34,9 @@ add operations that `search_operations` did not previously return.
 
 - `create-database-import` and `create-service-database-import` are classified
   **destructive**: a restore overwrites live data, and with `replace_existing`
-  drops the matching objects first.
+  drops the matching objects first. The HTTP client gates them by method and
+  path as well as by id, and `execute_destructive_operation` now accepts a
+  `body` so the restore's source and options can be sent.
 - `coolify-mcp check` probes identity with `GET /api/v1/team`; upstream
   deprecated `/teams/current`, which dropped out of the spec.
 

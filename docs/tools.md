@@ -342,7 +342,7 @@ catalog stops being a truthful map of what this server can do.
 | `operation_id` |           ●           |    ●     |      ●      |
 | `path_params`  |           ●           |    ●     |      ●      |
 | `query`        |           ●           |    ●     |      ●      |
-| `body`         |           —           |    ●     |      —      |
+| `body`         |           —           |    ●     |      ●      |
 | `fields`       |           ●           |    —     |      —      |
 | `reveal`       |           ●           |    ●     |      —      |
 
