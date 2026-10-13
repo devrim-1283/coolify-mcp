@@ -533,8 +533,11 @@ function parseResponseData<T>(text: string, headers: Headers, url: URL): T {
 
   const contentType = headers.get('content-type') ?? '';
   if (!contentType.includes('json')) {
-    // Coolify answers JSON everywhere. Anything else means the request was
-    // answered by something that is not Coolify.
+    // Coolify answers JSON everywhere except /version and /health, which
+    // return a bare string under a text/html content type. A markup body means
+    // the request was answered by something that is not Coolify — a login page
+    // or a proxy.
+    if (!text.trimStart().startsWith('<')) return text.trim() as T;
     throw new CoolifyError(
       `${url.origin} answered with ${contentType || 'no content type'} instead of JSON.`,
       'unknown',
