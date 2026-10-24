@@ -147,6 +147,7 @@ const FAMILY_KEYS: Record<OperationFamily, true> = {
   hetzner: true,
   digitalocean: true,
   vultr: true,
+  hostinger: true,
   tags: true,
   other: true,
 };

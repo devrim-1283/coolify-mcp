@@ -133,6 +133,20 @@ describe('destructive gate (transport layer)', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['migrate-server-between-instances', '/servers/srv-1/migrate'],
+    ['complete-server-transfer', '/servers/srv-1/transfer/complete'],
+  ])('refuses %s, a hand-off to another instance, by path and by id', async (id, path) => {
+    const byPath = await refusal(coolifyRequest(makeRequest({ method: 'POST', path })));
+    const byId = await refusal(
+      coolifyRequest(makeRequest({ method: 'POST', path: '/something-else', operationId: id })),
+    );
+
+    expect(byPath.kind).toBe('destructive_blocked');
+    expect(byId.kind).toBe('destructive_blocked');
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
   it('leaves the import upload, which only stages a file, as a write', async () => {
     const response = await coolifyRequest(
       makeRequest({ method: 'POST', path: '/databases/db-123/imports/uploads' }),

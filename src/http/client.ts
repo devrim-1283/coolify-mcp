@@ -58,7 +58,9 @@ interface DestructiveOverride {
  * two disables switch the API off, which locks the token out of its own
  * instance and is irreversible from the token's point of view — the enable
  * endpoint sits behind the same switch. The imports restore a backup over a
- * live database, and overwritten data does not come back.
+ * live database, and overwritten data does not come back. The server transfers
+ * hand a server to another Coolify instance and switch this instance's
+ * automations for it off, so from this token's point of view the server is gone.
  *
  * Matched on the operation id *and* on method+path template, so a caller
  * cannot dodge the gate by omitting the id or by renaming the operation.
@@ -72,6 +74,8 @@ const DESTRUCTIVE_OVERRIDES: readonly DestructiveOverride[] = [
     method: 'POST',
     path: '/services/{uuid}/databases/{database_uuid}/imports',
   },
+  { id: 'migrate-server-between-instances', method: 'POST', path: '/servers/{uuid}/migrate' },
+  { id: 'complete-server-transfer', method: 'POST', path: '/servers/{uuid}/transfer/complete' },
 ];
 
 // ---------------------------------------------------------------------------

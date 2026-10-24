@@ -283,13 +283,13 @@ reachable through three steps: `search_operations` → `describe_operation` →
 The catalog is generated at build time from Coolify's OpenAPI spec and compiled
 into the package. Current contents:
 
-|                  |                                                                                                 |
-| ---------------- | ----------------------------------------------------------------------------------------------- |
-| Coolify version  | **4.4.6**                                                                                       |
-| Spec sha256      | `c60b2d15…`                                                                                     |
-| Operations       | **291**                                                                                         |
-| By class         | 105 safe · 145 write · 41 destructive                                                           |
-| Flagged `costly` | 3 — `POST /servers/{hetzner,digitalocean,vultr}`, which provision billable cloud infrastructure |
+|                  |                                                                                                           |
+| ---------------- | --------------------------------------------------------------------------------------------------------- |
+| Coolify version  | **4.5.0**                                                                                                 |
+| Spec sha256      | `41fe14b1…`                                                                                               |
+| Operations       | **301**                                                                                                   |
+| By class         | 112 safe · 146 write · 43 destructive                                                                     |
+| Flagged `costly` | 4 — `POST /servers/{hetzner,digitalocean,vultr,hostinger}`, which provision billable cloud infrastructure |
 
 Building at release time rather than fetching at runtime is deliberate: a runtime
 fetch would mean parsing 795 KB on every stdio spawn, a network dependency for a
@@ -298,12 +298,12 @@ version anyway, and non-determinism in an MIT package — a supply-chain smell.
 
 ### `search_operations`
 
-| Parameter | Type      | Notes                                                                                                                                                                                                                                                                                            |
-| --------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `query`   | string    | Free text against operation id, path and summary.                                                                                                                                                                                                                                                |
-| `family`  | enum      | One of 20 families: `applications`, `databases`, `services`, `servers`, `projects`, `deployments`, `teams`, `security`, `destinations`, `github-apps`, `gitlab-apps`, `notifications`, `s3-storages`, `cloud-init-scripts`, `cloud-tokens`, `hetzner`, `digitalocean`, `vultr`, `tags`, `other`. |
-| `method`  | enum      | `GET`, `POST`, `PATCH`, `PUT`, `DELETE`.                                                                                                                                                                                                                                                         |
-| `limit`   | int 1–100 | Default 20.                                                                                                                                                                                                                                                                                      |
+| Parameter | Type      | Notes                                                                                                                                                                                                                                                                                                         |
+| --------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `query`   | string    | Free text against operation id, path and summary.                                                                                                                                                                                                                                                             |
+| `family`  | enum      | One of 21 families: `applications`, `databases`, `services`, `servers`, `projects`, `deployments`, `teams`, `security`, `destinations`, `github-apps`, `gitlab-apps`, `notifications`, `s3-storages`, `cloud-init-scripts`, `cloud-tokens`, `hetzner`, `digitalocean`, `vultr`, `hostinger`, `tags`, `other`. |
+| `method`  | enum      | `GET`, `POST`, `PATCH`, `PUT`, `DELETE`.                                                                                                                                                                                                                                                                      |
+| `limit`   | int 1–100 | Default 20.                                                                                                                                                                                                                                                                                                   |
 
 Whole-token matches outrank substring matches, and a small alias map covers the
 places where Coolify's vocabulary diverges from the question a person types —

@@ -42,6 +42,9 @@ const API_KILL_SWITCHES = ['disable-api', 'disable-mcp'] as const;
 /** Restore a backup over a live database's data. */
 const DATA_OVERWRITES = ['create-database-import', 'create-service-database-import'] as const;
 
+/** Hand a server to another Coolify instance and switch this instance's automations off. */
+const INSTANCE_HANDOFFS = ['migrate-server-between-instances', 'complete-server-transfer'] as const;
+
 function ids(rows: readonly CatalogOperation[]): string[] {
   return rows.map((row) => row.id);
 }
@@ -134,6 +137,16 @@ describe('danger classification', () => {
     expect(operation?.danger).toBe('destructive');
   });
 
+  it.each(INSTANCE_HANDOFFS)('files %s as destructive even though it is a POST', (id) => {
+    // Nothing is deleted, but the server's deployments, backups and Sentinel
+    // now answer to another instance the token may hold no credentials for.
+    const operation = getOperation(id);
+
+    expect(operation, `${id} is not in the catalog`).toBeDefined();
+    expect(operation?.method).toBe('POST');
+    expect(operation?.danger).toBe('destructive');
+  });
+
   it('files nothing else as destructive without being a DELETE', () => {
     // A widening here is a real change to the tool surface, so it should have to
     // be made deliberately rather than arriving with a regeneration.
@@ -141,18 +154,24 @@ describe('danger classification', () => {
       (operation) =>
         operation.danger === 'destructive' &&
         operation.method !== 'DELETE' &&
-        ![...API_KILL_SWITCHES, ...DATA_OVERWRITES].includes(operation.id as never),
+        ![...API_KILL_SWITCHES, ...DATA_OVERWRITES, ...INSTANCE_HANDOFFS].includes(
+          operation.id as never,
+        ),
     );
 
     expect(ids(unexpected)).toEqual([]);
   });
 
-  it('leaves the enable counterparts as ordinary writes', () => {
-    // Turning the API back on destroys nothing; classifying it destructive would
-    // put recovery behind the same flag as the thing you are recovering from.
-    for (const id of ['enable-api', 'enable-mcp']) {
-      expect(getOperation(id)?.danger, id).toBe('write');
-    }
+  it('leaves the enable counterpart as an ordinary write', () => {
+    // Turning MCP back on destroys nothing; classifying it destructive would put
+    // recovery behind the same flag as the thing you are recovering from.
+    expect(getOperation('enable-mcp')?.danger).toBe('write');
+    // Coolify 4.5.0 removed POST /enable; the API can only be re-enabled in the UI.
+    expect(getOperation('enable-api')).toBeUndefined();
+  });
+
+  it('files the server import, which adopts a server, as an ordinary write', () => {
+    expect(getOperation('import-server-transfer-bundle')?.danger).toBe('write');
   });
 
   it('flags cloud provisioning as costly without gating it', () => {
@@ -162,7 +181,7 @@ describe('danger classification', () => {
     for (const operation of costly) {
       expect(operation.method, operation.id).toBe('POST');
       expect(operation.danger, operation.id).not.toBe('destructive');
-      expect(operation.path, operation.id).toMatch(/hetzner|vultr|digitalocean/i);
+      expect(operation.path, operation.id).toMatch(/hetzner|vultr|digitalocean|hostinger/i);
     }
   });
 });

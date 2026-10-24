@@ -1,5 +1,5 @@
 // GENERATED FILE — DO NOT EDIT, run npm run codegen
-// Source: scripts/coolify-openapi.json (Coolify 4.4.6)
+// Source: scripts/coolify-openapi.json (Coolify 4.5.0)
 
 /**
  * Dereferenced, pruned request-body schemas keyed by operation id.
@@ -324,19 +324,19 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       manual_webhook_secret_github: {
         type: 'string',
-        description: 'Manual webhook secret for Github.',
+        description: 'Manual webhook secret for Github. Needs the deploy ability.',
       },
       manual_webhook_secret_gitlab: {
         type: 'string',
-        description: 'Manual webhook secret for Gitlab.',
+        description: 'Manual webhook secret for Gitlab. Needs the deploy ability.',
       },
       manual_webhook_secret_bitbucket: {
         type: 'string',
-        description: 'Manual webhook secret for Bitbucket.',
+        description: 'Manual webhook secret for Bitbucket. Needs the deploy ability.',
       },
       manual_webhook_secret_gitea: {
         type: 'string',
-        description: 'Manual webhook secret for Gitea.',
+        description: 'Manual webhook secret for Gitea. Needs the deploy ability.',
       },
       redirect: {
         type: 'string',
@@ -393,7 +393,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       watch_paths: {
         type: 'string',
-        description: 'The watch paths.',
+        description: 'Watch path patterns, one per line (newline-separated). Commas do not separate patterns.',
       },
       use_build_server: {
         type: 'boolean',
@@ -433,6 +433,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Sort environment variables.',
       },
+      redact_all_env_values_in_logs: {
+        type: 'boolean',
+        description: 'Redact all environment variable values in logs. When false, only locked (shown once) values are redacted. Requires team admin permissions.',
+      },
       is_pr_deployments_public_enabled: {
         type: 'boolean',
         description: 'Make pull request deployments public.',
@@ -457,6 +461,15 @@ export const SCHEMAS: Record<string, unknown> = {
       is_stripprefix_enabled: {
         type: 'boolean',
         description: 'Enable path prefix stripping.',
+      },
+      is_permanent_redirect_enabled: {
+        type: 'boolean',
+        description: 'Use permanent redirects (301/308) instead of temporary (302/307) for the HTTP to HTTPS and www redirects. Defaults to false.',
+      },
+      traefik_certificate_resolver: {
+        type: 'string',
+        nullable: true,
+        description: 'Traefik certificate resolver for this application. Null uses the server setting, "none" uses no resolver.',
       },
       is_raw_compose_deployment_enabled: {
         type: 'boolean',
@@ -526,6 +539,33 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         nullable: true,
         description: 'Password for HTTP Basic Authentication',
+      },
+      http_basic_auth_hash_algorithm: {
+        type: 'string',
+        enum: ['bcrypt', 'argon2id'],
+        default: 'bcrypt',
+        description: 'Hash algorithm for the HTTP Basic Authentication password. Argon2id needs the Caddy proxy, version 2.11 or newer.',
+      },
+      http_basic_auth_bcrypt_cost: {
+        type: 'integer',
+        minimum: 4,
+        maximum: 14,
+        default: 10,
+        description: 'Bcrypt cost for the HTTP Basic Authentication password.',
+      },
+      http_basic_auth_argon2id_memory_cost: {
+        type: 'integer',
+        minimum: 8192,
+        maximum: 262144,
+        default: 65536,
+        description: 'Argon2id memory cost in KiB for the HTTP Basic Authentication password.',
+      },
+      http_basic_auth_argon2id_time_cost: {
+        type: 'integer',
+        minimum: 1,
+        maximum: 12,
+        default: 4,
+        description: 'Argon2id time cost (iterations) for the HTTP Basic Authentication password.',
       },
       connect_to_docker_network: {
         type: 'boolean',
@@ -802,19 +842,19 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       manual_webhook_secret_github: {
         type: 'string',
-        description: 'Manual webhook secret for Github.',
+        description: 'Manual webhook secret for Github. Needs the deploy ability.',
       },
       manual_webhook_secret_gitlab: {
         type: 'string',
-        description: 'Manual webhook secret for Gitlab.',
+        description: 'Manual webhook secret for Gitlab. Needs the deploy ability.',
       },
       manual_webhook_secret_bitbucket: {
         type: 'string',
-        description: 'Manual webhook secret for Bitbucket.',
+        description: 'Manual webhook secret for Bitbucket. Needs the deploy ability.',
       },
       manual_webhook_secret_gitea: {
         type: 'string',
-        description: 'Manual webhook secret for Gitea.',
+        description: 'Manual webhook secret for Gitea. Needs the deploy ability.',
       },
       redirect: {
         type: 'string',
@@ -871,7 +911,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       watch_paths: {
         type: 'string',
-        description: 'The watch paths.',
+        description: 'Watch path patterns, one per line (newline-separated). Commas do not separate patterns.',
       },
       use_build_server: {
         type: 'boolean',
@@ -911,6 +951,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Sort environment variables.',
       },
+      redact_all_env_values_in_logs: {
+        type: 'boolean',
+        description: 'Redact all environment variable values in logs. When false, only locked (shown once) values are redacted. Requires team admin permissions.',
+      },
       is_pr_deployments_public_enabled: {
         type: 'boolean',
         description: 'Make pull request deployments public.',
@@ -935,6 +979,15 @@ export const SCHEMAS: Record<string, unknown> = {
       is_stripprefix_enabled: {
         type: 'boolean',
         description: 'Enable path prefix stripping.',
+      },
+      is_permanent_redirect_enabled: {
+        type: 'boolean',
+        description: 'Use permanent redirects (301/308) instead of temporary (302/307) for the HTTP to HTTPS and www redirects. Defaults to false.',
+      },
+      traefik_certificate_resolver: {
+        type: 'string',
+        nullable: true,
+        description: 'Traefik certificate resolver for this application. Null uses the server setting, "none" uses no resolver.',
       },
       is_raw_compose_deployment_enabled: {
         type: 'boolean',
@@ -1004,6 +1057,33 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         nullable: true,
         description: 'Password for HTTP Basic Authentication',
+      },
+      http_basic_auth_hash_algorithm: {
+        type: 'string',
+        enum: ['bcrypt', 'argon2id'],
+        default: 'bcrypt',
+        description: 'Hash algorithm for the HTTP Basic Authentication password. Argon2id needs the Caddy proxy, version 2.11 or newer.',
+      },
+      http_basic_auth_bcrypt_cost: {
+        type: 'integer',
+        minimum: 4,
+        maximum: 14,
+        default: 10,
+        description: 'Bcrypt cost for the HTTP Basic Authentication password.',
+      },
+      http_basic_auth_argon2id_memory_cost: {
+        type: 'integer',
+        minimum: 8192,
+        maximum: 262144,
+        default: 65536,
+        description: 'Argon2id memory cost in KiB for the HTTP Basic Authentication password.',
+      },
+      http_basic_auth_argon2id_time_cost: {
+        type: 'integer',
+        minimum: 1,
+        maximum: 12,
+        default: 4,
+        description: 'Argon2id time cost (iterations) for the HTTP Basic Authentication password.',
       },
       connect_to_docker_network: {
         type: 'boolean',
@@ -1280,19 +1360,19 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       manual_webhook_secret_github: {
         type: 'string',
-        description: 'Manual webhook secret for Github.',
+        description: 'Manual webhook secret for Github. Needs the deploy ability.',
       },
       manual_webhook_secret_gitlab: {
         type: 'string',
-        description: 'Manual webhook secret for Gitlab.',
+        description: 'Manual webhook secret for Gitlab. Needs the deploy ability.',
       },
       manual_webhook_secret_bitbucket: {
         type: 'string',
-        description: 'Manual webhook secret for Bitbucket.',
+        description: 'Manual webhook secret for Bitbucket. Needs the deploy ability.',
       },
       manual_webhook_secret_gitea: {
         type: 'string',
-        description: 'Manual webhook secret for Gitea.',
+        description: 'Manual webhook secret for Gitea. Needs the deploy ability.',
       },
       redirect: {
         type: 'string',
@@ -1349,7 +1429,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       watch_paths: {
         type: 'string',
-        description: 'The watch paths.',
+        description: 'Watch path patterns, one per line (newline-separated). Commas do not separate patterns.',
       },
       use_build_server: {
         type: 'boolean',
@@ -1389,6 +1469,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Sort environment variables.',
       },
+      redact_all_env_values_in_logs: {
+        type: 'boolean',
+        description: 'Redact all environment variable values in logs. When false, only locked (shown once) values are redacted. Requires team admin permissions.',
+      },
       is_pr_deployments_public_enabled: {
         type: 'boolean',
         description: 'Make pull request deployments public.',
@@ -1413,6 +1497,15 @@ export const SCHEMAS: Record<string, unknown> = {
       is_stripprefix_enabled: {
         type: 'boolean',
         description: 'Enable path prefix stripping.',
+      },
+      is_permanent_redirect_enabled: {
+        type: 'boolean',
+        description: 'Use permanent redirects (301/308) instead of temporary (302/307) for the HTTP to HTTPS and www redirects. Defaults to false.',
+      },
+      traefik_certificate_resolver: {
+        type: 'string',
+        nullable: true,
+        description: 'Traefik certificate resolver for this application. Null uses the server setting, "none" uses no resolver.',
       },
       is_raw_compose_deployment_enabled: {
         type: 'boolean',
@@ -1482,6 +1575,33 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         nullable: true,
         description: 'Password for HTTP Basic Authentication',
+      },
+      http_basic_auth_hash_algorithm: {
+        type: 'string',
+        enum: ['bcrypt', 'argon2id'],
+        default: 'bcrypt',
+        description: 'Hash algorithm for the HTTP Basic Authentication password. Argon2id needs the Caddy proxy, version 2.11 or newer.',
+      },
+      http_basic_auth_bcrypt_cost: {
+        type: 'integer',
+        minimum: 4,
+        maximum: 14,
+        default: 10,
+        description: 'Bcrypt cost for the HTTP Basic Authentication password.',
+      },
+      http_basic_auth_argon2id_memory_cost: {
+        type: 'integer',
+        minimum: 8192,
+        maximum: 262144,
+        default: 65536,
+        description: 'Argon2id memory cost in KiB for the HTTP Basic Authentication password.',
+      },
+      http_basic_auth_argon2id_time_cost: {
+        type: 'integer',
+        minimum: 1,
+        maximum: 12,
+        default: 4,
+        description: 'Argon2id time cost (iterations) for the HTTP Basic Authentication password.',
       },
       connect_to_docker_network: {
         type: 'boolean',
@@ -1696,19 +1816,19 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       manual_webhook_secret_github: {
         type: 'string',
-        description: 'Manual webhook secret for Github.',
+        description: 'Manual webhook secret for Github. Needs the deploy ability.',
       },
       manual_webhook_secret_gitlab: {
         type: 'string',
-        description: 'Manual webhook secret for Gitlab.',
+        description: 'Manual webhook secret for Gitlab. Needs the deploy ability.',
       },
       manual_webhook_secret_bitbucket: {
         type: 'string',
-        description: 'Manual webhook secret for Bitbucket.',
+        description: 'Manual webhook secret for Bitbucket. Needs the deploy ability.',
       },
       manual_webhook_secret_gitea: {
         type: 'string',
-        description: 'Manual webhook secret for Gitea.',
+        description: 'Manual webhook secret for Gitea. Needs the deploy ability.',
       },
       redirect: {
         type: 'string',
@@ -1766,6 +1886,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Sort environment variables.',
       },
+      redact_all_env_values_in_logs: {
+        type: 'boolean',
+        description: 'Redact all environment variable values in logs. When false, only locked (shown once) values are redacted. Requires team admin permissions.',
+      },
       is_pr_deployments_public_enabled: {
         type: 'boolean',
         description: 'Make pull request deployments public.',
@@ -1790,6 +1914,15 @@ export const SCHEMAS: Record<string, unknown> = {
       is_stripprefix_enabled: {
         type: 'boolean',
         description: 'Enable path prefix stripping.',
+      },
+      is_permanent_redirect_enabled: {
+        type: 'boolean',
+        description: 'Use permanent redirects (301/308) instead of temporary (302/307) for the HTTP to HTTPS and www redirects. Defaults to false.',
+      },
+      traefik_certificate_resolver: {
+        type: 'string',
+        nullable: true,
+        description: 'Traefik certificate resolver for this application. Null uses the server setting, "none" uses no resolver.',
       },
       is_raw_compose_deployment_enabled: {
         type: 'boolean',
@@ -1859,6 +1992,33 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         nullable: true,
         description: 'Password for HTTP Basic Authentication',
+      },
+      http_basic_auth_hash_algorithm: {
+        type: 'string',
+        enum: ['bcrypt', 'argon2id'],
+        default: 'bcrypt',
+        description: 'Hash algorithm for the HTTP Basic Authentication password. Argon2id needs the Caddy proxy, version 2.11 or newer.',
+      },
+      http_basic_auth_bcrypt_cost: {
+        type: 'integer',
+        minimum: 4,
+        maximum: 14,
+        default: 10,
+        description: 'Bcrypt cost for the HTTP Basic Authentication password.',
+      },
+      http_basic_auth_argon2id_memory_cost: {
+        type: 'integer',
+        minimum: 8192,
+        maximum: 262144,
+        default: 65536,
+        description: 'Argon2id memory cost in KiB for the HTTP Basic Authentication password.',
+      },
+      http_basic_auth_argon2id_time_cost: {
+        type: 'integer',
+        minimum: 1,
+        maximum: 12,
+        default: 4,
+        description: 'Argon2id time cost (iterations) for the HTTP Basic Authentication password.',
       },
       connect_to_docker_network: {
         type: 'boolean',
@@ -2055,19 +2215,19 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       manual_webhook_secret_github: {
         type: 'string',
-        description: 'Manual webhook secret for Github.',
+        description: 'Manual webhook secret for Github. Needs the deploy ability.',
       },
       manual_webhook_secret_gitlab: {
         type: 'string',
-        description: 'Manual webhook secret for Gitlab.',
+        description: 'Manual webhook secret for Gitlab. Needs the deploy ability.',
       },
       manual_webhook_secret_bitbucket: {
         type: 'string',
-        description: 'Manual webhook secret for Bitbucket.',
+        description: 'Manual webhook secret for Bitbucket. Needs the deploy ability.',
       },
       manual_webhook_secret_gitea: {
         type: 'string',
-        description: 'Manual webhook secret for Gitea.',
+        description: 'Manual webhook secret for Gitea. Needs the deploy ability.',
       },
       redirect: {
         type: 'string',
@@ -2125,6 +2285,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Sort environment variables.',
       },
+      redact_all_env_values_in_logs: {
+        type: 'boolean',
+        description: 'Redact all environment variable values in logs. When false, only locked (shown once) values are redacted. Requires team admin permissions.',
+      },
       is_pr_deployments_public_enabled: {
         type: 'boolean',
         description: 'Make pull request deployments public.',
@@ -2149,6 +2313,15 @@ export const SCHEMAS: Record<string, unknown> = {
       is_stripprefix_enabled: {
         type: 'boolean',
         description: 'Enable path prefix stripping.',
+      },
+      is_permanent_redirect_enabled: {
+        type: 'boolean',
+        description: 'Use permanent redirects (301/308) instead of temporary (302/307) for the HTTP to HTTPS and www redirects. Defaults to false.',
+      },
+      traefik_certificate_resolver: {
+        type: 'string',
+        nullable: true,
+        description: 'Traefik certificate resolver for this application. Null uses the server setting, "none" uses no resolver.',
       },
       is_raw_compose_deployment_enabled: {
         type: 'boolean',
@@ -2219,6 +2392,33 @@ export const SCHEMAS: Record<string, unknown> = {
         nullable: true,
         description: 'Password for HTTP Basic Authentication',
       },
+      http_basic_auth_hash_algorithm: {
+        type: 'string',
+        enum: ['bcrypt', 'argon2id'],
+        default: 'bcrypt',
+        description: 'Hash algorithm for the HTTP Basic Authentication password. Argon2id needs the Caddy proxy, version 2.11 or newer.',
+      },
+      http_basic_auth_bcrypt_cost: {
+        type: 'integer',
+        minimum: 4,
+        maximum: 14,
+        default: 10,
+        description: 'Bcrypt cost for the HTTP Basic Authentication password.',
+      },
+      http_basic_auth_argon2id_memory_cost: {
+        type: 'integer',
+        minimum: 8192,
+        maximum: 262144,
+        default: 65536,
+        description: 'Argon2id memory cost in KiB for the HTTP Basic Authentication password.',
+      },
+      http_basic_auth_argon2id_time_cost: {
+        type: 'integer',
+        minimum: 1,
+        maximum: 12,
+        default: 4,
+        description: 'Argon2id time cost (iterations) for the HTTP Basic Authentication password.',
+      },
       connect_to_docker_network: {
         type: 'boolean',
         description: 'The flag to connect the service to the predefined Docker network.',
@@ -2247,18 +2447,6 @@ export const SCHEMAS: Record<string, unknown> = {
   },
   'update-application-by-uuid': {
     properties: {
-      project_uuid: {
-        type: 'string',
-        description: 'The project UUID.',
-      },
-      server_uuid: {
-        type: 'string',
-        description: 'The server UUID.',
-      },
-      environment_name: {
-        type: 'string',
-        description: 'The environment name.',
-      },
       github_app_uuid: {
         type: 'string',
         description: 'The Github App UUID.',
@@ -2274,10 +2462,6 @@ export const SCHEMAS: Record<string, unknown> = {
       ports_exposes: {
         type: 'string',
         description: 'The ports to expose.',
-      },
-      destination_uuid: {
-        type: 'string',
-        description: 'The destination UUID.',
       },
       build_pack: {
         type: 'string',
@@ -2470,19 +2654,19 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       manual_webhook_secret_github: {
         type: 'string',
-        description: 'Manual webhook secret for Github.',
+        description: 'Manual webhook secret for Github. Needs the deploy ability.',
       },
       manual_webhook_secret_gitlab: {
         type: 'string',
-        description: 'Manual webhook secret for Gitlab.',
+        description: 'Manual webhook secret for Gitlab. Needs the deploy ability.',
       },
       manual_webhook_secret_bitbucket: {
         type: 'string',
-        description: 'Manual webhook secret for Bitbucket.',
+        description: 'Manual webhook secret for Bitbucket. Needs the deploy ability.',
       },
       manual_webhook_secret_gitea: {
         type: 'string',
-        description: 'Manual webhook secret for Gitea.',
+        description: 'Manual webhook secret for Gitea. Needs the deploy ability.',
       },
       redirect: {
         type: 'string',
@@ -2539,7 +2723,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       watch_paths: {
         type: 'string',
-        description: 'The watch paths.',
+        description: 'Watch path patterns, one per line (newline-separated). Commas do not separate patterns.',
       },
       use_build_server: {
         type: 'boolean',
@@ -2549,6 +2733,29 @@ export const SCHEMAS: Record<string, unknown> = {
       use_build_secrets: {
         type: 'boolean',
         description: 'Use Docker Build Secrets for build-time environment variables.',
+      },
+      http_basic_auth_hash_algorithm: {
+        type: 'string',
+        enum: ['bcrypt', 'argon2id'],
+        description: 'Hash algorithm for the HTTP Basic Authentication password. Argon2id needs the Caddy proxy, version 2.11 or newer.',
+      },
+      http_basic_auth_bcrypt_cost: {
+        type: 'integer',
+        minimum: 4,
+        maximum: 14,
+        description: 'Bcrypt cost for the HTTP Basic Authentication password.',
+      },
+      http_basic_auth_argon2id_memory_cost: {
+        type: 'integer',
+        minimum: 8192,
+        maximum: 262144,
+        description: 'Argon2id memory cost in KiB for the HTTP Basic Authentication password.',
+      },
+      http_basic_auth_argon2id_time_cost: {
+        type: 'integer',
+        minimum: 1,
+        maximum: 12,
+        description: 'Argon2id time cost (iterations) for the HTTP Basic Authentication password.',
       },
       is_git_submodules_enabled: {
         type: 'boolean',
@@ -2578,6 +2785,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Sort environment variables.',
       },
+      redact_all_env_values_in_logs: {
+        type: 'boolean',
+        description: 'Redact all environment variable values in logs. When false, only locked (shown once) values are redacted. Requires team admin permissions.',
+      },
       is_pr_deployments_public_enabled: {
         type: 'boolean',
         description: 'Make pull request deployments public.',
@@ -2602,6 +2813,15 @@ export const SCHEMAS: Record<string, unknown> = {
       is_stripprefix_enabled: {
         type: 'boolean',
         description: 'Enable path prefix stripping.',
+      },
+      is_permanent_redirect_enabled: {
+        type: 'boolean',
+        description: 'Use permanent redirects (301/308) instead of temporary (302/307) for the HTTP to HTTPS and www redirects. Defaults to false.',
+      },
+      traefik_certificate_resolver: {
+        type: 'string',
+        nullable: true,
+        description: 'Traefik certificate resolver for this application. Null uses the server setting, "none" uses no resolver.',
       },
       is_raw_compose_deployment_enabled: {
         type: 'boolean',
@@ -2817,7 +3037,7 @@ export const SCHEMAS: Record<string, unknown> = {
       content: {
         type: 'string',
         nullable: true,
-        description: 'File content (file only, optional).',
+        description: 'File content (file only, optional). Needs the deploy ability when set.',
       },
       is_directory: {
         type: 'boolean',
@@ -2895,7 +3115,7 @@ export const SCHEMAS: Record<string, unknown> = {
         type: ['string', 'null'],
       },
       clone_volumes: {
-        description: 'Whether to clone volume data.',
+        description: 'Whether to clone volume data. Needs the deploy ability.',
         type: 'boolean',
         default: false,
       },
@@ -2950,7 +3170,7 @@ export const SCHEMAS: Record<string, unknown> = {
     properties: {
       provider: {
         type: 'string',
-        enum: ['hetzner', 'digitalocean', 'vultr'],
+        enum: ['hetzner', 'digitalocean', 'vultr', 'hostinger'],
         description: 'The cloud provider.',
       },
       token: {
@@ -3109,7 +3329,13 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       s3_storage_uuid: {
         type: 'string',
-        description: 'S3 storage UUID (required if save_s3 is true)',
+        description: 'Primary S3 storage UUID. Sent without s3_storage_uuids, it selects this storage as the only destination. Either field is required if save_s3 is true.',
+      },
+      s3_storage_uuids: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
       },
       databases_to_backup: {
         type: 'string',
@@ -3122,7 +3348,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       backup_now: {
         type: 'boolean',
-        description: 'Whether to trigger backup immediately after creation',
+        description: 'Whether to trigger backup immediately after creation. Needs a token with the deploy permission.',
       },
       database_backup_retention_amount_locally: {
         type: 'integer',
@@ -3179,11 +3405,11 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       is_public: {
         type: 'boolean',
-        description: 'Is the database public?',
+        description: 'Is the database public? Changing it starts or stops the database proxy, so it needs a token with the deploy permission.',
       },
       public_port: {
         type: 'integer',
-        description: 'Public port of the database',
+        description: 'Public port of the database (1024-65535)',
       },
       public_port_timeout: {
         type: 'integer',
@@ -3216,6 +3442,10 @@ export const SCHEMAS: Record<string, unknown> = {
       limits_cpu_shares: {
         type: 'integer',
         description: 'CPU shares of the database',
+      },
+      instant_deploy: {
+        type: 'boolean',
+        description: 'Restart the database after the update. Requires the deploy ability.',
       },
       postgres_user: {
         type: 'string',
@@ -3358,6 +3588,10 @@ export const SCHEMAS: Record<string, unknown> = {
         minimum: 0,
         default: 5,
       },
+      redact_all_env_values_in_logs: {
+        type: 'boolean',
+        description: 'Redact all environment variable values in logs. When false, only locked (shown once) values, database passwords, and remote secrets are redacted. Requires team admin permissions.',
+      },
     },
     type: 'object',
   },
@@ -3369,11 +3603,16 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       s3_storage_uuid: {
         type: 'string',
-        description: 'S3 storage UUID',
+      },
+      s3_storage_uuids: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
       },
       backup_now: {
         type: 'boolean',
-        description: 'Whether to take a backup now or not',
+        description: 'Whether to take a backup now or not. Needs a token with the deploy permission.',
       },
       enabled: {
         type: 'boolean',
@@ -4496,7 +4735,7 @@ export const SCHEMAS: Record<string, unknown> = {
       content: {
         type: 'string',
         nullable: true,
-        description: 'File content (file only, optional).',
+        description: 'File content (file only, optional). Needs the deploy ability when set.',
       },
       is_directory: {
         type: 'boolean',
@@ -4572,6 +4811,7 @@ export const SCHEMAS: Record<string, unknown> = {
         type: ['string', 'null'],
       },
       clone_volumes: {
+        description: 'Whether to clone volume data. Needs the deploy ability.',
         type: 'boolean',
         default: false,
       },
@@ -4586,9 +4826,10 @@ export const SCHEMAS: Record<string, unknown> = {
         maxLength: 255,
       },
       network: {
+        description: 'Name of a new Docker network. Must not be bridge, host, none, or a network that already exists on the server.',
         type: 'string',
-        maxLength: 255,
         pattern: '^[a-zA-Z0-9][a-zA-Z0-9._-]*$',
+        maxLength: 255,
       },
       type: {
         type: 'string',
@@ -4889,7 +5130,7 @@ export const SCHEMAS: Record<string, unknown> = {
         items: {
           type: 'integer',
         },
-        description: 'Additional Hetzner SSH key IDs',
+        description: 'Additional Hetzner SSH key IDs. Needs a token with the deploy permission.',
       },
       hetzner_firewall_ids: {
         type: 'array',
@@ -4907,7 +5148,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       cloud_init_script: {
         type: 'string',
-        description: 'Cloud-init YAML script (optional)',
+        description: 'Cloud-init YAML script (optional). Needs a token with the deploy permission.',
       },
       instant_validate: {
         type: 'boolean',
@@ -5088,7 +5329,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       enabled: {
         type: 'boolean',
-        description: 'The flag to indicate if the scheduled task is enabled.',
+        description: 'The flag to indicate if the scheduled task is enabled. An enabled task requires the deploy ability.',
         default: true,
       },
     },
@@ -5121,7 +5362,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       enabled: {
         type: 'boolean',
-        description: 'The flag to indicate if the scheduled task is enabled.',
+        description: 'The flag to indicate if the scheduled task is enabled. An enabled task requires the deploy ability.',
         default: true,
       },
     },
@@ -5155,7 +5396,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       enabled: {
         type: 'boolean',
-        description: 'The flag to indicate if the scheduled task is enabled.',
+        description: 'The flag to indicate if the scheduled task is enabled. An enabled task requires the deploy ability.',
         default: true,
       },
     },
@@ -5188,7 +5429,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       enabled: {
         type: 'boolean',
-        description: 'The flag to indicate if the scheduled task is enabled.',
+        description: 'The flag to indicate if the scheduled task is enabled. An enabled task requires the deploy ability.',
         default: true,
       },
     },
@@ -5211,7 +5452,6 @@ export const SCHEMAS: Record<string, unknown> = {
     additionalProperties: false,
   },
   'update-private-key': {
-    required: ['private_key'],
     properties: {
       name: {
         type: 'string',
@@ -5317,6 +5557,19 @@ export const SCHEMAS: Record<string, unknown> = {
       logdrain_custom_config_parser: {
         type: 'string',
       },
+      is_logdrain_cloudwatch_enabled: {
+        type: 'boolean',
+      },
+      logdrain_cloudwatch_region: {
+        type: ['string', 'null'],
+      },
+      logdrain_cloudwatch_group: {
+        type: ['string', 'null'],
+      },
+      logdrain_cloudwatch_stream_prefix: {
+        description: 'Prepended to the container name to form the log stream name.',
+        type: ['string', 'null'],
+      },
     },
     type: 'object',
   },
@@ -5332,8 +5585,12 @@ export const SCHEMAS: Record<string, unknown> = {
       generate_exact_labels: {
         type: 'boolean',
       },
+      traefik_certificate_resolver: {
+        description: 'Traefik certificate resolver for generated HTTPS routers (letters, digits, _ and -). Null or empty to use your own certificates. Redeploy resources to apply.',
+        type: ['string', 'null'],
+      },
       proxy_type: {
-        description: 'Proxy type (case-insensitive).',
+        description: 'Proxy type (case-insensitive). Changing it starts the new proxy on the server and needs the deploy permission.',
         type: 'string',
         enum: ['traefik', 'caddy', 'nginx', 'none'],
       },
@@ -5413,11 +5670,57 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     type: 'object',
   },
+  'migrate-server-between-instances': {
+    required: ['target_url', 'target_token'],
+    properties: {
+      target_url: {
+        type: 'string',
+      },
+      target_token: {
+        description: 'API token on the target instance (root or write)',
+        type: 'string',
+      },
+    },
+    type: 'object',
+  },
+  'import-server-transfer-bundle': {
+    properties: {
+      bundle: {
+        description: 'Transfer bundle',
+        type: 'object',
+      },
+      dry_run: {
+        type: 'boolean',
+        default: false,
+      },
+      preserve_uuids: {
+        type: 'boolean',
+        default: true,
+      },
+      adopt_mode: {
+        description: 'Import without forcing redeploy; keep statuses for adoption',
+        type: 'boolean',
+        default: true,
+      },
+    },
+    type: 'object',
+  },
+  'complete-server-transfer': {
+    properties: {
+      export_id: {
+        type: ['string', 'null'],
+      },
+      target_instance_url: {
+        type: ['string', 'null'],
+      },
+    },
+    type: 'object',
+  },
   'create-server': {
     properties: {
       name: {
         type: 'string',
-        description: 'The name of the server.',
+        description: 'The name of the server. Must not contain control characters such as new lines.',
       },
       description: {
         type: 'string',
@@ -5465,7 +5768,7 @@ export const SCHEMAS: Record<string, unknown> = {
     properties: {
       name: {
         type: 'string',
-        description: 'The name of the server.',
+        description: 'The name of the server. Must not contain control characters such as new lines.',
       },
       description: {
         type: 'string',
@@ -5504,7 +5807,7 @@ export const SCHEMAS: Record<string, unknown> = {
       proxy_type: {
         type: 'string',
         enum: ['traefik', 'caddy', 'none'],
-        description: 'The proxy type.',
+        description: 'The proxy type. Changing it starts the new proxy on the server and needs the deploy permission.',
       },
       concurrent_builds: {
         type: 'integer',
@@ -5540,7 +5843,7 @@ export const SCHEMAS: Record<string, unknown> = {
   'validate-server-by-uuid': {
     properties: {
       install: {
-        description: 'Install missing prerequisites and Docker. This can restart the Docker daemon.',
+        description: 'Install missing prerequisites and Docker, then start the proxy. This can restart the Docker daemon. Needs the deploy permission.',
         type: 'boolean',
         default: false,
       },
@@ -5578,10 +5881,18 @@ export const SCHEMAS: Record<string, unknown> = {
       is_gzip_enabled: {
         type: ['boolean', 'null'],
       },
+      traefik_certificate_resolver: {
+        description: 'Traefik certificate resolver for this service application. Null uses the server setting, "none" uses no resolver.',
+        type: ['string', 'null'],
+      },
       is_stripprefix_enabled: {
         type: ['boolean', 'null'],
       },
       is_force_https_enabled: {
+        type: ['boolean', 'null'],
+      },
+      is_permanent_redirect_enabled: {
+        description: 'Use permanent redirects (301/308) instead of temporary (302/307) for the HTTP to HTTPS and www redirects. Defaults to false.',
         type: ['boolean', 'null'],
       },
       max_restart_count: {
@@ -5727,6 +6038,7 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
       },
       is_public: {
+        description: 'Changing it starts or stops the database proxy, so it needs a token with the deploy permission.',
         type: 'boolean',
       },
       public_port: {
@@ -5793,6 +6105,11 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'The base64 encoded Docker Compose content.',
       },
+      connect_to_docker_network: {
+        type: 'boolean',
+        default: false,
+        description: 'Connect the service to the predefined docker network.',
+      },
       urls: {
         type: 'array',
         description: 'Array of URLs to be applied to containers of a service.',
@@ -5819,6 +6136,11 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         default: true,
         description: 'Escape special characters in labels. By default, $ (and other chars) is escaped. If you want to use env variables inside the labels, turn this off.',
+      },
+      redact_all_env_values_in_logs: {
+        type: 'boolean',
+        default: true,
+        description: 'Redact all environment variable values in logs. When false, only locked (shown once) values are redacted. Requires team admin permissions.',
       },
       tags: {
         type: 'array',
@@ -5879,6 +6201,11 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         default: true,
         description: 'Escape special characters in labels. By default, $ (and other chars) is escaped. If you want to use env variables inside the labels, turn this off.',
+      },
+      redact_all_env_values_in_logs: {
+        type: 'boolean',
+        default: true,
+        description: 'Redact all environment variable values in logs. When false, only locked (shown once) values are redacted. Requires team admin permissions.',
       },
     },
     type: 'object',
@@ -6028,7 +6355,7 @@ export const SCHEMAS: Record<string, unknown> = {
       content: {
         type: 'string',
         nullable: true,
-        description: 'File content (file only, optional).',
+        description: 'File content (file only, optional). Needs the deploy ability when set.',
       },
       is_directory: {
         type: 'boolean',
@@ -6104,6 +6431,7 @@ export const SCHEMAS: Record<string, unknown> = {
         type: ['string', 'null'],
       },
       clone_volumes: {
+        description: 'Whether to clone volume data. Needs the deploy ability.',
         type: 'boolean',
         default: false,
       },
@@ -6187,11 +6515,19 @@ export const SCHEMAS: Record<string, unknown> = {
         default: false,
       },
       stop_during_backup: {
+        description: 'Stop the resource containers during the backup. Needs a token with the deploy permission.',
         type: 'boolean',
         default: false,
       },
       s3_storage_uuid: {
+        description: 'Primary S3 storage UUID. Sent without s3_storage_uuids, it selects this storage as the only destination.',
         type: ['string', 'null'],
+      },
+      s3_storage_uuids: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
       },
       retention_amount_locally: {
         type: 'integer',
@@ -6268,11 +6604,19 @@ export const SCHEMAS: Record<string, unknown> = {
         default: false,
       },
       stop_during_backup: {
+        description: 'Stop the resource containers during the backup. Needs a token with the deploy permission.',
         type: 'boolean',
         default: false,
       },
       s3_storage_uuid: {
+        description: 'Primary S3 storage UUID. Sent without s3_storage_uuids, it selects this storage as the only destination.',
         type: ['string', 'null'],
+      },
+      s3_storage_uuids: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
       },
       retention_amount_locally: {
         type: 'integer',
@@ -6349,11 +6693,19 @@ export const SCHEMAS: Record<string, unknown> = {
         default: false,
       },
       stop_during_backup: {
+        description: 'Stop the resource containers during the backup. Needs a token with the deploy permission.',
         type: 'boolean',
         default: false,
       },
       s3_storage_uuid: {
+        description: 'Primary S3 storage UUID. Sent without s3_storage_uuids, it selects this storage as the only destination.',
         type: ['string', 'null'],
+      },
+      s3_storage_uuids: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
       },
       retention_amount_locally: {
         type: 'integer',
