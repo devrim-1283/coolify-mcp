@@ -20,6 +20,39 @@ add operations that `search_operations` did not previously return.
 
 ### Added
 
+- **Catalog tracks Coolify 4.5.0** (was 4.4.6): 301 operations, up from 291.
+  New: the Hostinger provider (VPS catalog, data centers, OS templates, account
+  SSH keys, post-install scripts, and `create-hostinger-server`, flagged
+  `costly`) and server transfers between Coolify instances (`check-server-import`,
+  `import-server-transfer-bundle`, `migrate-server-between-instances`,
+  `get-server-transfer-status`, `complete-server-transfer`). Request bodies
+  gained `traefik_certificate_resolver`, `is_permanent_redirect_enabled`, the
+  HTTP basic auth hashing options and `redact_all_env_values_in_logs` on
+  applications; `instant_deploy` and `redact_all_env_values_in_logs` on
+  databases; CloudWatch log drains on servers; `s3_storage_uuids` on scheduled
+  backups; and `connect_to_docker_network` on services.
+- New `search_operations` family: `hostinger`.
+- `migrate-server-between-instances` and `complete-server-transfer` are
+  classified **destructive**: they hand a server to another Coolify instance
+  and switch this instance's automations for it off, so from the token's point
+  of view the server is gone. The HTTP client gates them by method and path as
+  well as by id.
+
+### Removed
+
+- `enable-api`: Coolify 4.5.0 removed `POST /enable`. The REST API can only be
+  switched back on in the Coolify UI, which makes `disable-api` more final than
+  before, not less.
+
+### Changed
+
+- Documented Coolify 4.5.0's token requirements: `control_resource`,
+  `execute_destructive_operation` and the proxy, log drain, Sentinel,
+  start/stop/restart and scheduled task writes now need the `deploy` ability on
+  top of `write`, and backup execution messages need `read:sensitive`.
+
+### Added (4.4.6)
+
 - **Catalog tracks Coolify 4.4.6** (was 4.2.0): 291 operations, up from 189.
   New: shared environment variables (team, project, environment, server),
   notification channels, S3 storages, GitLab apps, cloud-init scripts, server

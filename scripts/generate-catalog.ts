@@ -31,13 +31,13 @@ import type {
  * quietly adapts to whatever it is fed will happily emit a half-catalog after a
  * bad spec refresh. Bump this deliberately, in the same commit as the new spec.
  */
-const EXPECTED_RAW_OPERATIONS = 291;
+const EXPECTED_RAW_OPERATIONS = 301;
 
 /**
  * The spec's own `info.version` is the constant "0.1" and carries no
  * information. This is the coollabsio/coolify release the spec was taken from.
  */
-const COOLIFY_VERSION = '4.4.6';
+const COOLIFY_VERSION = '4.5.0';
 
 /**
  * Hand-maintained. These are not DELETEs, so the "gate the DELETEs" rule misses
@@ -56,6 +56,12 @@ const DESTRUCTIVE_OVERRIDE_ROUTES: readonly string[] = [
   // the matching objects first. Overwritten data does not come back.
   'POST /databases/{uuid}/imports',
   'POST /services/{uuid}/databases/{database_uuid}/imports',
+  // Hands the server to another Coolify instance and switches this instance's
+  // automations for it off. Nothing is deleted, but from this token's point of
+  // view the server is gone: its deployments, backups and Sentinel now answer
+  // to a target the token may hold no credentials for.
+  'POST /servers/{uuid}/migrate',
+  'POST /servers/{uuid}/transfer/complete',
 ];
 
 /**
@@ -67,6 +73,7 @@ const COSTLY_ROUTES: readonly string[] = [
   'POST /servers/hetzner',
   'POST /servers/digitalocean',
   'POST /servers/vultr',
+  'POST /servers/hostinger',
 ];
 
 // ---------------------------------------------------------------------------
@@ -134,6 +141,7 @@ const FAMILY_BY_SEGMENT: Readonly<Record<string, OperationFamily>> = {
   hetzner: 'hetzner',
   digitalocean: 'digitalocean',
   vultr: 'vultr',
+  hostinger: 'hostinger',
   tags: 'tags',
 };
 

@@ -41,6 +41,7 @@ export type OperationFamily =
   | 'hetzner'
   | 'digitalocean'
   | 'vultr'
+  | 'hostinger'
   | 'tags'
   | 'other';
 

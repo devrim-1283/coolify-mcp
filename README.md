@@ -7,7 +7,7 @@
 
 One MCP server that talks to every Coolify instance and every Coolify team you
 have, from one connection. Search across the fleet in a single call, read logs
-and environment variables, deploy, and reach all 291 catalogued REST operations
+and environment variables, deploy, and reach all 301 catalogued REST operations
 through a generic door.
 
 ---
@@ -71,7 +71,7 @@ honest account of both, and of the one axis where neither competes.
 |                       | Coolify's built-in `/mcp`    | `@masonator/coolify-mcp` | **coolify-mcp** (this project)                                      |
 | --------------------- | ---------------------------- | ------------------------ | ------------------------------------------------------------------- |
 | Where it runs         | Inside your Coolify instance | Local process            | Local process, **or remote over HTTP**                              |
-| Tools                 | 10                           | ~42, hand-curated        | 15 by default (16 with destructive enabled) + 291-operation catalog |
+| Tools                 | 10                           | ~42, hand-curated        | 15 by default (16 with destructive enabled) + 301-operation catalog |
 | Writes                | No — all 10 are read-only    | Yes                      | Yes, behind flags                                                   |
 | Instances per process | 1                            | 1                        | **N**                                                               |
 | Teams reachable       | The token's team             | The token's team         | **M — one connection per (instance, team)**                         |
@@ -505,24 +505,24 @@ you to rotate anyway. Full details: [docs/secrets.md](./docs/secrets.md).
 operations are enabled. Everything else in Coolify's API is behind
 `search_operations` → `describe_operation` → `execute_*`.
 
-| Tool                            | Class           | Coolify ability                                    |
-| ------------------------------- | --------------- | -------------------------------------------------- |
-| `find_resources`                | read            | `read`                                             |
-| `get_resource`                  | read            | `read`                                             |
-| `get_logs`                      | read            | `read:sensitive`                                   |
-| `get_environment_variables`     | read            | `read:sensitive`                                   |
-| `list_deployments`              | read            | `read`                                             |
-| `get_deployment`                | read            | `read` (`read:sensitive` for build log content)    |
-| `list_servers`                  | read            | `read`                                             |
-| `list_projects`                 | read            | `read`                                             |
-| `search_operations`             | read            | none — local catalog                               |
-| `describe_operation`            | read            | none — local catalog                               |
-| `execute_read_operation`        | read            | `read`, or `read:sensitive` on `/logs` and `/envs` |
-| `deploy`                        | write           | `deploy`                                           |
-| `control_resource`              | write           | `write`                                            |
-| `set_environment_variables`     | write           | `write`                                            |
-| `execute_write_operation`       | write           | `write`                                            |
-| `execute_destructive_operation` | **destructive** | `write` (or `root`)                                |
+| Tool                            | Class           | Coolify ability                                                                                                  |
+| ------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `find_resources`                | read            | `read`                                                                                                           |
+| `get_resource`                  | read            | `read`                                                                                                           |
+| `get_logs`                      | read            | `read:sensitive`                                                                                                 |
+| `get_environment_variables`     | read            | `read:sensitive`                                                                                                 |
+| `list_deployments`              | read            | `read`                                                                                                           |
+| `get_deployment`                | read            | `read` (`read:sensitive` for build log content)                                                                  |
+| `list_servers`                  | read            | `read`                                                                                                           |
+| `list_projects`                 | read            | `read`                                                                                                           |
+| `search_operations`             | read            | none — local catalog                                                                                             |
+| `describe_operation`            | read            | none — local catalog                                                                                             |
+| `execute_read_operation`        | read            | `read`, or `read:sensitive` on `/logs` and `/envs`                                                               |
+| `deploy`                        | write           | `deploy`                                                                                                         |
+| `control_resource`              | write           | `write` + `deploy` (Coolify ≥ 4.5.0)                                                                             |
+| `set_environment_variables`     | write           | `write`                                                                                                          |
+| `execute_write_operation`       | write           | `write`; `deploy` too for proxy, log drains, Sentinel, start/stop/restart and scheduled tasks on Coolify ≥ 4.5.0 |
+| `execute_destructive_operation` | **destructive** | `write` + `deploy` on Coolify ≥ 4.5.0 (or `root`)                                                                |
 
 `control_resource` carries `destructiveHint: false` on purpose: stopping a
 resource causes downtime but destroys no data and is undone by the `start` in the
@@ -626,8 +626,8 @@ upload: `POST …/imports/uploads` takes a multipart body, which a JSON tool cal
 cannot carry, so database imports have to come from S3. We will not ship a tool that pretends otherwise.
 
 **The catalog is generated from a pinned spec.** It is built at release time from
-Coolify **4.4.6** (spec sha `c60b2d15…`), covering **291 operations** — 105 read,
-145 write, 41 destructive, 3 flagged as provisioning billable cloud
+Coolify **4.5.0** (spec sha `41fe14b1…`), covering **301 operations** — 112 read,
+146 write, 43 destructive, 4 flagged as provisioning billable cloud
 infrastructure. An instance newer than the catalog may expose operations we do
 not list; `search_operations` says so explicitly when nothing matches, naming the
 spec version and date. CI fails the build when `npm run codegen` produces a diff,
