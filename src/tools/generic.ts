@@ -140,6 +140,7 @@ const FAMILY_KEYS: Record<OperationFamily, true> = {
   destinations: true,
   'github-apps': true,
   'gitlab-apps': true,
+  'gitea-apps': true,
   notifications: true,
   's3-storages': true,
   'cloud-init-scripts': true,

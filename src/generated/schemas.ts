@@ -1,5 +1,5 @@
 // GENERATED FILE — DO NOT EDIT, run npm run codegen
-// Source: scripts/coolify-openapi.json (Coolify 4.5.0)
+// Source: scripts/coolify-openapi.json (Coolify 4.7.5)
 
 /**
  * Dereferenced, pruned request-body schemas keyed by operation id.
@@ -23,7 +23,7 @@ export const SCHEMAS: Record<string, unknown> = {
         enum: ['github', 'gitlab', 'gitea', 'bitbucket'],
       },
       commit: {
-        description: 'Commit SHA to deploy. Required for Bitbucket.',
+        description: 'Commit SHA to deploy. Required for a new Bitbucket preview. Needs the write permission.',
         type: ['string', 'null'],
       },
       docker_tag: {
@@ -73,24 +73,10 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     type: 'object',
   },
-  'configure-application-secret-manager': {
-    required: ['integration_token_uuid'],
-    properties: {
-      integration_token_uuid: {
-        type: 'string',
-      },
-      settings: {
-        type: 'object',
-      },
-    },
-    type: 'object',
-  },
   'create-public-application': {
     required: [
       'project_uuid',
       'server_uuid',
-      'environment_name',
-      'environment_uuid',
       'git_repository',
       'git_branch',
       'build_pack',
@@ -119,6 +105,16 @@ export const SCHEMAS: Record<string, unknown> = {
       git_branch: {
         type: 'string',
         description: 'The git branch.',
+      },
+      git_https_username: {
+        type: 'string',
+        nullable: true,
+        description: 'Username for HTTPS access to a private repository on a custom Git host (not github.com).',
+      },
+      git_https_password: {
+        type: 'string',
+        nullable: true,
+        description: 'Password or access token for HTTPS access to a private repository on a custom Git host (not github.com). It is stored encrypted and never returned.',
       },
       build_pack: {
         type: 'string',
@@ -356,6 +352,11 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'The Dockerfile location in the repository.',
       },
+      dockerfile_target_build: {
+        type: 'string',
+        nullable: true,
+        description: 'The Docker build target (stage) in the Dockerfile.',
+      },
       docker_compose_location: {
         type: 'string',
         description: 'The Docker Compose location.',
@@ -417,6 +418,13 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Use a shallow Git clone.',
       },
+      is_auto_cancel_queued_deployments_enabled: {
+        type: 'boolean',
+        description: 'Cancel older queued webhook deployments when a newer push arrives. Default: true.',
+      },
+      is_auto_cancel_building_deployments_enabled: {
+        type: 'boolean',
+      },
       disable_build_cache: {
         type: 'boolean',
         description: 'Disable the build cache.',
@@ -429,6 +437,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Include the source commit in the build.',
       },
+      include_network_hosts_in_build: {
+        type: 'boolean',
+        description: 'Add the containers of the destination network as build hosts.',
+      },
       is_env_sorting_enabled: {
         type: 'boolean',
         description: 'Sort environment variables.',
@@ -436,6 +448,11 @@ export const SCHEMAS: Record<string, unknown> = {
       redact_all_env_values_in_logs: {
         type: 'boolean',
         description: 'Redact all environment variable values in logs. When false, only locked (shown once) values are redacted. Requires team admin permissions.',
+      },
+      include_coolify_default_variables: {
+        type: 'boolean',
+        default: true,
+        description: 'Add the predefined COOLIFY_* variables (COOLIFY_URL, COOLIFY_FQDN, ...) to the environment. Requires team admin permissions. Redeploy to apply it.',
       },
       is_pr_deployments_public_enabled: {
         type: 'boolean',
@@ -447,6 +464,12 @@ export const SCHEMAS: Record<string, unknown> = {
         minimum: 1,
         maximum: 3600,
         description: 'Container stop grace period in seconds.',
+      },
+      rolling_update_drain_seconds: {
+        type: 'integer',
+        minimum: 0,
+        maximum: 300,
+        description: 'Seconds to wait after the new container is healthy before old containers stop during a rolling update. 0 turns the wait off. Default: 5.',
       },
       docker_images_to_keep: {
         type: 'integer',
@@ -470,6 +493,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         nullable: true,
         description: 'Traefik certificate resolver for this application. Null uses the server setting, "none" uses no resolver.',
+      },
+      is_container_label_readonly_enabled: {
+        type: 'boolean',
+        default: true,
       },
       is_raw_compose_deployment_enabled: {
         type: 'boolean',
@@ -506,6 +533,10 @@ export const SCHEMAS: Record<string, unknown> = {
       is_consistent_container_name_enabled: {
         type: 'boolean',
         description: 'Use a consistent container name across deployments.',
+      },
+      is_image_scan_enabled: {
+        type: 'boolean',
+        description: 'Scan the images of the application for vulnerabilities. Needs image scanning on the server. Default true.',
       },
       custom_internal_name: {
         type: 'string',
@@ -602,8 +633,6 @@ export const SCHEMAS: Record<string, unknown> = {
     required: [
       'project_uuid',
       'server_uuid',
-      'environment_name',
-      'environment_uuid',
       'github_app_uuid',
       'git_repository',
       'git_branch',
@@ -874,6 +903,11 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'The Dockerfile location in the repository',
       },
+      dockerfile_target_build: {
+        type: 'string',
+        nullable: true,
+        description: 'The Docker build target (stage) in the Dockerfile.',
+      },
       docker_compose_location: {
         type: 'string',
         description: 'The Docker Compose location.',
@@ -935,6 +969,13 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Use a shallow Git clone.',
       },
+      is_auto_cancel_queued_deployments_enabled: {
+        type: 'boolean',
+        description: 'Cancel older queued webhook deployments when a newer push arrives. Default: true.',
+      },
+      is_auto_cancel_building_deployments_enabled: {
+        type: 'boolean',
+      },
       disable_build_cache: {
         type: 'boolean',
         description: 'Disable the build cache.',
@@ -947,6 +988,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Include the source commit in the build.',
       },
+      include_network_hosts_in_build: {
+        type: 'boolean',
+        description: 'Add the containers of the destination network as build hosts.',
+      },
       is_env_sorting_enabled: {
         type: 'boolean',
         description: 'Sort environment variables.',
@@ -954,6 +999,11 @@ export const SCHEMAS: Record<string, unknown> = {
       redact_all_env_values_in_logs: {
         type: 'boolean',
         description: 'Redact all environment variable values in logs. When false, only locked (shown once) values are redacted. Requires team admin permissions.',
+      },
+      include_coolify_default_variables: {
+        type: 'boolean',
+        default: true,
+        description: 'Add the predefined COOLIFY_* variables (COOLIFY_URL, COOLIFY_FQDN, ...) to the environment. Requires team admin permissions. Redeploy to apply it.',
       },
       is_pr_deployments_public_enabled: {
         type: 'boolean',
@@ -965,6 +1015,12 @@ export const SCHEMAS: Record<string, unknown> = {
         minimum: 1,
         maximum: 3600,
         description: 'Container stop grace period in seconds.',
+      },
+      rolling_update_drain_seconds: {
+        type: 'integer',
+        minimum: 0,
+        maximum: 300,
+        description: 'Seconds to wait after the new container is healthy before old containers stop during a rolling update. 0 turns the wait off. Default: 5.',
       },
       docker_images_to_keep: {
         type: 'integer',
@@ -988,6 +1044,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         nullable: true,
         description: 'Traefik certificate resolver for this application. Null uses the server setting, "none" uses no resolver.',
+      },
+      is_container_label_readonly_enabled: {
+        type: 'boolean',
+        default: true,
       },
       is_raw_compose_deployment_enabled: {
         type: 'boolean',
@@ -1024,6 +1084,561 @@ export const SCHEMAS: Record<string, unknown> = {
       is_consistent_container_name_enabled: {
         type: 'boolean',
         description: 'Use a consistent container name across deployments.',
+      },
+      is_image_scan_enabled: {
+        type: 'boolean',
+        description: 'Scan the images of the application for vulnerabilities. Needs image scanning on the server. Default true.',
+      },
+      custom_internal_name: {
+        type: 'string',
+        nullable: true,
+        description: 'Custom internal container name. Turns is_consistent_container_name_enabled on when that field is not sent; sending it as false together with a name returns 422.',
+      },
+      custom_container_name_prefix: {
+        type: 'string',
+        nullable: true,
+        description: 'Prefix for generated container names (prefix-20260908T141530). Slugified and unique across the instance.',
+      },
+      preview_url_template: {
+        type: 'string',
+        description: 'Preview URL template.',
+      },
+      max_restart_count: {
+        type: 'integer',
+        minimum: 0,
+        description: 'Maximum container restart count before stopping.',
+      },
+      is_http_basic_auth_enabled: {
+        type: 'boolean',
+        description: 'HTTP Basic Authentication enabled.',
+      },
+      http_basic_auth_username: {
+        type: 'string',
+        nullable: true,
+        description: 'Username for HTTP Basic Authentication',
+      },
+      http_basic_auth_password: {
+        type: 'string',
+        nullable: true,
+        description: 'Password for HTTP Basic Authentication',
+      },
+      http_basic_auth_hash_algorithm: {
+        type: 'string',
+        enum: ['bcrypt', 'argon2id'],
+        default: 'bcrypt',
+        description: 'Hash algorithm for the HTTP Basic Authentication password. Argon2id needs the Caddy proxy, version 2.11 or newer.',
+      },
+      http_basic_auth_bcrypt_cost: {
+        type: 'integer',
+        minimum: 4,
+        maximum: 14,
+        default: 10,
+        description: 'Bcrypt cost for the HTTP Basic Authentication password.',
+      },
+      http_basic_auth_argon2id_memory_cost: {
+        type: 'integer',
+        minimum: 8192,
+        maximum: 262144,
+        default: 65536,
+        description: 'Argon2id memory cost in KiB for the HTTP Basic Authentication password.',
+      },
+      http_basic_auth_argon2id_time_cost: {
+        type: 'integer',
+        minimum: 1,
+        maximum: 12,
+        default: 4,
+        description: 'Argon2id time cost (iterations) for the HTTP Basic Authentication password.',
+      },
+      connect_to_docker_network: {
+        type: 'boolean',
+        description: 'The flag to connect the service to the predefined Docker network.',
+      },
+      force_domain_override: {
+        type: 'boolean',
+        description: 'Force domain usage even if conflicts are detected. Default is false.',
+      },
+      autogenerate_domain: {
+        type: 'boolean',
+        default: true,
+      },
+      is_container_label_escape_enabled: {
+        type: 'boolean',
+        default: true,
+      },
+      tags: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
+        description: 'Tags to assign to the application.',
+      },
+      is_preserve_repository_enabled: {
+        type: 'boolean',
+        default: false,
+        description: 'Preserve repository during deployment.',
+      },
+    },
+    type: 'object',
+  },
+  'create-private-gitea-app-application': {
+    required: [
+      'project_uuid',
+      'server_uuid',
+      'gitea_app_uuid',
+      'git_repository',
+      'git_branch',
+      'build_pack',
+    ],
+    properties: {
+      project_uuid: {
+        type: 'string',
+        description: 'The project UUID.',
+      },
+      server_uuid: {
+        type: 'string',
+        description: 'The server UUID.',
+      },
+      environment_name: {
+        type: 'string',
+        description: 'The environment name. You need to provide at least one of environment_name or environment_uuid.',
+      },
+      environment_uuid: {
+        type: 'string',
+        description: 'The environment UUID. You need to provide at least one of environment_name or environment_uuid.',
+      },
+      gitea_app_uuid: {
+        type: 'string',
+        description: 'The Gitea App UUID. The source must be connected.',
+      },
+      git_repository: {
+        type: 'string',
+        description: 'The repository as owner/name, or its URL on the Gitea instance.',
+      },
+      git_branch: {
+        type: 'string',
+        description: 'The git branch.',
+      },
+      ports_exposes: {
+        type: 'string',
+        description: 'The ports to expose.',
+      },
+      destination_uuid: {
+        type: 'string',
+        description: 'The destination UUID.',
+      },
+      build_pack: {
+        type: 'string',
+        enum: [
+          'nixpacks',
+          'railpack',
+          'static',
+          'dockerfile',
+          'dockercompose',
+        ],
+        description: 'The build pack type.',
+      },
+      name: {
+        type: 'string',
+        description: 'The application name.',
+      },
+      description: {
+        type: 'string',
+        description: 'The application description.',
+      },
+      domains: {
+        type: 'string',
+        description: 'The application URLs in a comma-separated list.',
+      },
+      noindex_domains: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
+      },
+      git_commit_sha: {
+        type: 'string',
+        description: 'The git commit SHA.',
+      },
+      docker_registry_image_name: {
+        type: 'string',
+        description: 'The docker registry image name.',
+      },
+      docker_registry_image_tag: {
+        type: 'string',
+        description: 'The docker registry image tag.',
+      },
+      is_static: {
+        type: 'boolean',
+        description: 'The flag to indicate if the application is static.',
+      },
+      is_spa: {
+        type: 'boolean',
+        description: 'The flag to indicate if the application is a single-page application (SPA). Only relevant when is_static is true.',
+      },
+      is_auto_deploy_enabled: {
+        type: 'boolean',
+        description: 'The flag to indicate if auto-deploy is enabled on git push. Defaults to true.',
+      },
+      is_force_https_enabled: {
+        type: 'boolean',
+        description: 'The flag to indicate if HTTPS is forced. Defaults to true.',
+      },
+      is_preview_deployments_enabled: {
+        type: 'boolean',
+        description: 'Enable preview deployments for pull requests.',
+      },
+      static_image: {
+        type: 'string',
+        enum: ['nginx:alpine'],
+        description: 'The static image.',
+      },
+      install_command: {
+        type: 'string',
+        description: 'The install command.',
+      },
+      build_command: {
+        type: 'string',
+        description: 'The build command.',
+      },
+      start_command: {
+        type: 'string',
+        description: 'The start command.',
+      },
+      ports_mappings: {
+        type: 'string',
+        description: 'The ports mappings.',
+      },
+      base_directory: {
+        type: 'string',
+        description: 'The base directory for all commands.',
+      },
+      publish_directory: {
+        type: 'string',
+        description: 'The publish directory.',
+      },
+      health_check_enabled: {
+        type: 'boolean',
+        description: 'Health check enabled.',
+      },
+      health_check_path: {
+        type: 'string',
+        description: 'Health check path.',
+      },
+      health_check_port: {
+        type: 'string',
+        nullable: true,
+        description: 'Health check port.',
+      },
+      health_check_host: {
+        type: 'string',
+        nullable: true,
+        description: 'Health check host.',
+      },
+      health_check_method: {
+        type: 'string',
+        description: 'Health check method.',
+      },
+      health_check_return_code: {
+        type: 'integer',
+        description: 'Health check return code.',
+      },
+      health_check_scheme: {
+        type: 'string',
+        description: 'Health check scheme.',
+      },
+      health_check_response_text: {
+        type: 'string',
+        nullable: true,
+        description: 'Health check response text.',
+      },
+      health_check_interval: {
+        type: 'integer',
+        description: 'Health check interval in seconds.',
+      },
+      health_check_timeout: {
+        type: 'integer',
+        description: 'Health check timeout in seconds.',
+      },
+      health_check_retries: {
+        type: 'integer',
+        description: 'Health check retries count.',
+      },
+      health_check_start_period: {
+        type: 'integer',
+        description: 'Health check start period in seconds.',
+      },
+      limits_memory: {
+        type: 'string',
+        description: 'Memory limit.',
+      },
+      limits_memory_swap: {
+        type: 'string',
+        description: 'Memory swap limit.',
+      },
+      limits_memory_swappiness: {
+        type: 'integer',
+        description: 'Memory swappiness.',
+      },
+      limits_memory_reservation: {
+        type: 'string',
+        description: 'Memory reservation.',
+      },
+      limits_cpus: {
+        type: 'string',
+        description: 'CPU limit.',
+      },
+      limits_cpuset: {
+        type: 'string',
+        nullable: true,
+        description: 'CPU set.',
+      },
+      limits_cpu_shares: {
+        type: 'integer',
+        description: 'CPU shares.',
+      },
+      custom_labels: {
+        type: 'string',
+        description: 'Custom labels.',
+      },
+      custom_docker_run_options: {
+        type: 'string',
+        description: 'Custom docker run options.',
+      },
+      post_deployment_command: {
+        type: 'string',
+        description: 'Post deployment command.',
+      },
+      post_deployment_command_container: {
+        type: 'string',
+        description: 'Post deployment command container.',
+      },
+      pre_deployment_command: {
+        type: 'string',
+        description: 'Pre deployment command.',
+      },
+      pre_deployment_command_container: {
+        type: 'string',
+        description: 'Pre deployment command container.',
+      },
+      manual_webhook_secret_github: {
+        type: 'string',
+        description: 'Manual webhook secret for Github. Needs the deploy ability.',
+      },
+      manual_webhook_secret_gitlab: {
+        type: 'string',
+        description: 'Manual webhook secret for Gitlab. Needs the deploy ability.',
+      },
+      manual_webhook_secret_bitbucket: {
+        type: 'string',
+        description: 'Manual webhook secret for Bitbucket. Needs the deploy ability.',
+      },
+      manual_webhook_secret_gitea: {
+        type: 'string',
+        description: 'Manual webhook secret for Gitea. Needs the deploy ability.',
+      },
+      redirect: {
+        type: 'string',
+        nullable: true,
+        description: 'How to set redirect with Traefik / Caddy. www<->non-www.',
+        enum: ['www', 'non-www', 'both'],
+      },
+      instant_deploy: {
+        type: 'boolean',
+        description: 'The flag to indicate if the application should be deployed instantly.',
+      },
+      dockerfile: {
+        type: 'string',
+        description: 'The Dockerfile content.',
+      },
+      dockerfile_location: {
+        type: 'string',
+        description: 'The Dockerfile location in the repository',
+      },
+      dockerfile_target_build: {
+        type: 'string',
+        nullable: true,
+        description: 'The Docker build target (stage) in the Dockerfile.',
+      },
+      docker_compose_location: {
+        type: 'string',
+        description: 'The Docker Compose location.',
+      },
+      docker_compose_custom_start_command: {
+        type: 'string',
+        description: 'The Docker Compose custom start command.',
+      },
+      docker_compose_custom_build_command: {
+        type: 'string',
+        description: 'The Docker Compose custom build command.',
+      },
+      docker_compose_domains: {
+        type: 'array',
+        description: 'Array of URLs to be applied to containers of a dockercompose application.',
+        items: {
+          properties: {
+            name: {
+              type: 'string',
+              description: 'The service name as defined in docker-compose.',
+            },
+            domain: {
+              type: 'string',
+              description: 'Comma-separated list of URLs (e.g. "https://app.coolify.io,https://app2.coolify.io")',
+            },
+            redirect: {
+              type: 'string',
+              nullable: true,
+              description: 'Per-service www/non-www redirect for this compose service.',
+              enum: ['www', 'non-www', 'both'],
+            },
+          },
+          type: 'object',
+        },
+      },
+      watch_paths: {
+        type: 'string',
+        description: 'Watch path patterns, one per line (newline-separated). Commas do not separate patterns.',
+      },
+      use_build_server: {
+        type: 'boolean',
+        nullable: true,
+        description: 'Use build server.',
+      },
+      use_build_secrets: {
+        type: 'boolean',
+        default: false,
+        description: 'Use Docker Build Secrets for build-time environment variables.',
+      },
+      is_git_submodules_enabled: {
+        type: 'boolean',
+        description: 'Clone Git submodules.',
+      },
+      is_git_lfs_enabled: {
+        type: 'boolean',
+        description: 'Enable Git LFS.',
+      },
+      is_git_shallow_clone_enabled: {
+        type: 'boolean',
+        description: 'Use a shallow Git clone.',
+      },
+      is_auto_cancel_queued_deployments_enabled: {
+        type: 'boolean',
+        description: 'Cancel older queued webhook deployments when a newer push arrives. Default: true.',
+      },
+      is_auto_cancel_building_deployments_enabled: {
+        type: 'boolean',
+      },
+      disable_build_cache: {
+        type: 'boolean',
+        description: 'Disable the build cache.',
+      },
+      inject_build_args_to_dockerfile: {
+        type: 'boolean',
+        description: 'Inject build arguments into the Dockerfile build.',
+      },
+      include_source_commit_in_build: {
+        type: 'boolean',
+        description: 'Include the source commit in the build.',
+      },
+      include_network_hosts_in_build: {
+        type: 'boolean',
+        description: 'Add the containers of the destination network as build hosts.',
+      },
+      is_env_sorting_enabled: {
+        type: 'boolean',
+        description: 'Sort environment variables.',
+      },
+      redact_all_env_values_in_logs: {
+        type: 'boolean',
+        description: 'Redact all environment variable values in logs. When false, only locked (shown once) values are redacted. Requires team admin permissions.',
+      },
+      include_coolify_default_variables: {
+        type: 'boolean',
+        default: true,
+        description: 'Add the predefined COOLIFY_* variables (COOLIFY_URL, COOLIFY_FQDN, ...) to the environment. Requires team admin permissions. Redeploy to apply it.',
+      },
+      is_pr_deployments_public_enabled: {
+        type: 'boolean',
+        description: 'Make pull request deployments public.',
+      },
+      stop_grace_period: {
+        type: 'integer',
+        nullable: true,
+        minimum: 1,
+        maximum: 3600,
+        description: 'Container stop grace period in seconds.',
+      },
+      rolling_update_drain_seconds: {
+        type: 'integer',
+        minimum: 0,
+        maximum: 300,
+        description: 'Seconds to wait after the new container is healthy before old containers stop during a rolling update. 0 turns the wait off. Default: 5.',
+      },
+      docker_images_to_keep: {
+        type: 'integer',
+        minimum: 0,
+        maximum: 100,
+        description: 'Number of Docker images to retain.',
+      },
+      is_gzip_enabled: {
+        type: 'boolean',
+        description: 'Enable gzip compression.',
+      },
+      is_stripprefix_enabled: {
+        type: 'boolean',
+        description: 'Enable path prefix stripping.',
+      },
+      is_permanent_redirect_enabled: {
+        type: 'boolean',
+        description: 'Use permanent redirects (301/308) instead of temporary (302/307) for the HTTP to HTTPS and www redirects. Defaults to false.',
+      },
+      traefik_certificate_resolver: {
+        type: 'string',
+        nullable: true,
+        description: 'Traefik certificate resolver for this application. Null uses the server setting, "none" uses no resolver.',
+      },
+      is_container_label_readonly_enabled: {
+        type: 'boolean',
+        default: true,
+      },
+      is_raw_compose_deployment_enabled: {
+        type: 'boolean',
+        description: 'Deploy the raw Docker Compose definition.',
+      },
+      is_log_drain_enabled: {
+        type: 'boolean',
+        description: 'Enable log drain for the application.',
+      },
+      is_gpu_enabled: {
+        type: 'boolean',
+        description: 'Enable GPU support.',
+      },
+      gpu_driver: {
+        type: 'string',
+        nullable: true,
+        description: 'GPU driver name.',
+      },
+      gpu_count: {
+        type: 'string',
+        nullable: true,
+        description: 'Number of GPUs to allocate.',
+      },
+      gpu_device_ids: {
+        type: 'string',
+        nullable: true,
+        description: 'Comma-separated GPU device IDs.',
+      },
+      gpu_options: {
+        type: 'string',
+        nullable: true,
+        description: 'Additional GPU options.',
+      },
+      is_consistent_container_name_enabled: {
+        type: 'boolean',
+        description: 'Use a consistent container name across deployments.',
+      },
+      is_image_scan_enabled: {
+        type: 'boolean',
+        description: 'Scan the images of the application for vulnerabilities. Needs image scanning on the server. Default true.',
       },
       custom_internal_name: {
         type: 'string',
@@ -1120,8 +1735,6 @@ export const SCHEMAS: Record<string, unknown> = {
     required: [
       'project_uuid',
       'server_uuid',
-      'environment_name',
-      'environment_uuid',
       'private_key_uuid',
       'git_repository',
       'git_branch',
@@ -1392,6 +2005,11 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'The Dockerfile location in the repository.',
       },
+      dockerfile_target_build: {
+        type: 'string',
+        nullable: true,
+        description: 'The Docker build target (stage) in the Dockerfile.',
+      },
       docker_compose_location: {
         type: 'string',
         description: 'The Docker Compose location.',
@@ -1453,6 +2071,13 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Use a shallow Git clone.',
       },
+      is_auto_cancel_queued_deployments_enabled: {
+        type: 'boolean',
+        description: 'Cancel older queued webhook deployments when a newer push arrives. Default: true.',
+      },
+      is_auto_cancel_building_deployments_enabled: {
+        type: 'boolean',
+      },
       disable_build_cache: {
         type: 'boolean',
         description: 'Disable the build cache.',
@@ -1465,6 +2090,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Include the source commit in the build.',
       },
+      include_network_hosts_in_build: {
+        type: 'boolean',
+        description: 'Add the containers of the destination network as build hosts.',
+      },
       is_env_sorting_enabled: {
         type: 'boolean',
         description: 'Sort environment variables.',
@@ -1472,6 +2101,11 @@ export const SCHEMAS: Record<string, unknown> = {
       redact_all_env_values_in_logs: {
         type: 'boolean',
         description: 'Redact all environment variable values in logs. When false, only locked (shown once) values are redacted. Requires team admin permissions.',
+      },
+      include_coolify_default_variables: {
+        type: 'boolean',
+        default: true,
+        description: 'Add the predefined COOLIFY_* variables (COOLIFY_URL, COOLIFY_FQDN, ...) to the environment. Requires team admin permissions. Redeploy to apply it.',
       },
       is_pr_deployments_public_enabled: {
         type: 'boolean',
@@ -1483,6 +2117,12 @@ export const SCHEMAS: Record<string, unknown> = {
         minimum: 1,
         maximum: 3600,
         description: 'Container stop grace period in seconds.',
+      },
+      rolling_update_drain_seconds: {
+        type: 'integer',
+        minimum: 0,
+        maximum: 300,
+        description: 'Seconds to wait after the new container is healthy before old containers stop during a rolling update. 0 turns the wait off. Default: 5.',
       },
       docker_images_to_keep: {
         type: 'integer',
@@ -1506,6 +2146,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         nullable: true,
         description: 'Traefik certificate resolver for this application. Null uses the server setting, "none" uses no resolver.',
+      },
+      is_container_label_readonly_enabled: {
+        type: 'boolean',
+        default: true,
       },
       is_raw_compose_deployment_enabled: {
         type: 'boolean',
@@ -1542,6 +2186,10 @@ export const SCHEMAS: Record<string, unknown> = {
       is_consistent_container_name_enabled: {
         type: 'boolean',
         description: 'Use a consistent container name across deployments.',
+      },
+      is_image_scan_enabled: {
+        type: 'boolean',
+        description: 'Scan the images of the application for vulnerabilities. Needs image scanning on the server. Default true.',
       },
       custom_internal_name: {
         type: 'string',
@@ -1635,13 +2283,7 @@ export const SCHEMAS: Record<string, unknown> = {
     type: 'object',
   },
   'create-dockerfile-application': {
-    required: [
-      'project_uuid',
-      'server_uuid',
-      'environment_name',
-      'environment_uuid',
-      'dockerfile',
-    ],
+    required: ['project_uuid', 'server_uuid', 'dockerfile'],
     properties: {
       project_uuid: {
         type: 'string',
@@ -1870,6 +2512,13 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Use a shallow Git clone.',
       },
+      is_auto_cancel_queued_deployments_enabled: {
+        type: 'boolean',
+        description: 'Cancel older queued webhook deployments when a newer push arrives. Default: true.',
+      },
+      is_auto_cancel_building_deployments_enabled: {
+        type: 'boolean',
+      },
       disable_build_cache: {
         type: 'boolean',
         description: 'Disable the build cache.',
@@ -1882,6 +2531,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Include the source commit in the build.',
       },
+      include_network_hosts_in_build: {
+        type: 'boolean',
+        description: 'Add the containers of the destination network as build hosts.',
+      },
       is_env_sorting_enabled: {
         type: 'boolean',
         description: 'Sort environment variables.',
@@ -1889,6 +2542,11 @@ export const SCHEMAS: Record<string, unknown> = {
       redact_all_env_values_in_logs: {
         type: 'boolean',
         description: 'Redact all environment variable values in logs. When false, only locked (shown once) values are redacted. Requires team admin permissions.',
+      },
+      include_coolify_default_variables: {
+        type: 'boolean',
+        default: true,
+        description: 'Add the predefined COOLIFY_* variables (COOLIFY_URL, COOLIFY_FQDN, ...) to the environment. Requires team admin permissions. Redeploy to apply it.',
       },
       is_pr_deployments_public_enabled: {
         type: 'boolean',
@@ -1900,6 +2558,12 @@ export const SCHEMAS: Record<string, unknown> = {
         minimum: 1,
         maximum: 3600,
         description: 'Container stop grace period in seconds.',
+      },
+      rolling_update_drain_seconds: {
+        type: 'integer',
+        minimum: 0,
+        maximum: 300,
+        description: 'Seconds to wait after the new container is healthy before old containers stop during a rolling update. 0 turns the wait off. Default: 5.',
       },
       docker_images_to_keep: {
         type: 'integer',
@@ -1923,6 +2587,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         nullable: true,
         description: 'Traefik certificate resolver for this application. Null uses the server setting, "none" uses no resolver.',
+      },
+      is_container_label_readonly_enabled: {
+        type: 'boolean',
+        default: true,
       },
       is_raw_compose_deployment_enabled: {
         type: 'boolean',
@@ -1959,6 +2627,10 @@ export const SCHEMAS: Record<string, unknown> = {
       is_consistent_container_name_enabled: {
         type: 'boolean',
         description: 'Use a consistent container name across deployments.',
+      },
+      is_image_scan_enabled: {
+        type: 'boolean',
+        description: 'Scan the images of the application for vulnerabilities. Needs image scanning on the server. Default true.',
       },
       custom_internal_name: {
         type: 'string',
@@ -2047,13 +2719,7 @@ export const SCHEMAS: Record<string, unknown> = {
     type: 'object',
   },
   'create-dockerimage-application': {
-    required: [
-      'project_uuid',
-      'server_uuid',
-      'environment_name',
-      'environment_uuid',
-      'docker_registry_image_name',
-    ],
+    required: ['project_uuid', 'server_uuid', 'docker_registry_image_name'],
     properties: {
       project_uuid: {
         type: 'string',
@@ -2269,6 +2935,13 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Use a shallow Git clone.',
       },
+      is_auto_cancel_queued_deployments_enabled: {
+        type: 'boolean',
+        description: 'Cancel older queued webhook deployments when a newer push arrives. Default: true.',
+      },
+      is_auto_cancel_building_deployments_enabled: {
+        type: 'boolean',
+      },
       disable_build_cache: {
         type: 'boolean',
         description: 'Disable the build cache.',
@@ -2281,6 +2954,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Include the source commit in the build.',
       },
+      include_network_hosts_in_build: {
+        type: 'boolean',
+        description: 'Add the containers of the destination network as build hosts.',
+      },
       is_env_sorting_enabled: {
         type: 'boolean',
         description: 'Sort environment variables.',
@@ -2288,6 +2965,11 @@ export const SCHEMAS: Record<string, unknown> = {
       redact_all_env_values_in_logs: {
         type: 'boolean',
         description: 'Redact all environment variable values in logs. When false, only locked (shown once) values are redacted. Requires team admin permissions.',
+      },
+      include_coolify_default_variables: {
+        type: 'boolean',
+        default: true,
+        description: 'Add the predefined COOLIFY_* variables (COOLIFY_URL, COOLIFY_FQDN, ...) to the environment. Requires team admin permissions. Redeploy to apply it.',
       },
       is_pr_deployments_public_enabled: {
         type: 'boolean',
@@ -2299,6 +2981,12 @@ export const SCHEMAS: Record<string, unknown> = {
         minimum: 1,
         maximum: 3600,
         description: 'Container stop grace period in seconds.',
+      },
+      rolling_update_drain_seconds: {
+        type: 'integer',
+        minimum: 0,
+        maximum: 300,
+        description: 'Seconds to wait after the new container is healthy before old containers stop during a rolling update. 0 turns the wait off. Default: 5.',
       },
       docker_images_to_keep: {
         type: 'integer',
@@ -2322,6 +3010,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         nullable: true,
         description: 'Traefik certificate resolver for this application. Null uses the server setting, "none" uses no resolver.',
+      },
+      is_container_label_readonly_enabled: {
+        type: 'boolean',
+        default: true,
       },
       is_raw_compose_deployment_enabled: {
         type: 'boolean',
@@ -2358,6 +3050,10 @@ export const SCHEMAS: Record<string, unknown> = {
       is_consistent_container_name_enabled: {
         type: 'boolean',
         description: 'Use a consistent container name across deployments.',
+      },
+      is_image_scan_enabled: {
+        type: 'boolean',
+        description: 'Scan the images of the application for vulnerabilities. Needs image scanning on the server. Default true.',
       },
       custom_internal_name: {
         type: 'string',
@@ -2451,6 +3147,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'The Github App UUID.',
       },
+      gitea_app_uuid: {
+        type: 'string',
+        description: 'The Gitea App UUID. The source must be connected. Do not send it together with github_app_uuid.',
+      },
       git_repository: {
         type: 'string',
         description: 'The git repository URL.',
@@ -2458,6 +3158,16 @@ export const SCHEMAS: Record<string, unknown> = {
       git_branch: {
         type: 'string',
         description: 'The git branch.',
+      },
+      git_https_username: {
+        type: 'string',
+        nullable: true,
+        description: 'Username for HTTPS access to a private repository on a custom Git host. Send null to remove it.',
+      },
+      git_https_password: {
+        type: 'string',
+        nullable: true,
+        description: 'Password or access token for HTTPS access to a private repository on a custom Git host. It is stored encrypted and never returned. Send null or an empty string to remove the credentials.',
       },
       ports_exposes: {
         type: 'string',
@@ -2686,6 +3396,11 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'The Dockerfile location in the repository.',
       },
+      dockerfile_target_build: {
+        type: 'string',
+        nullable: true,
+        description: 'The Docker build target (stage) in the Dockerfile.',
+      },
       docker_compose_location: {
         type: 'string',
         description: 'The Docker Compose location.',
@@ -2769,6 +3484,13 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Use a shallow Git clone.',
       },
+      is_auto_cancel_queued_deployments_enabled: {
+        type: 'boolean',
+        description: 'Cancel older queued webhook deployments when a newer push arrives. Default: true.',
+      },
+      is_auto_cancel_building_deployments_enabled: {
+        type: 'boolean',
+      },
       disable_build_cache: {
         type: 'boolean',
         description: 'Disable the build cache.',
@@ -2781,6 +3503,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Include the source commit in the build.',
       },
+      include_network_hosts_in_build: {
+        type: 'boolean',
+        description: 'Add the containers of the destination network as build hosts.',
+      },
       is_env_sorting_enabled: {
         type: 'boolean',
         description: 'Sort environment variables.',
@@ -2788,6 +3514,11 @@ export const SCHEMAS: Record<string, unknown> = {
       redact_all_env_values_in_logs: {
         type: 'boolean',
         description: 'Redact all environment variable values in logs. When false, only locked (shown once) values are redacted. Requires team admin permissions.',
+      },
+      include_coolify_default_variables: {
+        type: 'boolean',
+        default: true,
+        description: 'Add the predefined COOLIFY_* variables (COOLIFY_URL, COOLIFY_FQDN, ...) to the environment. Requires team admin permissions. Redeploy to apply it.',
       },
       is_pr_deployments_public_enabled: {
         type: 'boolean',
@@ -2799,6 +3530,12 @@ export const SCHEMAS: Record<string, unknown> = {
         minimum: 1,
         maximum: 3600,
         description: 'Container stop grace period in seconds.',
+      },
+      rolling_update_drain_seconds: {
+        type: 'integer',
+        minimum: 0,
+        maximum: 300,
+        description: 'Seconds to wait after the new container is healthy before old containers stop during a rolling update. 0 turns the wait off. Default: 5.',
       },
       docker_images_to_keep: {
         type: 'integer',
@@ -2822,6 +3559,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         nullable: true,
         description: 'Traefik certificate resolver for this application. Null uses the server setting, "none" uses no resolver.',
+      },
+      is_container_label_readonly_enabled: {
+        type: 'boolean',
+        default: true,
       },
       is_raw_compose_deployment_enabled: {
         type: 'boolean',
@@ -2858,6 +3599,10 @@ export const SCHEMAS: Record<string, unknown> = {
       is_consistent_container_name_enabled: {
         type: 'boolean',
         description: 'Use a consistent container name across deployments.',
+      },
+      is_image_scan_enabled: {
+        type: 'boolean',
+        description: 'Scan the images of the application for vulnerabilities. Needs image scanning on the server. Default true.',
       },
       custom_internal_name: {
         type: 'string',
@@ -2920,7 +3665,6 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       is_shown_once: {
         type: 'boolean',
-        description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
       },
     },
     type: 'object',
@@ -2950,7 +3694,6 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       is_shown_once: {
         type: 'boolean',
-        description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
       },
     },
     type: 'object',
@@ -2984,7 +3727,6 @@ export const SCHEMAS: Record<string, unknown> = {
             },
             is_shown_once: {
               type: 'boolean',
-              description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
             },
           },
           type: 'object',
@@ -3081,7 +3823,7 @@ export const SCHEMAS: Record<string, unknown> = {
       content: {
         type: 'string',
         nullable: true,
-        description: 'The file content (file only, not allowed for read-only storages). Changing the content of a file outside the resource directory needs the deploy permission.',
+        description: 'The file content (file only, not allowed for read-only storages). Changing the content needs the deploy permission.',
       },
     },
     type: 'object',
@@ -3126,7 +3868,7 @@ export const SCHEMAS: Record<string, unknown> = {
     required: ['commit'],
     properties: {
       commit: {
-        description: 'Image tag / commit to roll back to.',
+        description: 'Image tag / commit to roll back to. Must be a tag from the rollback images list or the commit of a successful production deployment.',
         type: 'string',
       },
     },
@@ -3325,6 +4067,11 @@ export const SCHEMAS: Record<string, unknown> = {
       save_s3: {
         type: 'boolean',
         description: 'Whether to save backups to S3',
+        default: false,
+      },
+      disable_local_backup: {
+        type: 'boolean',
+        description: 'Delete the local backup file after the upload to S3. Only allowed when save_s3 is true.',
         default: false,
       },
       s3_storage_uuid: {
@@ -3592,6 +4339,14 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
         description: 'Redact all environment variable values in logs. When false, only locked (shown once) values, database passwords, and remote secrets are redacted. Requires team admin permissions.',
       },
+      include_coolify_default_variables: {
+        type: 'boolean',
+        description: 'Add the predefined COOLIFY_* variables (COOLIFY_URL, COOLIFY_FQDN, ...) to the environment. Requires team admin permissions. Restart the database to apply it.',
+      },
+      is_log_drain_enabled: {
+        type: 'boolean',
+        description: 'Send the database logs to the log drain of the server. Log drain must be enabled on the server. Restart the database to apply it.',
+      },
     },
     type: 'object',
   },
@@ -3600,6 +4355,10 @@ export const SCHEMAS: Record<string, unknown> = {
       save_s3: {
         type: 'boolean',
         description: 'Whether data is saved in s3 or not',
+      },
+      disable_local_backup: {
+        type: 'boolean',
+        description: 'Delete the local backup file after the upload to S3. Only allowed when save_s3 is true. Turning save_s3 off also turns this off.',
       },
       s3_storage_uuid: {
         type: 'string',
@@ -3669,12 +4428,7 @@ export const SCHEMAS: Record<string, unknown> = {
     type: 'object',
   },
   'create-database-postgresql': {
-    required: [
-      'server_uuid',
-      'project_uuid',
-      'environment_name',
-      'environment_uuid',
-    ],
+    required: ['server_uuid', 'project_uuid'],
     properties: {
       server_uuid: {
         type: 'string',
@@ -3787,12 +4541,7 @@ export const SCHEMAS: Record<string, unknown> = {
     type: 'object',
   },
   'create-database-clickhouse': {
-    required: [
-      'server_uuid',
-      'project_uuid',
-      'environment_name',
-      'environment_uuid',
-    ],
+    required: ['server_uuid', 'project_uuid'],
     properties: {
       server_uuid: {
         type: 'string',
@@ -3889,12 +4638,7 @@ export const SCHEMAS: Record<string, unknown> = {
     type: 'object',
   },
   'create-database-dragonfly': {
-    required: [
-      'server_uuid',
-      'project_uuid',
-      'environment_name',
-      'environment_uuid',
-    ],
+    required: ['server_uuid', 'project_uuid'],
     properties: {
       server_uuid: {
         type: 'string',
@@ -3987,12 +4731,7 @@ export const SCHEMAS: Record<string, unknown> = {
     type: 'object',
   },
   'create-database-redis': {
-    required: [
-      'server_uuid',
-      'project_uuid',
-      'environment_name',
-      'environment_uuid',
-    ],
+    required: ['server_uuid', 'project_uuid'],
     properties: {
       server_uuid: {
         type: 'string',
@@ -4032,7 +4771,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       image: {
         type: 'string',
-        description: 'Docker Image of the database',
+        description: 'Docker image of the database. Default: valkey/valkey:9-alpine. For Redis, use a Redis image, for example redis:8.',
       },
       is_public: {
         type: 'boolean',
@@ -4089,12 +4828,7 @@ export const SCHEMAS: Record<string, unknown> = {
     type: 'object',
   },
   'create-database-keydb': {
-    required: [
-      'server_uuid',
-      'project_uuid',
-      'environment_name',
-      'environment_uuid',
-    ],
+    required: ['server_uuid', 'project_uuid'],
     properties: {
       server_uuid: {
         type: 'string',
@@ -4191,12 +4925,7 @@ export const SCHEMAS: Record<string, unknown> = {
     type: 'object',
   },
   'create-database-mariadb': {
-    required: [
-      'server_uuid',
-      'project_uuid',
-      'environment_name',
-      'environment_uuid',
-    ],
+    required: ['server_uuid', 'project_uuid'],
     properties: {
       server_uuid: {
         type: 'string',
@@ -4305,12 +5034,7 @@ export const SCHEMAS: Record<string, unknown> = {
     type: 'object',
   },
   'create-database-mysql': {
-    required: [
-      'server_uuid',
-      'project_uuid',
-      'environment_name',
-      'environment_uuid',
-    ],
+    required: ['server_uuid', 'project_uuid'],
     properties: {
       server_uuid: {
         type: 'string',
@@ -4419,12 +5143,7 @@ export const SCHEMAS: Record<string, unknown> = {
     type: 'object',
   },
   'create-database-mongodb': {
-    required: [
-      'server_uuid',
-      'project_uuid',
-      'environment_name',
-      'environment_uuid',
-    ],
+    required: ['server_uuid', 'project_uuid'],
     properties: {
       server_uuid: {
         type: 'string',
@@ -4521,12 +5240,7 @@ export const SCHEMAS: Record<string, unknown> = {
     type: 'object',
   },
   'create-database-sqlite': {
-    required: [
-      'server_uuid',
-      'project_uuid',
-      'environment_name',
-      'environment_uuid',
-    ],
+    required: ['server_uuid', 'project_uuid'],
     properties: {
       server_uuid: {
         type: 'string',
@@ -4651,7 +5365,6 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       is_shown_once: {
         type: 'boolean',
-        description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
       },
     },
     type: 'object',
@@ -4677,7 +5390,6 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       is_shown_once: {
         type: 'boolean',
-        description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
       },
     },
     type: 'object',
@@ -4707,7 +5419,6 @@ export const SCHEMAS: Record<string, unknown> = {
             },
             is_shown_once: {
               type: 'boolean',
-              description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
             },
           },
           type: 'object',
@@ -4779,7 +5490,7 @@ export const SCHEMAS: Record<string, unknown> = {
       content: {
         type: 'string',
         nullable: true,
-        description: 'The file content (file only, not allowed for read-only storages). Changing the content of a file outside the resource directory needs the deploy permission.',
+        description: 'The file content (file only, not allowed for read-only storages). Changing the content needs the deploy permission.',
       },
     },
     type: 'object',
@@ -4843,6 +5554,94 @@ export const SCHEMAS: Record<string, unknown> = {
       name: {
         type: 'string',
         maxLength: 255,
+      },
+    },
+    type: 'object',
+  },
+  'create-application-dns-record': {
+    required: ['hostname'],
+    properties: {
+      hostname: {
+        description: 'A saved domain of the resource.',
+        type: 'string',
+      },
+      integration_token_uuid: {
+        description: 'Cloudflare token to use. Required when several tokens manage the zone of the hostname.',
+        type: 'string',
+      },
+      address: {
+        description: 'A public address of the server. Default: default_address of the DNS status.',
+        type: 'string',
+      },
+    },
+    type: 'object',
+  },
+  'create-service-dns-record': {
+    required: ['hostname'],
+    properties: {
+      hostname: {
+        description: 'A saved domain of the resource.',
+        type: 'string',
+      },
+      integration_token_uuid: {
+        description: 'Cloudflare token to use. Required when several tokens manage the zone of the hostname.',
+        type: 'string',
+      },
+      address: {
+        description: 'A public address of the server. Default: default_address of the DNS status.',
+        type: 'string',
+      },
+    },
+    type: 'object',
+  },
+  'replace-application-dns-record': {
+    required: ['hostname', 'record_id', 'current'],
+    properties: {
+      hostname: {
+        description: 'A saved domain of the resource.',
+        type: 'string',
+      },
+      integration_token_uuid: {
+        description: 'Cloudflare token to use. Required when several tokens manage the zone of the hostname.',
+        type: 'string',
+      },
+      record_id: {
+        description: 'conflict.record_id from the 409 response of the create request.',
+        type: 'string',
+      },
+      current: {
+        description: 'conflict.current from the 409 response. The record is replaced only when it still has this value.',
+        type: 'string',
+      },
+      address: {
+        description: 'A public address of the server. Default: default_address of the DNS status.',
+        type: 'string',
+      },
+    },
+    type: 'object',
+  },
+  'replace-service-dns-record': {
+    required: ['hostname', 'record_id', 'current'],
+    properties: {
+      hostname: {
+        description: 'A saved domain of the resource.',
+        type: 'string',
+      },
+      integration_token_uuid: {
+        description: 'Cloudflare token to use. Required when several tokens manage the zone of the hostname.',
+        type: 'string',
+      },
+      record_id: {
+        description: 'conflict.record_id from the 409 response of the create request.',
+        type: 'string',
+      },
+      current: {
+        description: 'conflict.current from the 409 response. The record is replaced only when it still has this value.',
+        type: 'string',
+      },
+      address: {
+        description: 'A public address of the server. Default: default_address of the DNS status.',
+        type: 'string',
       },
     },
     type: 'object',
@@ -5152,7 +5951,7 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       instant_validate: {
         type: 'boolean',
-        description: 'Validate server immediately after creation',
+        description: 'Validate the server and install Docker when it is running. Defaults to true for tokens with the deploy permission, and needs that permission.',
       },
     },
     type: 'object',
@@ -5162,7 +5961,7 @@ export const SCHEMAS: Record<string, unknown> = {
     properties: {
       provider: {
         type: 'string',
-        enum: ['doppler', 'infisical', 'vault'],
+        enum: ['cloudflare', 'doppler', 'infisical', 'vault'],
       },
       name: {
         type: 'string',
@@ -5170,7 +5969,55 @@ export const SCHEMAS: Record<string, unknown> = {
       token: {
         type: 'string',
       },
+      capabilities: {
+        description: 'Cloudflare: dns, tunnel (tunnel needs dns). Default: dns. Secret managers: secrets.',
+        type: 'array',
+        items: {
+          type: 'string',
+          enum: ['dns', 'tunnel', 'secrets'],
+        },
+      },
+      automatic_dns: {
+        description: 'Cloudflare only. Create DNS records when a domain is added. Default: true.',
+        type: 'boolean',
+      },
+      proxied_dns: {
+        description: 'Cloudflare only. Create new records proxied (orange cloud). Default: false.',
+        type: 'boolean',
+      },
       metadata: {
+        description: 'Secret managers only: base_url, client_id (Infisical), namespace (Vault), timeout.',
+        type: 'object',
+      },
+    },
+    type: 'object',
+  },
+  'update-integration-token-by-uuid': {
+    properties: {
+      name: {
+        type: 'string',
+      },
+      token: {
+        description: 'New secret. Required when base_url, client_id (Infisical), or namespace (Vault) changes.',
+        type: 'string',
+      },
+      capabilities: {
+        type: 'array',
+        items: {
+          type: 'string',
+          enum: ['dns', 'tunnel', 'secrets'],
+        },
+      },
+      automatic_dns: {
+        description: 'Cloudflare only.',
+        type: 'boolean',
+      },
+      proxied_dns: {
+        description: 'Cloudflare only.',
+        type: 'boolean',
+      },
+      metadata: {
+        description: 'Secret managers only. Fields to change: base_url, client_id, namespace, timeout. An empty value removes a field.',
         type: 'object',
       },
     },
@@ -5225,8 +6072,14 @@ export const SCHEMAS: Record<string, unknown> = {
     type: 'object',
   },
   'create-s3-storage': {
-    required: ['name', 'endpoint', 'bucket', 'region', 'key', 'secret'],
+    required: ['name', 'endpoint', 'key'],
     properties: {
+      type: {
+        type: 'string',
+        enum: ['s3', 'sftp', 'ftps', 'webdav'],
+        default: 's3',
+        description: 'The storage protocol. It cannot change later.',
+      },
       name: {
         type: 'string',
         description: 'A friendly name for the storage.',
@@ -5238,23 +6091,34 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       endpoint: {
         type: 'string',
-        description: 'S3-compatible endpoint URL.',
       },
       bucket: {
         type: 'string',
-        description: 'S3 bucket name.',
+        description: 'S3 bucket name. Required for S3, not allowed for the other types.',
       },
       region: {
         type: 'string',
-        description: 'S3 region.',
+        description: 'S3 region. Required for S3, not allowed for the other types.',
+      },
+      use_path_style_endpoint: {
+        type: 'boolean',
+      },
+      skip_tls_verification: {
+        type: 'boolean',
+        description: 'S3 only. Do not check the TLS certificate of the endpoint. Use only for endpoints with a self-signed or private CA certificate. Default: false.',
       },
       key: {
         type: 'string',
-        description: 'Access key.',
+        description: 'S3: the access key. Other types: the username.',
       },
       secret: {
         type: 'string',
-        description: 'Secret key.',
+        description: 'S3: the secret key. Other types: the password. SFTP: not needed with private_key_uuid.',
+      },
+      private_key_uuid: {
+        type: 'string',
+        nullable: true,
+        description: 'SFTP only: the UUID of a private key of your team to log in with instead of a password.',
       },
       is_usable: {
         type: 'boolean',
@@ -5276,23 +6140,36 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       endpoint: {
         type: 'string',
-        description: 'S3-compatible endpoint URL.',
+        description: 'The endpoint URL, in the format of the storage type (see Create S3 Storage).',
       },
       bucket: {
         type: 'string',
-        description: 'S3 bucket name.',
+        description: 'S3 bucket name. Only for S3 storages.',
       },
       region: {
         type: 'string',
-        description: 'S3 region.',
+        description: 'S3 region. Only for S3 storages.',
+      },
+      use_path_style_endpoint: {
+        type: 'boolean',
+        description: 'Use path-style URLs (endpoint/bucket). Set to false for providers that only accept virtual-hosted-style URLs (bucket.endpoint), such as Alibaba Cloud OSS.',
+      },
+      skip_tls_verification: {
+        type: 'boolean',
+        description: 'S3 only. Do not check the TLS certificate of the endpoint. Use only for endpoints with a self-signed or private CA certificate. Default: false.',
       },
       key: {
         type: 'string',
-        description: 'Access key.',
+        description: 'S3: the access key. Other types: the username.',
       },
       secret: {
         type: 'string',
-        description: 'Secret key.',
+        description: 'S3: the secret key. Other types: the password. SFTP: sending a password switches the login to the password.',
+      },
+      private_key_uuid: {
+        type: 'string',
+        nullable: true,
+        description: 'SFTP only: the UUID of a private key of your team to log in with. Null switches the login to the saved password.',
       },
       is_usable: {
         type: 'boolean',
@@ -5327,6 +6204,10 @@ export const SCHEMAS: Record<string, unknown> = {
         default: 300,
         maximum: 36000,
       },
+      use_shell: {
+        type: 'boolean',
+        default: true,
+      },
       enabled: {
         type: 'boolean',
         description: 'The flag to indicate if the scheduled task is enabled. An enabled task requires the deploy ability.',
@@ -5359,6 +6240,10 @@ export const SCHEMAS: Record<string, unknown> = {
         description: 'The timeout of the scheduled task in seconds.',
         default: 300,
         maximum: 36000,
+      },
+      use_shell: {
+        type: 'boolean',
+        default: true,
       },
       enabled: {
         type: 'boolean',
@@ -5394,6 +6279,10 @@ export const SCHEMAS: Record<string, unknown> = {
         default: 300,
         maximum: 36000,
       },
+      use_shell: {
+        type: 'boolean',
+        default: true,
+      },
       enabled: {
         type: 'boolean',
         description: 'The flag to indicate if the scheduled task is enabled. An enabled task requires the deploy ability.',
@@ -5427,10 +6316,48 @@ export const SCHEMAS: Record<string, unknown> = {
         default: 300,
         maximum: 36000,
       },
+      use_shell: {
+        type: 'boolean',
+        default: true,
+      },
       enabled: {
         type: 'boolean',
         description: 'The flag to indicate if the scheduled task is enabled. An enabled task requires the deploy ability.',
         default: true,
+      },
+    },
+    type: 'object',
+  },
+  'set-secret-manager-source': {
+    required: ['integration_token_uuid'],
+    properties: {
+      integration_token_uuid: {
+        type: 'string',
+      },
+      settings: {
+        description: 'Doppler service account: project, config. Infisical: project_id, environment, secret_path. Vault: mount, path.',
+        type: 'object',
+      },
+    },
+    type: 'object',
+  },
+  'configure-application-secret-manager': {
+    required: ['integration_token_uuid'],
+    properties: {
+      integration_token_uuid: {
+        type: 'string',
+      },
+      settings: {
+        type: 'object',
+      },
+    },
+    type: 'object',
+  },
+  'add-secret-manager-reference': {
+    required: ['key'],
+    properties: {
+      key: {
+        type: 'string',
       },
     },
     type: 'object',
@@ -5528,6 +6455,34 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     type: 'object',
   },
+  'update-server-image-scanning': {
+    properties: {
+      is_image_scan_enabled: {
+        type: 'boolean',
+      },
+      image_scan_memory_mb: {
+        description: 'Memory limit of each scanner step, in MB. A value above the memory of the server is refused.',
+        type: 'integer',
+        enum: [1024, 2048, 4096, 8192],
+      },
+      image_scan_syft_timeout: {
+        description: 'Time limit of one Syft run (package list of an image), in seconds.',
+        type: 'integer',
+        enum: [300, 600, 1200, 1800, 3600],
+      },
+      image_scan_grype_timeout: {
+        description: 'Time limit of one Grype run (vulnerability match), in seconds.',
+        type: 'integer',
+        enum: [300, 600, 1200, 1800, 3600],
+      },
+      image_scan_cpus: {
+        description: 'CPU limit of each scanner step. A value above the CPU count of the server is refused.',
+        type: 'number',
+        enum: [0.5, 1, 2, 4],
+      },
+    },
+    type: 'object',
+  },
   'update-server-log-drains': {
     properties: {
       is_logdrain_newrelic_enabled: {
@@ -5543,6 +6498,10 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
       },
       logdrain_axiom_dataset_name: {
+        type: 'string',
+      },
+      logdrain_axiom_domain: {
+        description: 'Base domain of the Axiom edge deployment. Default: us-east-1.aws.edge.axiom.co. Use eu-central-1.aws.edge.axiom.co for EU datasets.',
         type: 'string',
       },
       logdrain_axiom_api_key: {
@@ -5580,6 +6539,10 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       redirect_url: {
         description: 'Public http(s) redirect URL, or null to clear.',
+        type: ['string', 'null'],
+      },
+      proxy_error_page: {
+        description: 'Custom HTML error page that the proxy shows for unknown hosts (when redirect_url is empty) and for resources in maintenance mode. Null restores the default page.',
         type: ['string', 'null'],
       },
       generate_exact_labels: {
@@ -5761,6 +6724,9 @@ export const SCHEMAS: Record<string, unknown> = {
         enum: ['traefik', 'caddy', 'none'],
         description: 'The proxy type.',
       },
+      ssh_host_key: {
+        type: 'string',
+      },
     },
     type: 'object',
   },
@@ -5837,6 +6803,20 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'integer',
         description: 'SSH connection timeout in seconds (1-300). Default: 10.',
       },
+      wildcard_domain: {
+        type: 'string',
+        nullable: true,
+        description: 'Wildcard domain (URL) used to generate domains for new resources on this server. Null removes it.',
+      },
+      server_timezone: {
+        type: 'string',
+        description: 'Timezone of the server, for example Europe/Berlin. Scheduled tasks and backups use it.',
+      },
+      backup_compression_cpu_percentage: {
+        type: 'integer',
+        enum: [25, 50, 75, 100],
+        description: 'Maximum CPU percentage that backup compression can use. Default: 25.',
+      },
     },
     type: 'object',
   },
@@ -5846,6 +6826,15 @@ export const SCHEMAS: Record<string, unknown> = {
         description: 'Install missing prerequisites and Docker, then start the proxy. This can restart the Docker daemon. Needs the deploy permission.',
         type: 'boolean',
         default: false,
+      },
+    },
+    type: 'object',
+  },
+  'reset-server-host-key-by-uuid': {
+    properties: {
+      ssh_host_key: {
+        description: 'The SSH host key(s) to trust, as public key lines or known_hosts lines.',
+        type: 'string',
       },
     },
     type: 'object',
@@ -5894,6 +6883,11 @@ export const SCHEMAS: Record<string, unknown> = {
       is_permanent_redirect_enabled: {
         description: 'Use permanent redirects (301/308) instead of temporary (302/307) for the HTTP to HTTPS and www redirects. Defaults to false.',
         type: ['boolean', 'null'],
+      },
+      redirect: {
+        description: 'How to handle www and non-www domains. "www" redirects non-www to www, "non-www" redirects www to non-www. Both need a www and a non-www domain in url.',
+        type: 'string',
+        enum: ['both', 'www', 'non-www'],
       },
       max_restart_count: {
         description: 'Maximum Docker restart count before Coolify stops the container. Set to 0 to disable the limit.',
@@ -6055,12 +7049,7 @@ export const SCHEMAS: Record<string, unknown> = {
     additionalProperties: false,
   },
   'create-service': {
-    required: [
-      'server_uuid',
-      'project_uuid',
-      'environment_name',
-      'environment_uuid',
-    ],
+    required: ['server_uuid', 'project_uuid'],
     properties: {
       type: {
         description: 'The one-click service type (e.g. "actualbudget", "calibre-web", "gitea-with-mysql" ...)',
@@ -6207,6 +7196,11 @@ export const SCHEMAS: Record<string, unknown> = {
         default: true,
         description: 'Redact all environment variable values in logs. When false, only locked (shown once) values are redacted. Requires team admin permissions.',
       },
+      include_coolify_default_variables: {
+        type: 'boolean',
+        default: true,
+        description: 'Add the predefined COOLIFY_* variables (COOLIFY_URL, COOLIFY_FQDN, ...) to the environment. Requires team admin permissions. Redeploy to apply it.',
+      },
     },
     type: 'object',
   },
@@ -6220,10 +7214,6 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'The value of the environment variable.',
       },
-      is_preview: {
-        type: 'boolean',
-        description: 'The flag to indicate if the environment variable is used in preview deployments.',
-      },
       is_literal: {
         type: 'boolean',
         description: 'The flag to indicate if the environment variable is a literal, nothing espaced.',
@@ -6234,7 +7224,6 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       is_shown_once: {
         type: 'boolean',
-        description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
       },
     },
     type: 'object',
@@ -6250,10 +7239,6 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'string',
         description: 'The value of the environment variable.',
       },
-      is_preview: {
-        type: 'boolean',
-        description: 'The flag to indicate if the environment variable is used in preview deployments.',
-      },
       is_literal: {
         type: 'boolean',
         description: 'The flag to indicate if the environment variable is a literal, nothing espaced.',
@@ -6264,7 +7249,6 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       is_shown_once: {
         type: 'boolean',
-        description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
       },
     },
     type: 'object',
@@ -6284,10 +7268,6 @@ export const SCHEMAS: Record<string, unknown> = {
               type: 'string',
               description: 'The value of the environment variable.',
             },
-            is_preview: {
-              type: 'boolean',
-              description: 'The flag to indicate if the environment variable is used in preview deployments.',
-            },
             is_literal: {
               type: 'boolean',
               description: 'The flag to indicate if the environment variable is a literal, nothing espaced.',
@@ -6298,7 +7278,6 @@ export const SCHEMAS: Record<string, unknown> = {
             },
             is_shown_once: {
               type: 'boolean',
-              description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
             },
           },
           type: 'object',
@@ -6399,7 +7378,7 @@ export const SCHEMAS: Record<string, unknown> = {
       content: {
         type: 'string',
         nullable: true,
-        description: 'The file content (file only, not allowed for read-only storages). Changing the content of a file outside the resource directory needs the deploy permission.',
+        description: 'The file content (file only, not allowed for read-only storages). Changing the content needs the deploy permission.',
       },
     },
     type: 'object',
@@ -6454,11 +7433,186 @@ export const SCHEMAS: Record<string, unknown> = {
         type: 'boolean',
       },
       is_shown_once: {
-        description: 'If true, the saved value is hidden in the UI and API responses. MCP never returns environment variable values.',
         type: 'boolean',
       },
       comment: {
         type: ['string', 'null'],
+        maxLength: 256,
+      },
+    },
+    type: 'object',
+  },
+  'update-team-shared-env': {
+    description: 'Send at least one field.',
+    properties: {
+      key: {
+        type: 'string',
+      },
+      value: {
+        type: ['string', 'null'],
+      },
+      is_literal: {
+        type: 'boolean',
+      },
+      is_multiline: {
+        type: 'boolean',
+      },
+      is_shown_once: {
+        type: 'boolean',
+      },
+      comment: {
+        type: ['string', 'null'],
+        maxLength: 256,
+      },
+    },
+    type: 'object',
+  },
+  'create-project-shared-env': {
+    required: ['key'],
+    properties: {
+      key: {
+        type: 'string',
+      },
+      value: {
+        type: ['string', 'null'],
+      },
+      is_literal: {
+        type: 'boolean',
+      },
+      is_multiline: {
+        type: 'boolean',
+      },
+      is_shown_once: {
+        type: 'boolean',
+      },
+      comment: {
+        type: ['string', 'null'],
+        maxLength: 256,
+      },
+    },
+    type: 'object',
+  },
+  'update-project-shared-env': {
+    description: 'Send at least one field.',
+    properties: {
+      key: {
+        type: 'string',
+      },
+      value: {
+        type: ['string', 'null'],
+      },
+      is_literal: {
+        type: 'boolean',
+      },
+      is_multiline: {
+        type: 'boolean',
+      },
+      is_shown_once: {
+        type: 'boolean',
+      },
+      comment: {
+        type: ['string', 'null'],
+        maxLength: 256,
+      },
+    },
+    type: 'object',
+  },
+  'create-environment-shared-env': {
+    required: ['key'],
+    properties: {
+      key: {
+        type: 'string',
+      },
+      value: {
+        type: ['string', 'null'],
+      },
+      is_literal: {
+        type: 'boolean',
+      },
+      is_multiline: {
+        type: 'boolean',
+      },
+      is_shown_once: {
+        type: 'boolean',
+      },
+      comment: {
+        type: ['string', 'null'],
+        maxLength: 256,
+      },
+    },
+    type: 'object',
+  },
+  'update-environment-shared-env': {
+    description: 'Send at least one field.',
+    properties: {
+      key: {
+        type: 'string',
+      },
+      value: {
+        type: ['string', 'null'],
+      },
+      is_literal: {
+        type: 'boolean',
+      },
+      is_multiline: {
+        type: 'boolean',
+      },
+      is_shown_once: {
+        type: 'boolean',
+      },
+      comment: {
+        type: ['string', 'null'],
+        maxLength: 256,
+      },
+    },
+    type: 'object',
+  },
+  'create-server-shared-env': {
+    required: ['key'],
+    properties: {
+      key: {
+        type: 'string',
+      },
+      value: {
+        type: ['string', 'null'],
+      },
+      is_literal: {
+        type: 'boolean',
+      },
+      is_multiline: {
+        type: 'boolean',
+      },
+      is_shown_once: {
+        type: 'boolean',
+      },
+      comment: {
+        type: ['string', 'null'],
+        maxLength: 256,
+      },
+    },
+    type: 'object',
+  },
+  'update-server-shared-env': {
+    description: 'Send at least one field.',
+    properties: {
+      key: {
+        type: 'string',
+      },
+      value: {
+        type: ['string', 'null'],
+      },
+      is_literal: {
+        type: 'boolean',
+      },
+      is_multiline: {
+        type: 'boolean',
+      },
+      is_shown_once: {
+        type: 'boolean',
+      },
+      comment: {
+        type: ['string', 'null'],
+        maxLength: 256,
       },
     },
     type: 'object',
@@ -6486,11 +7640,15 @@ export const SCHEMAS: Record<string, unknown> = {
     type: 'object',
   },
   'update-token-team': {
-    required: ['is_build_server_fallback_enabled'],
+    minProperties: 1,
     properties: {
       is_build_server_fallback_enabled: {
         type: 'boolean',
         description: 'Whether deployments can fall back to the deployment server when no usable dedicated build server is available.',
+      },
+      scan_images_on_new_servers: {
+        type: 'boolean',
+        description: 'Whether image scanning is turned on for servers added to the team from now on.',
       },
     },
     type: 'object',

@@ -7,7 +7,7 @@
 
 One MCP server that talks to every Coolify instance and every Coolify team you
 have, from one connection. Search across the fleet in a single call, read logs
-and environment variables, deploy, and reach all 301 catalogued REST operations
+and environment variables, deploy, and reach all 330 catalogued REST operations
 through a generic door.
 
 ---
@@ -71,7 +71,7 @@ honest account of both, and of the one axis where neither competes.
 |                       | Coolify's built-in `/mcp`    | `@masonator/coolify-mcp` | **coolify-mcp** (this project)                                      |
 | --------------------- | ---------------------------- | ------------------------ | ------------------------------------------------------------------- |
 | Where it runs         | Inside your Coolify instance | Local process            | Local process, **or remote over HTTP**                              |
-| Tools                 | 10                           | ~42, hand-curated        | 15 by default (16 with destructive enabled) + 301-operation catalog |
+| Tools                 | 10                           | ~42, hand-curated        | 15 by default (16 with destructive enabled) + 330-operation catalog |
 | Writes                | No — all 10 are read-only    | Yes                      | Yes, behind flags                                                   |
 | Instances per process | 1                            | 1                        | **N**                                                               |
 | Teams reachable       | The token's team             | The token's team         | **M — one connection per (instance, team)**                         |
@@ -626,8 +626,8 @@ upload: `POST …/imports/uploads` takes a multipart body, which a JSON tool cal
 cannot carry, so database imports have to come from S3. We will not ship a tool that pretends otherwise.
 
 **The catalog is generated from a pinned spec.** It is built at release time from
-Coolify **4.5.0** (spec sha `41fe14b1…`), covering **301 operations** — 112 read,
-146 write, 43 destructive, 4 flagged as provisioning billable cloud
+Coolify **4.7.5** (spec sha `01d0fac5…`), covering **330 operations** — 125 read,
+155 write, 50 destructive, 4 flagged as provisioning billable cloud
 infrastructure. An instance newer than the catalog may expose operations we do
 not list; `search_operations` says so explicitly when nothing matches, naming the
 spec version and date. CI fails the build when `npm run codegen` produces a diff,

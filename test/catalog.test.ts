@@ -40,7 +40,15 @@ const LOCKED = { allowDestructive: false, readOnly: true } as const;
 const API_KILL_SWITCHES = ['disable-api', 'disable-mcp'] as const;
 
 /** Restore a backup over a live database's data. */
-const DATA_OVERWRITES = ['create-database-import', 'create-service-database-import'] as const;
+const DATA_OVERWRITES = [
+  'create-database-import',
+  'create-service-database-import',
+  'replace-application-dns-record',
+  'replace-service-dns-record',
+] as const;
+
+/** Drop the server's trusted SSH host key, so the next key presented is trusted. */
+const TRUST_RESETS = ['reset-server-host-key-by-uuid'] as const;
 
 /** Hand a server to another Coolify instance and switch this instance's automations off. */
 const INSTANCE_HANDOFFS = ['migrate-server-between-instances', 'complete-server-transfer'] as const;
@@ -147,6 +155,14 @@ describe('danger classification', () => {
     expect(operation?.danger).toBe('destructive');
   });
 
+  it.each(TRUST_RESETS)('files %s as destructive even though it is a POST', (id) => {
+    const operation = getOperation(id);
+
+    expect(operation, `${id} is not in the catalog`).toBeDefined();
+    expect(operation?.method).toBe('POST');
+    expect(operation?.danger).toBe('destructive');
+  });
+
   it('files nothing else as destructive without being a DELETE', () => {
     // A widening here is a real change to the tool surface, so it should have to
     // be made deliberately rather than arriving with a regeneration.
@@ -154,7 +170,7 @@ describe('danger classification', () => {
       (operation) =>
         operation.danger === 'destructive' &&
         operation.method !== 'DELETE' &&
-        ![...API_KILL_SWITCHES, ...DATA_OVERWRITES, ...INSTANCE_HANDOFFS].includes(
+        ![...API_KILL_SWITCHES, ...DATA_OVERWRITES, ...INSTANCE_HANDOFFS, ...TRUST_RESETS].includes(
           operation.id as never,
         ),
     );

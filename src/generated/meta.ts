@@ -1,13 +1,13 @@
 // GENERATED FILE — DO NOT EDIT, run npm run codegen
-// Source: scripts/coolify-openapi.json (Coolify 4.5.0)
+// Source: scripts/coolify-openapi.json (Coolify 4.7.5)
 
 import type { CatalogMeta } from '../types.js';
 
 export const METADATA: CatalogMeta = {
-  coolifyVersion: '4.5.0',
-  specSha256: '41fe14b154a6e2a3fc110e2563c9957bd0969b8e44510ba6387caa33416c6d62',
-  rawOperationCount: 301,
+  coolifyVersion: '4.7.5',
+  specSha256: '01d0fac5546dc91652271b3649fa847daa06bd9f678a237a656a0c178aa90baf',
+  rawOperationCount: 330,
   strippedCount: 0,
-  operationCount: 301,
-  generatedAt: '2026-10-24T14:51:16.670Z',
+  operationCount: 330,
+  generatedAt: '2026-11-14T13:54:10.604Z',
 };
