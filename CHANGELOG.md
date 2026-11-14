@@ -20,6 +20,23 @@ add operations that `search_operations` did not previously return.
 
 ### Added
 
+- **Catalog tracks Coolify 4.7.5** (was 4.5.0): 330 operations, up from 301,
+  none removed. New: image vulnerability scanning (`get-server-image-scanning`,
+  `update-server-image-scanning`, `list-vulnerabilities` and per-resource
+  `get-{application,service,database}-vulnerabilities`), DNS records for
+  applications and services through Cloudflare integration tokens
+  (`list-dns-zones`, `get-*-dns`, `create-*-dns-record`, `replace-*-dns-record`,
+  `release-*-dns-record`, and the `security/integration-tokens` family),
+  secret manager sources on applications, services and databases, Gitea apps
+  (`list-gitea-apps`, `create-private-gitea-app-application`) and
+  `reset-server-host-key-by-uuid`.
+- New `search_operations` family: `gitea-apps`. `/vulnerabilities` is filed
+  under `security`.
+- `replace-application-dns-record`, `replace-service-dns-record` and
+  `reset-server-host-key-by-uuid` are classified **destructive**: the first two
+  repoint a DNS record that already served something else, the third makes
+  Coolify trust whichever SSH host key the server presents next. The HTTP
+  client gates them by method and path as well as by id.
 - **Catalog tracks Coolify 4.5.0** (was 4.4.6): 301 operations, up from 291.
   New: the Hostinger provider (VPS catalog, data centers, OS templates, account
   SSH keys, post-install scripts, and `create-hostinger-server`, flagged

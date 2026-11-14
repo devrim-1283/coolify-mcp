@@ -31,13 +31,13 @@ import type {
  * quietly adapts to whatever it is fed will happily emit a half-catalog after a
  * bad spec refresh. Bump this deliberately, in the same commit as the new spec.
  */
-const EXPECTED_RAW_OPERATIONS = 301;
+const EXPECTED_RAW_OPERATIONS = 330;
 
 /**
  * The spec's own `info.version` is the constant "0.1" and carries no
  * information. This is the coollabsio/coolify release the spec was taken from.
  */
-const COOLIFY_VERSION = '4.5.0';
+const COOLIFY_VERSION = '4.7.5';
 
 /**
  * Hand-maintained. These are not DELETEs, so the "gate the DELETEs" rule misses
@@ -62,6 +62,15 @@ const DESTRUCTIVE_OVERRIDE_ROUTES: readonly string[] = [
   // to a target the token may hold no credentials for.
   'POST /servers/{uuid}/migrate',
   'POST /servers/{uuid}/transfer/complete',
+  // Repoints a DNS record that already exists at the provider (the conflict a
+  // create answered 409 for) to this resource's server. Whatever that record
+  // served before stops resolving there, and the old target is not kept.
+  'POST /applications/{uuid}/dns/replace',
+  'POST /services/{uuid}/dns/replace',
+  // Drops the trusted SSH host key. Without a key in the body, Coolify trusts
+  // whatever the server presents next, so a man in the middle at that moment
+  // becomes the trusted host.
+  'POST /servers/{uuid}/host-key/reset',
 ];
 
 /**
@@ -134,6 +143,9 @@ const FAMILY_BY_SEGMENT: Readonly<Record<string, OperationFamily>> = {
   destinations: 'destinations',
   'github-apps': 'github-apps',
   'gitlab-apps': 'gitlab-apps',
+  'gitea-apps': 'gitea-apps',
+  // Image scan findings across the team; per-resource ones live under their resource.
+  vulnerabilities: 'security',
   notifications: 'notifications',
   's3-storages': 's3-storages',
   'cloud-init-scripts': 'cloud-init-scripts',
