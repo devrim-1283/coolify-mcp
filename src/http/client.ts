@@ -61,6 +61,8 @@ interface DestructiveOverride {
  * live database, and overwritten data does not come back. The server transfers
  * hand a server to another Coolify instance and switch this instance's
  * automations for it off, so from this token's point of view the server is gone.
+ * The DNS replaces repoint a record that already served something else, and the
+ * host-key reset makes Coolify trust whichever key the server presents next.
  *
  * Matched on the operation id *and* on method+path template, so a caller
  * cannot dodge the gate by omitting the id or by renaming the operation.
@@ -76,6 +78,13 @@ const DESTRUCTIVE_OVERRIDES: readonly DestructiveOverride[] = [
   },
   { id: 'migrate-server-between-instances', method: 'POST', path: '/servers/{uuid}/migrate' },
   { id: 'complete-server-transfer', method: 'POST', path: '/servers/{uuid}/transfer/complete' },
+  {
+    id: 'replace-application-dns-record',
+    method: 'POST',
+    path: '/applications/{uuid}/dns/replace',
+  },
+  { id: 'replace-service-dns-record', method: 'POST', path: '/services/{uuid}/dns/replace' },
+  { id: 'reset-server-host-key-by-uuid', method: 'POST', path: '/servers/{uuid}/host-key/reset' },
 ];
 
 // ---------------------------------------------------------------------------

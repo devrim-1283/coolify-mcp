@@ -34,6 +34,7 @@ export type OperationFamily =
   | 'destinations'
   | 'github-apps'
   | 'gitlab-apps'
+  | 'gitea-apps'
   | 'notifications'
   | 's3-storages'
   | 'cloud-init-scripts'
